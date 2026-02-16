@@ -2,19 +2,11 @@
 
 namespace CCK\FilamentShot;
 
-use Filament\Support\Assets\AlpineComponent;
-use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Js;
-use Filament\Support\Facades\FilamentAsset;
-use Filament\Support\Facades\FilamentIcon;
-use Illuminate\Filesystem\Filesystem;
-use Livewire\Features\SupportTesting\Testable;
-use Spatie\LaravelPackageTools\Commands\InstallCommand;
+use CCK\FilamentShot\Commands\FilamentShotCommand;
+use CCK\FilamentShot\Support\AssetResolver;
+use CCK\FilamentShot\Support\BrowsershotFactory;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use CCK\FilamentShot\Commands\FilamentShotCommand;
-use CCK\FilamentShot\Testing\TestsFilamentShot;
 
 class FilamentShotServiceProvider extends PackageServiceProvider
 {
@@ -24,20 +16,8 @@ class FilamentShotServiceProvider extends PackageServiceProvider
 
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package->name(static::$name)
-            ->hasCommands($this->getCommands())
-            ->hasInstallCommand(function (InstallCommand $command) {
-                $command
-                    ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub('cck/filament-shot');
-            });
+            ->hasCommands($this->getCommands());
 
         $configFileName = $package->shortName();
 
@@ -45,65 +25,15 @@ class FilamentShotServiceProvider extends PackageServiceProvider
             $package->hasConfigFile();
         }
 
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
-        }
-
-        if (file_exists($package->basePath('/../resources/lang'))) {
-            $package->hasTranslations();
-        }
-
         if (file_exists($package->basePath('/../resources/views'))) {
             $package->hasViews(static::$viewNamespace);
         }
     }
 
-    public function packageRegistered(): void {}
-
-    public function packageBooted(): void
+    public function packageRegistered(): void
     {
-        // Asset Registration
-        FilamentAsset::register(
-            $this->getAssets(),
-            $this->getAssetPackageName()
-        );
-
-        FilamentAsset::registerScriptData(
-            $this->getScriptData(),
-            $this->getAssetPackageName()
-        );
-
-        // Icon Registration
-        FilamentIcon::register($this->getIcons());
-
-        // Handle Stubs
-        if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-                $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-shot/{$file->getFilename()}"),
-                ], 'filament-shot-stubs');
-            }
-        }
-
-        // Testing
-        Testable::mixin(new TestsFilamentShot);
-    }
-
-    protected function getAssetPackageName(): ?string
-    {
-        return 'cck/filament-shot';
-    }
-
-    /**
-     * @return array<Asset>
-     */
-    protected function getAssets(): array
-    {
-        return [
-            // AlpineComponent::make('filament-shot', __DIR__ . '/../resources/dist/components/filament-shot.js'),
-            // Css::make('filament-shot-styles', __DIR__ . '/../resources/dist/filament-shot.css'),
-            // Js::make('filament-shot-scripts', __DIR__ . '/../resources/dist/filament-shot.js'),
-        ];
+        $this->app->singleton(AssetResolver::class);
+        $this->app->singleton(BrowsershotFactory::class);
     }
 
     /**
@@ -113,40 +43,6 @@ class FilamentShotServiceProvider extends PackageServiceProvider
     {
         return [
             FilamentShotCommand::class,
-        ];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getIcons(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getRoutes(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getScriptData(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getMigrations(): array
-    {
-        return [
-            'create_filament-shot_table',
         ];
     }
 }
