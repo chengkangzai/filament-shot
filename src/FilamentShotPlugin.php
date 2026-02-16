@@ -1,15 +1,15 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace CCK\FilamentShot;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
-class SkeletonPlugin implements Plugin
+class FilamentShotPlugin implements Plugin
 {
     public function getId(): string
     {
-        return 'skeleton';
+        return 'filament-shot';
     }
 
     public function register(Panel $panel): void
