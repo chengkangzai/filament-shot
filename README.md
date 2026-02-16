@@ -1,68 +1,283 @@
-# renders Filament v3 UI components (Forms, Tables, Infolists, Stats Widgets) as PNG images programmatically.
+# Filament Shot
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/cck/filament-shot.svg?style=flat-square)](https://packagist.org/packages/cck/filament-shot)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/cck/filament-shot/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/cck/filament-shot/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/cck/filament-shot/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/cck/filament-shot/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/chengkangzai/filament-shot/run-tests.yml?branch=5.x&label=tests&style=flat-square)](https://github.com/chengkangzai/filament-shot/actions?query=workflow%3Arun-tests+branch%3A5.x)
 [![Total Downloads](https://img.shields.io/packagist/dt/cck/filament-shot.svg?style=flat-square)](https://packagist.org/packages/cck/filament-shot)
 
+Render Filament v5 UI components — Forms, Tables, Infolists, and Stats Widgets — as PNG screenshots programmatically. Define your components using familiar Filament classes and get pixel-perfect images without spinning up a browser manually.
 
+## How It Works
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+Filament Shot generates standalone HTML using its own Blade templates styled with Filament's CSS classes, then captures screenshots via [Browsershot](https://github.com/spatie/browsershot). This avoids Livewire context issues entirely — no running application or panel required.
+
+## Requirements
+
+- PHP 8.2+
+- Laravel 11+
+- Filament v5
+- Node.js 18+ and [Puppeteer](https://pptr.dev/)
+- A Chromium-based browser (Chrome, Chromium, etc.)
 
 ## Installation
 
-You can install the package via composer:
+Install the package via Composer:
 
 ```bash
 composer require cck/filament-shot
 ```
 
-> [!IMPORTANT]
-> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
-
-After setting up a custom theme add the plugin's views to your theme css file or your app's css file if using the standalone packages.
-
-```css
-@source '../../../../vendor/cck/filament-shot/resources/**/*.blade.php';
-```
-
-You can publish and run the migrations with:
+Install Puppeteer (required by Browsershot):
 
 ```bash
-php artisan vendor:publish --tag="filament-shot-migrations"
-php artisan migrate
+npm install puppeteer
 ```
 
-You can publish the config file with:
+Publish the config file (optional):
 
 ```bash
-php artisan vendor:publish --tag="filament-shot-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="filament-shot-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
+php artisan vendor:publish --tag="shot-config"
 ```
 
 ## Usage
 
+### Forms
+
+Capture Filament form components as an image:
+
 ```php
-$filamentShot = new CCK\FilamentShot();
-echo $filamentShot->echoPhrase('Hello, CCK!');
+use CCK\FilamentShot\FilamentShot;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+
+FilamentShot::form([
+    TextInput::make('name')
+        ->label('Full Name')
+        ->placeholder('Enter your name'),
+    TextInput::make('email')
+        ->label('Email Address')
+        ->placeholder('you@example.com'),
+    Select::make('role')
+        ->label('Role')
+        ->options([
+            'admin' => 'Administrator',
+            'editor' => 'Editor',
+            'viewer' => 'Viewer',
+        ]),
+    Toggle::make('active')
+        ->label('Active'),
+])
+->state(['name' => 'Jane Doe', 'email' => 'jane@example.com'])
+->save('form.png');
+```
+
+Supported field types: `TextInput`, `Select`, `Textarea`, `Toggle`, `Checkbox`, `Radio`, `Placeholder`.
+
+### Tables
+
+```php
+use CCK\FilamentShot\FilamentShot;
+use Filament\Tables\Columns\TextColumn;
+
+FilamentShot::table()
+    ->columns([
+        TextColumn::make('name'),
+        TextColumn::make('email'),
+        TextColumn::make('role'),
+    ])
+    ->records([
+        ['name' => 'Alice', 'email' => 'alice@example.com', 'role' => 'Admin'],
+        ['name' => 'Bob', 'email' => 'bob@example.com', 'role' => 'Editor'],
+        ['name' => 'Charlie', 'email' => 'charlie@example.com', 'role' => 'Viewer'],
+    ])
+    ->heading('Team Members')
+    ->striped()
+    ->save('table.png');
+```
+
+### Infolists
+
+```php
+use CCK\FilamentShot\FilamentShot;
+use Filament\Infolists\Components\TextEntry;
+
+FilamentShot::infolist([
+    TextEntry::make('name')->label('Name'),
+    TextEntry::make('email')->label('Email'),
+    TextEntry::make('joined')->label('Member Since'),
+])
+->state([
+    'name' => 'Jane Doe',
+    'email' => 'jane@example.com',
+    'joined' => 'January 2024',
+])
+->save('infolist.png');
+```
+
+### Stats Widgets
+
+```php
+use CCK\FilamentShot\FilamentShot;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+
+FilamentShot::stats([
+    Stat::make('Total Users', '1,234')
+        ->description('12% increase')
+        ->descriptionIcon('heroicon-m-arrow-trending-up')
+        ->color('success'),
+    Stat::make('Revenue', '$56,789')
+        ->description('8% increase')
+        ->chart([7, 3, 4, 5, 6, 3, 5, 8]),
+    Stat::make('Orders', '456')
+        ->description('3% decrease')
+        ->descriptionIcon('heroicon-m-arrow-trending-down')
+        ->color('danger'),
+])
+->save('stats.png');
+```
+
+## Output Methods
+
+Every renderer supports multiple output methods:
+
+```php
+$renderer = FilamentShot::form([...]);
+
+// Save to disk
+$renderer->save('/path/to/screenshot.png');
+
+// Get base64-encoded PNG
+$base64 = $renderer->toBase64();
+
+// Get rendered HTML (useful for debugging)
+$html = $renderer->toHtml();
+
+// Get an HTTP response with the PNG
+return $renderer->toResponse();
+```
+
+## Customization
+
+### Viewport
+
+Control the screenshot dimensions and resolution:
+
+```php
+FilamentShot::form([...])
+    ->width(1280)
+    ->height(720)
+    ->deviceScale(2)  // Retina / HiDPI
+    ->save('screenshot.png');
+```
+
+### Theme
+
+Switch between light and dark mode, or set a custom primary color:
+
+```php
+FilamentShot::form([...])
+    ->darkMode()
+    ->primaryColor('#3b82f6')
+    ->save('dark-form.png');
+```
+
+### Artisan Command
+
+Capture screenshots from a config file:
+
+```bash
+php artisan filament-shot:capture --config=screenshots.php
+```
+
+The config file should return an array of screenshot definitions:
+
+```php
+<?php
+
+use Filament\Forms\Components\TextInput;
+
+return [
+    [
+        'type' => 'form',
+        'components' => [
+            TextInput::make('name')->label('Name'),
+            TextInput::make('email')->label('Email'),
+        ],
+        'output' => 'storage/screenshots/form.png',
+        'width' => 800,
+        'dark_mode' => false,
+    ],
+];
+```
+
+Supported types: `form`, `table`, `infolist`, `stats`.
+
+## Configuration
+
+```php
+// config/shot.php
+
+return [
+
+    // Default viewport dimensions for screenshots
+    'viewport' => [
+        'width' => 1024,
+        'height' => 768,
+        'device_scale_factor' => 2,
+    ],
+
+    // Default theme settings
+    'theme' => [
+        'dark_mode' => false,
+        'primary_color' => '#6366f1',
+    ],
+
+    // Browsershot / Puppeteer configuration
+    'browsershot' => [
+        'node_binary' => null,       // Path to Node.js binary
+        'npm_binary' => null,        // Path to npm binary
+        'chrome_path' => null,       // Path to Chrome/Chromium binary
+        'no_sandbox' => false,       // Set true for Docker/CI environments
+        'timeout' => 60,             // Timeout in seconds
+        'additional_options' => [],   // Extra Puppeteer launch options
+    ],
+
+    // CSS customization
+    'css' => [
+        'theme_path' => null,  // Override path to Filament theme CSS
+        'extra' => '',         // Additional CSS to inject
+    ],
+
+];
+```
+
+### Docker / CI Environments
+
+If running in a Docker container or CI pipeline, you'll likely need to enable `no_sandbox`:
+
+```php
+// config/shot.php
+'browsershot' => [
+    'no_sandbox' => true,
+],
 ```
 
 ## Testing
 
 ```bash
 composer test
+```
+
+Run only unit tests (no Chrome required):
+
+```bash
+vendor/bin/pest --exclude-group=integration
+```
+
+Run integration tests (requires Chrome + Puppeteer):
+
+```bash
+vendor/bin/pest --group=integration
 ```
 
 ## Changelog
