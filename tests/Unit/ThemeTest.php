@@ -3,7 +3,7 @@
 use CCK\FilamentShot\Renderers\FormRenderer;
 
 it('defaults to light mode', function () {
-    config()->set('shot.theme.dark_mode', false);
+    config()->set('filament-shot.theme.dark_mode', false);
 
     $renderer = new FormRenderer([]);
 
@@ -25,7 +25,7 @@ it('can toggle back to light mode', function () {
 });
 
 it('uses config default for primary color', function () {
-    config()->set('shot.theme.primary_color', '#ff0000');
+    config()->set('filament-shot.theme.primary_color', '#ff0000');
 
     $renderer = new FormRenderer([]);
 

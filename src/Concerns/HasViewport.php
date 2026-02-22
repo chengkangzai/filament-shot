@@ -33,16 +33,16 @@ trait HasViewport
 
     public function getWidth(): int
     {
-        return $this->viewportWidth ?? config('shot.viewport.width', 1024);
+        return $this->viewportWidth ?? config('filament-shot.viewport.width', 1024);
     }
 
     public function getHeight(): int
     {
-        return $this->viewportHeight ?? config('shot.viewport.height', 768);
+        return $this->viewportHeight ?? config('filament-shot.viewport.height', 768);
     }
 
     public function getDeviceScale(): int
     {
-        return $this->deviceScaleFactor ?? config('shot.viewport.device_scale_factor', 2);
+        return $this->deviceScaleFactor ?? config('filament-shot.viewport.device_scale_factor', 2);
     }
 }

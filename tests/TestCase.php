@@ -46,6 +46,6 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app): void
     {
         $app['config']->set('database.default', 'testing');
-        $app['config']->set('shot.browsershot.no_sandbox', true);
+        $app['config']->set('filament-shot.browsershot.no_sandbox', true);
     }
 }

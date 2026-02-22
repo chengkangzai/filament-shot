@@ -3,9 +3,9 @@
 use CCK\FilamentShot\Renderers\FormRenderer;
 
 it('uses config defaults for viewport', function () {
-    config()->set('shot.viewport.width', 800);
-    config()->set('shot.viewport.height', 600);
-    config()->set('shot.viewport.device_scale_factor', 3);
+    config()->set('filament-shot.viewport.width', 800);
+    config()->set('filament-shot.viewport.height', 600);
+    config()->set('filament-shot.viewport.device_scale_factor', 3);
 
     $renderer = new FormRenderer([]);
 

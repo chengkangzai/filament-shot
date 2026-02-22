@@ -35,7 +35,7 @@ npm install puppeteer
 Publish the config file (optional):
 
 ```bash
-php artisan vendor:publish --tag="shot-config"
+php artisan vendor:publish --tag="filament-shot-config"
 ```
 
 ## Usage
@@ -215,7 +215,7 @@ Supported types: `form`, `table`, `infolist`, `stats`.
 ## Configuration
 
 ```php
-// config/shot.php
+// config/filament-shot.php
 
 return [
 
@@ -256,7 +256,7 @@ return [
 If running in a Docker container or CI pipeline, you'll likely need to enable `no_sandbox`:
 
 ```php
-// config/shot.php
+// config/filament-shot.php
 'browsershot' => [
     'no_sandbox' => true,
 ],

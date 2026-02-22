@@ -31,11 +31,11 @@ trait HasTheme
 
     public function isDarkMode(): bool
     {
-        return $this->darkMode ?? config('shot.theme.dark_mode', false);
+        return $this->darkMode ?? config('filament-shot.theme.dark_mode', false);
     }
 
     public function getPrimaryColor(): string
     {
-        return $this->primaryColor ?? config('shot.theme.primary_color', '#6366f1');
+        return $this->primaryColor ?? config('filament-shot.theme.primary_color', '#6366f1');
     }
 }
