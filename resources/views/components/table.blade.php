@@ -21,31 +21,7 @@
                     <tr class="fi-ta-row {{ $striped && $index % 2 === 1 ? 'fi-striped' : '' }}">
                         @foreach($columns as $column)
                             <td class="fi-ta-cell">
-                                @php
-                                    $value = $record[$column['name']] ?? '';
-                                    $isBadge = $column['badge'] ?? false;
-                                @endphp
-
-                                @if($isBadge)
-                                    @php
-                                        $colorName = $column['color'] ?? null;
-
-                                        if ($colorName === null && isset($column['getColor'])) {
-                                            $colorName = ($column['getColor'])($value);
-                                        }
-
-                                        $badgeClasses = \CCK\FilamentShot\Renderers\TableRenderer::resolveBadgeClasses($colorName);
-                                    @endphp
-                                    <div class="fi-ta-text fi-ta-text-has-badges fi-ta-text-item">
-                                        <span class="fi-badge fi-size-sm {{ $badgeClasses }}">
-                                            {{ $value }}
-                                        </span>
-                                    </div>
-                                @else
-                                    <div class="fi-ta-text">
-                                        <span class="fi-ta-text-item fi-size-sm">{{ $value }}</span>
-                                    </div>
-                                @endif
+                                {!! $column->renderCell($record) !!}
                             </td>
                         @endforeach
                     </tr>

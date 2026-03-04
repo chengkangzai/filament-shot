@@ -150,13 +150,13 @@ it('renders badge with default primary color when no color specified', function 
         ->toContain('fi-color-primary');
 });
 
-it('renders array column with getColor callback for dynamic per-record badge colors', function () {
+it('renders array column with color callback for dynamic per-record badge colors', function () {
     $html = FilamentShot::table()
         ->columns([
             [
                 'name' => 'status',
                 'badge' => true,
-                'getColor' => fn (string $state): string => match ($state) {
+                'color' => fn (string $state): string => match ($state) {
                     'Blocked' => 'danger',
                     'Active' => 'success',
                     default => 'primary',
@@ -173,6 +173,88 @@ it('renders array column with getColor callback for dynamic per-record badge col
         ->toContain('fi-badge')
         ->toContain('fi-color-danger')
         ->toContain('fi-color-success');
+});
+
+it('renders mono fontFamily from TextColumn', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('code')->fontFamily(\Filament\Support\Enums\FontFamily::Mono),
+        ])
+        ->records([
+            ['code' => 'abc123'],
+        ])
+        ->toHtml();
+
+    expect($html)->toContain('fi-font-mono');
+});
+
+it('renders mono fontFamily from array definition', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            ['name' => 'code', 'fontFamily' => 'mono'],
+        ])
+        ->records([
+            ['code' => 'abc123'],
+        ])
+        ->toHtml();
+
+    expect($html)->toContain('fi-font-mono');
+});
+
+it('renders custom global font in renderHtml output', function () {
+    $html = FilamentShot::table()
+        ->columns([TextColumn::make('name')])
+        ->records([])
+        ->font('JetBrains Mono')
+        ->renderHtml();
+
+    expect($html)
+        ->toContain('JetBrains Mono')
+        ->toContain('JetBrains+Mono');
+});
+
+it('renders TextColumn with weight Bold', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(\Filament\Support\Enums\FontWeight::Bold),
+        ])
+        ->records([['name' => 'Alice']])
+        ->toHtml();
+
+    expect($html)->toContain('fi-font-bold');
+});
+
+it('renders TextColumn with alignment End', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('price')->alignment(\Filament\Support\Enums\Alignment::End),
+        ])
+        ->records([['price' => '99.99']])
+        ->toHtml();
+
+    expect($html)->toContain('fi-align-end');
+});
+
+it('renders TextColumn with wrap', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('notes')->wrap(),
+        ])
+        ->records([['notes' => 'Long text']])
+        ->toHtml();
+
+    expect($html)->toContain('fi-wrapped');
+});
+
+it('renders TextColumn with size Large', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('title')->size(\Filament\Support\Enums\TextSize::Large),
+        ])
+        ->records([['title' => 'Hello']])
+        ->toHtml();
+
+    expect($html)->toContain('fi-size-lg');
 });
 
 it('injects OKLCH color CSS variables', function () {
