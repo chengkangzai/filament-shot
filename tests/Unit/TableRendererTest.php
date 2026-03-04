@@ -22,7 +22,7 @@ it('renders table with columns and records', function () {
         ->toContain('alice@example.com')
         ->toContain('Bob')
         ->toContain('bob@example.com')
-        ->toContain('fi-ta');
+        ->toContain('fi-ta-ctn');
 });
 
 it('renders column headers', function () {
@@ -57,7 +57,7 @@ it('supports striped rows', function () {
         ->striped()
         ->toHtml();
 
-    expect($html)->toContain('background-color: #f9fafb');
+    expect($html)->toContain('fi-striped');
 });
 
 it('renders table with heading', function () {
@@ -84,7 +84,7 @@ it('renders badge column from TextColumn', function () {
 
     expect($html)
         ->toContain('Active')
-        ->toContain('border-radius: 9999px');
+        ->toContain('fi-badge');
 });
 
 it('renders badge column with color from TextColumn', function () {
@@ -99,8 +99,8 @@ it('renders badge column with color from TextColumn', function () {
 
     expect($html)
         ->toContain('Blocked')
-        ->toContain('border-radius: 9999px')
-        ->toContain('#dc2626');
+        ->toContain('fi-badge')
+        ->toContain('fi-color-danger');
 });
 
 it('renders badge column from array definition', function () {
@@ -115,8 +115,8 @@ it('renders badge column from array definition', function () {
 
     expect($html)
         ->toContain('Active')
-        ->toContain('border-radius: 9999px')
-        ->toContain('#16a34a');
+        ->toContain('fi-badge')
+        ->toContain('fi-color-success');
 });
 
 it('renders non-badge columns as plain text', function () {
@@ -131,5 +131,35 @@ it('renders non-badge columns as plain text', function () {
 
     expect($html)
         ->toContain('Alice')
-        ->not->toContain('border-radius: 9999px');
+        ->toContain('fi-ta-text-item')
+        ->not->toContain('class="fi-badge');
+});
+
+it('renders badge with default primary color when no color specified', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('status')->badge(),
+        ])
+        ->records([
+            ['status' => 'Pending'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-badge')
+        ->toContain('fi-color-primary');
+});
+
+it('injects OKLCH color CSS variables', function () {
+    $html = FilamentShot::table()
+        ->columns([TextColumn::make('name')])
+        ->records([])
+        ->renderHtml();
+
+    expect($html)
+        ->toContain('--danger-50:')
+        ->toContain('--success-50:')
+        ->toContain('--primary-50:')
+        ->toContain('--gray-50:')
+        ->toContain('oklch');
 });

@@ -22,6 +22,7 @@ abstract class BaseRenderer
         return view('filament-shot::layouts.base', [
             'darkMode' => $this->isDarkMode(),
             'primaryColor' => $this->getPrimaryColor(),
+            'colorVariables' => $this->getColorCssVariables(),
             'themeCss' => $resolver->getThemeCssContent(),
             'extraCss' => $resolver->getExtraCss(),
             'content' => $this->renderContent(),

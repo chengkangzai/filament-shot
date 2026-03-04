@@ -9,6 +9,7 @@
 
         :root {
             --primary-color: {{ $primaryColor }};
+            {!! $colorVariables !!}
         }
 
         * {

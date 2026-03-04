@@ -2,6 +2,9 @@
 
 namespace CCK\FilamentShot\Renderers;
 
+use Filament\Support\Facades\FilamentColor;
+use Filament\Support\View\Components\BadgeComponent;
+
 class TableRenderer extends BaseRenderer
 {
     protected array $columns = [];
@@ -52,7 +55,6 @@ class TableRenderer extends BaseRenderer
             'records' => $this->records,
             'heading' => $this->heading,
             'striped' => $this->striped,
-            'darkMode' => $this->isDarkMode(),
         ])->render();
     }
 
@@ -71,9 +73,27 @@ class TableRenderer extends BaseRenderer
             'name' => $this->safeCall(fn () => $column->getName(), ''),
             'label' => $this->safeCall(fn () => $column->getLabel(), ''),
             'badge' => $this->safeCall(fn () => $column->isBadge(), false),
-            'color' => null, // Color is resolved per-record in the template
-            'getColor' => method_exists($column, 'getColor') ? fn ($state) => $this->safeCall(fn () => $column->getColor($state), null) : null,
+            'color' => null,
+            'getColor' => method_exists($column, 'getColor')
+                ? fn ($state) => $this->safeCall(fn () => $column->getColor($state), null)
+                : null,
         ];
+    }
+
+    /**
+     * Resolve Filament CSS classes for a badge color.
+     *
+     * @return string CSS class string (e.g. "fi-color fi-color-danger fi-text-color-600 dark:fi-text-color-300")
+     */
+    public static function resolveBadgeClasses(?string $color): string
+    {
+        if ($color === null) {
+            $color = 'primary';
+        }
+
+        $classes = FilamentColor::getComponentClasses(BadgeComponent::class, $color);
+
+        return implode(' ', $classes);
     }
 
     protected function safeCall(callable $callback, mixed $default): mixed
