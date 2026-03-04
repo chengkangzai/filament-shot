@@ -71,3 +71,65 @@ it('renders table with heading', function () {
         ->toContain('Users List')
         ->toContain('fi-ta-header');
 });
+
+it('renders badge column from TextColumn', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('status')->badge(),
+        ])
+        ->records([
+            ['status' => 'Active'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('Active')
+        ->toContain('border-radius: 9999px');
+});
+
+it('renders badge column with color from TextColumn', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('status')->badge()->color('danger'),
+        ])
+        ->records([
+            ['status' => 'Blocked'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('Blocked')
+        ->toContain('border-radius: 9999px')
+        ->toContain('#dc2626');
+});
+
+it('renders badge column from array definition', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            ['name' => 'status', 'badge' => true, 'color' => 'success'],
+        ])
+        ->records([
+            ['status' => 'Active'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('Active')
+        ->toContain('border-radius: 9999px')
+        ->toContain('#16a34a');
+});
+
+it('renders non-badge columns as plain text', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name'),
+        ])
+        ->records([
+            ['name' => 'Alice'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('Alice')
+        ->not->toContain('border-radius: 9999px');
+});
