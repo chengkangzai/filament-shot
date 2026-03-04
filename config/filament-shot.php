@@ -12,6 +12,7 @@ return [
     'theme' => [
         'dark_mode' => false,
         'primary_color' => '#6366f1',
+        'font' => 'Inter',
     ],
 
     'browsershot' => [

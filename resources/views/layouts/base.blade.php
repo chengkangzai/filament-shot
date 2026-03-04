@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>{!! $themeCss !!}</style>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family={{ urlencode($font) }}:wght@300;400;500;600;700&display=swap');
 
         :root {
             --primary-color: {{ $primaryColor }};
@@ -13,7 +13,7 @@
         }
 
         * {
-            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+            font-family: '{{ $font }}', ui-sans-serif, system-ui, sans-serif;
         }
 
         body {
@@ -23,7 +23,7 @@
         }
 
         .fi-body {
-            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+            font-family: '{{ $font }}', ui-sans-serif, system-ui, sans-serif;
         }
     </style>
     @if($extraCss)

@@ -2,6 +2,7 @@
 
 namespace CCK\FilamentShot\Renderers;
 
+use CCK\FilamentShot\Concerns\HasFont;
 use CCK\FilamentShot\Concerns\HasOutput;
 use CCK\FilamentShot\Concerns\HasTheme;
 use CCK\FilamentShot\Concerns\HasViewport;
@@ -9,6 +10,7 @@ use CCK\FilamentShot\Support\AssetResolver;
 
 abstract class BaseRenderer
 {
+    use HasFont;
     use HasOutput;
     use HasTheme;
     use HasViewport;
@@ -27,6 +29,7 @@ abstract class BaseRenderer
             'extraCss' => $resolver->getExtraCss(),
             'content' => $this->renderContent(),
             'contentWidth' => $this->getWidth() . 'px',
+            'font' => $this->getFont(),
         ])->render();
     }
 }
