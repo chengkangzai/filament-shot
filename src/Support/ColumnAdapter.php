@@ -88,15 +88,15 @@ class ColumnAdapter implements ArrayAccess
             $badgeClasses = self::resolveBadgeClasses($colorName);
             $escapedValue = e($value);
 
-            return '<div class="fi-ta-text fi-ta-text-has-badges fi-ta-text-item ' . $extraClasses . '">'
-                . '<span class="fi-badge fi-size-sm ' . $badgeClasses . '">' . $escapedValue . '</span>'
+            return '<div class="fi-ta-text fi-ta-text-has-badges">'
+                . '<span class="fi-badge fi-size-sm ' . $badgeClasses . ' ' . $extraClasses . '">' . $escapedValue . '</span>'
                 . '</div>';
         }
 
         $escapedValue = e($value);
 
-        return '<div class="fi-ta-text ' . $extraClasses . '">'
-            . '<span class="fi-ta-text-item fi-size-sm">' . $escapedValue . '</span>'
+        return '<div class="fi-ta-text">'
+            . '<span class="fi-ta-text-item fi-size-sm ' . $extraClasses . '">' . $escapedValue . '</span>'
             . '</div>';
     }
 
