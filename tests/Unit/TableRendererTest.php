@@ -150,6 +150,31 @@ it('renders badge with default primary color when no color specified', function 
         ->toContain('fi-color-primary');
 });
 
+it('renders array column with getColor callback for dynamic per-record badge colors', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            [
+                'name' => 'status',
+                'badge' => true,
+                'getColor' => fn (string $state): string => match ($state) {
+                    'Blocked' => 'danger',
+                    'Active' => 'success',
+                    default => 'primary',
+                },
+            ],
+        ])
+        ->records([
+            ['status' => 'Blocked'],
+            ['status' => 'Active'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-badge')
+        ->toContain('fi-color-danger')
+        ->toContain('fi-color-success');
+});
+
 it('injects OKLCH color CSS variables', function () {
     $html = FilamentShot::table()
         ->columns([TextColumn::make('name')])

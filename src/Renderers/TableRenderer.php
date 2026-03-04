@@ -66,6 +66,7 @@ class TableRenderer extends BaseRenderer
                 'label' => $column['label'] ?? str($column['name'] ?? '')->headline()->toString(),
                 'badge' => $column['badge'] ?? false,
                 'color' => $column['color'] ?? null,
+                'getColor' => $column['getColor'] ?? null,
             ];
         }
 
