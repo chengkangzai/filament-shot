@@ -12,18 +12,11 @@
             {!! $colorVariables !!}
         }
 
-        * {
-            font-family: '{{ $font }}', ui-sans-serif, system-ui, sans-serif;
-        }
-
         body {
             margin: 0;
             padding: 24px;
-            background-color: {{ $darkMode ? '#111827' : '#f9fafb' }};
-        }
-
-        .fi-body {
             font-family: '{{ $font }}', ui-sans-serif, system-ui, sans-serif;
+            background-color: {{ $darkMode ? '#111827' : '#f9fafb' }};
         }
     </style>
     @if($extraCss)
