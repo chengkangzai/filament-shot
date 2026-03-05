@@ -213,3 +213,64 @@ it('renders array source with callable fontFamily', function () {
 
     expect($html)->toContain('fi-font-serif');
 });
+
+// --- renderCell edge cases ---
+
+it('does not produce trailing whitespace in class attributes', function () {
+    $adapter = new ColumnAdapter(['name' => 'email']);
+
+    $html = $adapter->renderCell(['email' => 'test@example.com']);
+
+    expect($html)->not->toMatch('/class="[^"]*\s"/');
+});
+
+it('does not produce trailing whitespace in badge class attributes', function () {
+    $adapter = new ColumnAdapter(['name' => 'status', 'badge' => true, 'color' => 'success']);
+
+    $html = $adapter->renderCell(['status' => 'Active']);
+
+    expect($html)->not->toMatch('/class="[^"]*\s"/');
+});
+
+it('escapes HTML entities in cell values', function () {
+    $adapter = new ColumnAdapter(['name' => 'content']);
+
+    $html = $adapter->renderCell(['content' => '<script>alert("xss")</script>']);
+
+    expect($html)
+        ->not->toContain('<script>')
+        ->toContain('&lt;script&gt;');
+});
+
+it('renders missing record key as empty cell', function () {
+    $adapter = new ColumnAdapter(['name' => 'missing_field']);
+
+    $html = $adapter->renderCell(['other_field' => 'value']);
+
+    expect($html)->toContain('fi-ta-text-item');
+});
+
+it('renders numeric record value correctly', function () {
+    $adapter = new ColumnAdapter(['name' => 'price']);
+
+    $html = $adapter->renderCell(['price' => 42.5]);
+
+    expect($html)->toContain('42.5');
+});
+
+it('applies fontFamily to outer div for array badge columns', function () {
+    $adapter = new ColumnAdapter([
+        'name' => 'code',
+        'badge' => true,
+        'color' => 'primary',
+        'fontFamily' => 'mono',
+    ]);
+
+    $html = $adapter->renderCell(['code' => 'ABC']);
+
+    // fi-font-mono should be on the outer div with fi-ta-text-item,
+    // not on the inner fi-badge span (Filament CSS targets .fi-ta-text-item.fi-font-mono)
+    expect($html)
+        ->toContain('fi-ta-text-item')
+        ->toMatch('/fi-ta-text-item[^"]*fi-font-mono/');
+});
