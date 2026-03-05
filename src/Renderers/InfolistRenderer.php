@@ -36,13 +36,4 @@ class InfolistRenderer extends BaseRenderer
             'value' => $this->state[$name] ?? $this->safeCall(fn () => $entry->getConstantState(), ''),
         ];
     }
-
-    protected function safeCall(callable $callback, mixed $default): mixed
-    {
-        try {
-            return $callback() ?? $default;
-        } catch (\Throwable) {
-            return $default;
-        }
-    }
 }

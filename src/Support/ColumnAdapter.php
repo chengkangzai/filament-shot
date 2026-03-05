@@ -83,20 +83,22 @@ class ColumnAdapter implements ArrayAccess
         $isBadge = $this->resolve('badge', false);
         $extraClasses = $this->resolveClasses($value);
 
+        $escapedValue = e($value);
+
         if ($isBadge) {
             $colorName = $this->resolve('color', null, $value);
             $badgeClasses = self::resolveBadgeClasses($colorName);
-            $escapedValue = e($value);
+            $divClasses = trim('fi-ta-text fi-ta-text-has-badges fi-ta-text-item ' . $extraClasses);
 
-            return '<div class="fi-ta-text fi-ta-text-has-badges">'
-                . '<span class="fi-badge fi-size-sm ' . $badgeClasses . ' ' . $extraClasses . '">' . $escapedValue . '</span>'
+            return '<div class="' . $divClasses . '">'
+                . '<span class="fi-badge fi-size-sm ' . $badgeClasses . '">' . $escapedValue . '</span>'
                 . '</div>';
         }
 
-        $escapedValue = e($value);
+        $spanClasses = trim('fi-ta-text-item fi-size-sm ' . $extraClasses);
 
         return '<div class="fi-ta-text">'
-            . '<span class="fi-ta-text-item fi-size-sm ' . $extraClasses . '">' . $escapedValue . '</span>'
+            . '<span class="' . $spanClasses . '">' . $escapedValue . '</span>'
             . '</div>';
     }
 

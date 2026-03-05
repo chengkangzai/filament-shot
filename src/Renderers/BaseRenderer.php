@@ -17,6 +17,15 @@ abstract class BaseRenderer
 
     abstract protected function renderContent(): string;
 
+    protected function safeCall(callable $callback, mixed $default): mixed
+    {
+        try {
+            return $callback() ?? $default;
+        } catch (\Throwable) {
+            return $default;
+        }
+    }
+
     public function renderHtml(): string
     {
         $resolver = app(AssetResolver::class);

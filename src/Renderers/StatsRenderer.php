@@ -31,13 +31,4 @@ class StatsRenderer extends BaseRenderer
             'chart' => $this->safeCall(fn () => $stat->getChart(), null),
         ];
     }
-
-    protected function safeCall(callable $callback, mixed $default): mixed
-    {
-        try {
-            return $callback() ?? $default;
-        } catch (\Throwable) {
-            return $default;
-        }
-    }
 }
