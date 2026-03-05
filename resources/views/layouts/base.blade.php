@@ -9,6 +9,9 @@
 
         :root {
             --primary-color: {{ $primaryColor }};
+            --font-family: '{{ $font }}';
+            --mono-font-family: ui-monospace;
+            --serif-font-family: ui-serif;
             {!! $colorVariables !!}
         }
 
