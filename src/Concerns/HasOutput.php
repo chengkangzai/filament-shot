@@ -46,6 +46,7 @@ trait HasOutput
             $this->getWidth(),
             $this->getHeight(),
             $this->getDeviceScale(),
+            fitContent: $this->viewportHeight === null,
         );
     }
 }

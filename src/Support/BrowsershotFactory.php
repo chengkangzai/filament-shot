@@ -6,13 +6,17 @@ use Spatie\Browsershot\Browsershot;
 
 class BrowsershotFactory
 {
-    public function create(string $html, int $width, int $height, int $deviceScale): Browsershot
+    public function create(string $html, int $width, int $height, int $deviceScale, bool $fitContent = false): Browsershot
     {
         $browsershot = Browsershot::html($html)
             ->windowSize($width, $height)
             ->deviceScaleFactor($deviceScale)
             ->timeout(config('filament-shot.browsershot.timeout', 60))
             ->waitUntilNetworkIdle();
+
+        if ($fitContent) {
+            $browsershot->select('body');
+        }
 
         if ($nodeBinary = config('filament-shot.browsershot.node_binary')) {
             $browsershot->setNodeBinary($nodeBinary);
