@@ -185,6 +185,26 @@ it('generates infolist example', function () use ($outputDir) {
     expect(file_exists("$outputDir/infolist.png"))->toBeTrue();
 })->group('examples');
 
+it('generates infolist dark example', function () use ($outputDir) {
+    FilamentShot::infolist([
+        TextEntry::make('name')->label('Name'),
+        TextEntry::make('email')->label('Email'),
+        TextEntry::make('role')->label('Role'),
+        TextEntry::make('joined')->label('Member Since'),
+    ])
+        ->state([
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'role' => 'Administrator',
+            'joined' => 'January 2024',
+        ])
+        ->darkMode()
+        ->width(600)
+        ->save("$outputDir/infolist-dark.png");
+
+    expect(file_exists("$outputDir/infolist-dark.png"))->toBeTrue();
+})->group('examples');
+
 it('generates stats example', function () use ($outputDir) {
     FilamentShot::stats([
         Stat::make('Total Users', '1,234')

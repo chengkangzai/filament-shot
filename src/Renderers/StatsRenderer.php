@@ -2,6 +2,9 @@
 
 namespace CCK\FilamentShot\Renderers;
 
+use Filament\Support\Facades\FilamentColor;
+use Filament\Widgets\View\Components\StatsOverviewWidgetComponent\StatComponent\DescriptionComponent;
+
 class StatsRenderer extends BaseRenderer
 {
     public function __construct(
@@ -19,16 +22,23 @@ class StatsRenderer extends BaseRenderer
 
     protected function extractStatData(object $stat): array
     {
+        $descriptionColor = $this->safeCall(fn () => $stat->getDescriptionColor(), null);
+        $chartColor = $this->safeCall(fn () => $stat->getChartColor(), null);
+
         return [
             'label' => $this->safeCall(fn () => $stat->getLabel(), ''),
             'value' => $this->safeCall(fn () => $stat->getValue(), ''),
             'description' => $this->safeCall(fn () => $stat->getDescription(), null),
             'descriptionIcon' => $this->safeCall(fn () => $stat->getDescriptionIcon(), null),
             'descriptionIconPosition' => $this->safeCall(fn () => $stat->getDescriptionIconPosition(), 'before'),
-            'descriptionColor' => $this->safeCall(fn () => $stat->getDescriptionColor(), null),
+            'descriptionColor' => $descriptionColor,
+            'descriptionColorClasses' => $descriptionColor
+                ? implode(' ', FilamentColor::getComponentClasses(DescriptionComponent::class, $descriptionColor))
+                : '',
             'icon' => $this->safeCall(fn () => $stat->getIcon(), null),
             'color' => $this->safeCall(fn () => $stat->getColor(), null),
             'chart' => $this->safeCall(fn () => $stat->getChart(), null),
+            'chartColor' => $chartColor,
         ];
     }
 }
