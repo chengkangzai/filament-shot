@@ -19,7 +19,7 @@ return [
         'node_binary' => null,
         'npm_binary' => null,
         'chrome_path' => null,
-        'no_sandbox' => false,
+        'no_sandbox' => env('FILAMENT_SHOT_NO_SANDBOX', false),
         'timeout' => 60,
         'additional_options' => [],
     ],
