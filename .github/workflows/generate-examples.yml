@@ -1,0 +1,59 @@
+name: "Generate Examples"
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    name: Generate example screenshots
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, exif, iconv, fileinfo
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Install Puppeteer
+        run: npm install puppeteer
+
+      - name: Generate example screenshots
+        run: vendor/bin/pest tests/Examples/GenerateExamplesTest.php --no-coverage
+        env:
+          FILAMENT_SHOT_NO_SANDBOX: true
+
+      - name: Upload example images as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: example-screenshots
+          path: examples/images/*.png
+
+      - name: Check for image changes
+        id: changes
+        run: |
+          git add examples/images/
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push updated images
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add examples/images/
+          git commit -m "Update example screenshots [skip ci]"
+          git push
