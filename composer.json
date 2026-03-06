@@ -1,6 +1,6 @@
 {
     "name": "chengkangzai/filament-shot",
-    "description": "renders Filament v3 UI components (Forms, Tables, Infolists, Stats Widgets) as PNG images programmatically.",
+    "description": "Render Filament v4/v5 UI components (Forms, Tables, Infolists, Stats Widgets) as PNG images programmatically.",
     "keywords": [
         "chengkangzai",
         "laravel",

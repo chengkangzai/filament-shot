@@ -4,7 +4,7 @@
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/chengkangzai/filament-shot/run-tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/chengkangzai/filament-shot/actions?query=workflow%3Arun-tests+branch%3Amaster)
 [![Total Downloads](https://img.shields.io/packagist/dt/chengkangzai/filament-shot.svg?style=flat-square)](https://packagist.org/packages/chengkangzai/filament-shot)
 
-Render Filament v5 UI components — Forms, Tables, Infolists, and Stats Widgets — as PNG screenshots programmatically. Define your components using familiar Filament classes and get pixel-perfect images without spinning up a browser manually.
+Render Filament v4/v5 UI components — Forms, Tables, Infolists, and Stats Widgets — as PNG screenshots programmatically. Define your components using familiar Filament classes and get pixel-perfect images without spinning up a browser manually.
 
 ## Examples
 
@@ -44,7 +44,7 @@ Filament Shot generates standalone HTML using its own Blade templates styled wit
 
 - PHP 8.2+
 - Laravel 11+
-- Filament v5
+- Filament v4 or v5
 - Node.js 18+ and [Puppeteer](https://pptr.dev/)
 - A Chromium-based browser (Chrome, Chromium, etc.)
 

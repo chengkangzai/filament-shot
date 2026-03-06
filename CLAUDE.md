@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Filament Shot renders Filament v5 UI components (Forms, Tables, Infolists, Stats Widgets) as PNG screenshots. It generates standalone HTML with Filament's CSS classes, then captures via Browsershot/Puppeteer — no Livewire or running application needed.
+Filament Shot renders Filament v4/v5 UI components (Forms, Tables, Infolists, Stats Widgets) as PNG screenshots. It generates standalone HTML with Filament's CSS classes, then captures via Browsershot/Puppeteer — no Livewire or running application needed.
 
 ## Commands
 
