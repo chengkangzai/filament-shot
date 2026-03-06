@@ -1,18 +1,18 @@
 {
-    "name": "cck/filament-shot",
+    "name": "chengkangzai/filament-shot",
     "description": "renders Filament v3 UI components (Forms, Tables, Infolists, Stats Widgets) as PNG images programmatically.",
     "keywords": [
-        "CCK",
+        "chengkangzai",
         "laravel",
         "filamentphp",
         "filament",
         "filament-plugin",
         "filament-shot"
     ],
-    "homepage": "https://github.com/cck/filament-shot",
+    "homepage": "https://github.com/chengkangzai/filament-shot",
     "support": {
-        "issues": "https://github.com/cck/filament-shot/issues",
-        "source": "https://github.com/cck/filament-shot"
+        "issues": "https://github.com/chengkangzai/filament-shot/issues",
+        "source": "https://github.com/chengkangzai/filament-shot"
     },
     "license": "MIT",
     "authors": [
