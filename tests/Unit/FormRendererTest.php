@@ -54,7 +54,7 @@ it('renders a textarea field', function () {
 
     expect($html)
         ->toContain('Biography')
-        ->toContain('fi-textarea-input')
+        ->toContain('fi-fo-textarea')
         ->toContain('name="bio"');
 });
 
@@ -65,7 +65,7 @@ it('renders a toggle field', function () {
 
     expect($html)
         ->toContain('Active')
-        ->toContain('fi-toggle-input');
+        ->toContain('fi-toggle');
 });
 
 it('renders a checkbox field', function () {

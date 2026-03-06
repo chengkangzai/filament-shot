@@ -9,6 +9,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Support\Facades\FilamentColor;
+use Filament\Support\View\Components\ToggleComponent;
 
 class FormRenderer extends BaseRenderer
 {
@@ -69,6 +71,13 @@ class FormRenderer extends BaseRenderer
 
         if ($component instanceof Textarea) {
             $data['rows'] = $this->safeCall(fn () => $component->getRows(), 3);
+        }
+
+        if ($component instanceof Toggle) {
+            $onColor = $this->safeCall(fn () => $component->getOnColor(), 'primary') ?? 'primary';
+            $offColor = $this->safeCall(fn () => $component->getOffColor(), 'gray') ?? 'gray';
+            $data['onColorClasses'] = implode(' ', FilamentColor::getComponentClasses(ToggleComponent::class, $onColor));
+            $data['offColorClasses'] = implode(' ', FilamentColor::getComponentClasses(ToggleComponent::class, $offColor));
         }
 
         if ($component instanceof Placeholder) {

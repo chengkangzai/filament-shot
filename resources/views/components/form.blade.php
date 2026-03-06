@@ -1,13 +1,19 @@
 <div class="fi-fo-component-ctn" style="display: flex; flex-direction: column; gap: 1.5rem;">
     @foreach($fields as $field)
-        <div class="fi-fo-field-wrp">
-            @if(!empty($field['label']) && $field['type'] !== 'checkbox')
-                <label class="fi-fo-field-wrp-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #374151;">
-                    {{ $field['label'] }}
-                </label>
+        <div class="fi-fo-field">
+            @if(!empty($field['label']) && !in_array($field['type'], ['checkbox', 'toggle']))
+                <div class="fi-fo-field-label-col">
+                    <div class="fi-fo-field-label-ctn">
+                        <label class="fi-fo-field-label">
+                            <span class="fi-fo-field-label-content">{{ $field['label'] }}</span>
+                        </label>
+                    </div>
+                </div>
             @endif
 
-            @include('filament-shot::components.fields.' . $field['type'], ['field' => $field])
+            <div class="fi-fo-field-content-col">
+                @include('filament-shot::components.fields.' . $field['type'], ['field' => $field])
+            </div>
         </div>
     @endforeach
 </div>
