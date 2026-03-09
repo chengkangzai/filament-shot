@@ -2,12 +2,8 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -176,10 +172,13 @@ it('generates table dark example', function () use ($outputDir) {
 
 it('generates infolist example', function () use ($outputDir) {
     FilamentShot::infolist([
-        TextEntry::make('name')->label('Name'),
-        TextEntry::make('email')->label('Email'),
-        TextEntry::make('role')->label('Role'),
-        TextEntry::make('joined')->label('Member Since'),
+        Section::make('User Profile')
+            ->schema([
+                TextEntry::make('name')->label('Name'),
+                TextEntry::make('email')->label('Email'),
+                TextEntry::make('role')->label('Role'),
+                TextEntry::make('joined')->label('Member Since'),
+            ]),
     ])
         ->state([
             'name' => 'Jane Doe',
@@ -195,10 +194,13 @@ it('generates infolist example', function () use ($outputDir) {
 
 it('generates infolist dark example', function () use ($outputDir) {
     FilamentShot::infolist([
-        TextEntry::make('name')->label('Name'),
-        TextEntry::make('email')->label('Email'),
-        TextEntry::make('role')->label('Role'),
-        TextEntry::make('joined')->label('Member Since'),
+        Section::make('User Profile')
+            ->schema([
+                TextEntry::make('name')->label('Name'),
+                TextEntry::make('email')->label('Email'),
+                TextEntry::make('role')->label('Role'),
+                TextEntry::make('joined')->label('Member Since'),
+            ]),
     ])
         ->state([
             'name' => 'Jane Doe',
@@ -301,7 +303,8 @@ it('generates form with section layout example', function () use ($outputDir) {
 
 it('generates form with grid layout example', function () use ($outputDir) {
     FilamentShot::form([
-        Grid::make(2)
+        Grid::make()
+            ->columns(['default' => 2])
             ->schema([
                 TextInput::make('first_name')
                     ->label('First Name')
@@ -323,17 +326,32 @@ it('generates form with grid layout example', function () use ($outputDir) {
 
 it('generates form with additional field types example', function () use ($outputDir) {
     FilamentShot::form([
-        DatePicker::make('birthday')->label('Birthday'),
-        ColorPicker::make('theme_color')->label('Theme Color'),
-        TagsInput::make('skills')->label('Skills'),
-        FileUpload::make('avatar')->label('Avatar'),
-        KeyValue::make('metadata')->label('Metadata'),
+        Section::make('Event Details')
+            ->schema([
+                TextInput::make('event_name')
+                    ->label('Event Name'),
+                DatePicker::make('event_date')
+                    ->label('Date'),
+                Select::make('category')
+                    ->label('Category')
+                    ->options([
+                        'conference' => 'Conference',
+                        'workshop' => 'Workshop',
+                        'meetup' => 'Meetup',
+                    ]),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->rows(2),
+                Toggle::make('published')
+                    ->label('Published'),
+            ]),
     ])
         ->state([
-            'birthday' => '1990-06-15',
-            'theme_color' => '#3b82f6',
-            'skills' => ['Laravel', 'PHP', 'Vue.js'],
-            'metadata' => ['role' => 'admin', 'plan' => 'pro'],
+            'event_name' => 'Laravel Meetup 2024',
+            'event_date' => '2024-06-15',
+            'category' => 'meetup',
+            'description' => 'Monthly Laravel community gathering with talks and networking.',
+            'published' => true,
         ])
         ->width(600)
         ->save("$outputDir/form-fields.png");
