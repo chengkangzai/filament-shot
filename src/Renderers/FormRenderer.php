@@ -77,8 +77,6 @@ class FormRenderer extends BaseRenderer
             'layout' => 'section',
             'heading' => $this->safeCall(fn () => $component->getHeading(), ''),
             'description' => $this->safeCall(fn () => $component->getDescription(), null),
-            'compact' => $this->safeCall(fn () => $component->isCompact(), false),
-            'collapsed' => $this->safeCall(fn () => $component->isCollapsed(), false),
             'children' => array_map(fn ($child) => $this->processComponent($child), $children),
         ];
     }
@@ -213,6 +211,7 @@ class FormRenderer extends BaseRenderer
             $component instanceof Checkbox => 'checkbox',
             $component instanceof Radio => 'radio',
             $component instanceof Placeholder => 'placeholder',
+            // DatePicker must come before DateTimePicker because DatePicker extends DateTimePicker
             $component instanceof DatePicker => 'date-picker',
             $component instanceof DateTimePicker => 'date-time-picker',
             $component instanceof FileUpload => 'file-upload',

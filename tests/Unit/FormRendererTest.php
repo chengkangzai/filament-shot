@@ -273,7 +273,7 @@ it('renders a rich editor field', function () {
     expect($html)
         ->toContain('Content')
         ->toContain('fi-fo-rich-editor')
-        ->toContain('Hello world');
+        ->toContain('<p>Hello world</p>');
 });
 
 it('renders a markdown editor field', function () {

@@ -10,19 +10,19 @@
             @forelse($field['pairs'] ?? [] as $key => $value)
                 <tr>
                     <td style="padding: 0.375rem 0.75rem; border-bottom: 1px solid var(--gray-200);">
-                        <input type="text" value="{{ $key }}" class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
+                        <input type="text" value="{{ $key }}" @if($field['disabled'] ?? false) disabled @endif class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
                     </td>
                     <td style="padding: 0.375rem 0.75rem; border-bottom: 1px solid var(--gray-200); border-inline-start: 1px solid var(--gray-200);">
-                        <input type="text" value="{{ $value }}" class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
+                        <input type="text" value="{{ $value }}" @if($field['disabled'] ?? false) disabled @endif class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
                     </td>
                 </tr>
             @empty
                 <tr>
                     <td style="padding: 0.375rem 0.75rem;">
-                        <input type="text" placeholder="Key" class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
+                        <input type="text" placeholder="Key" @if($field['disabled'] ?? false) disabled @endif class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
                     </td>
                     <td style="padding: 0.375rem 0.75rem; border-inline-start: 1px solid var(--gray-200);">
-                        <input type="text" placeholder="Value" class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
+                        <input type="text" placeholder="Value" @if($field['disabled'] ?? false) disabled @endif class="fi-input" style="border: none; outline: none; width: 100%; padding: 0; box-shadow: none;" />
                     </td>
                 </tr>
             @endforelse
