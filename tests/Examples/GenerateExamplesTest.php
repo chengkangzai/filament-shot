@@ -2,13 +2,21 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -246,4 +254,89 @@ it('generates stats dark example', function () use ($outputDir) {
         ->save("$outputDir/stats-dark.png");
 
     expect(file_exists("$outputDir/stats-dark.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with icon column example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(FontWeight::Bold),
+            TextColumn::make('email'),
+            IconColumn::make('is_active')->boolean()->label('Active'),
+        ])
+        ->records([
+            ['name' => 'Alice Johnson', 'email' => 'alice@example.com', 'is_active' => 1],
+            ['name' => 'Bob Smith', 'email' => 'bob@example.com', 'is_active' => 0],
+            ['name' => 'Charlie Brown', 'email' => 'charlie@example.com', 'is_active' => 1],
+        ])
+        ->heading('Users')
+        ->width(800)
+        ->save("$outputDir/table-icon-column.png");
+
+    expect(file_exists("$outputDir/table-icon-column.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with section layout example', function () use ($outputDir) {
+    FilamentShot::form([
+        Section::make('Personal Information')
+            ->schema([
+                TextInput::make('name')
+                    ->label('Full Name')
+                    ->placeholder('Enter your name'),
+                TextInput::make('email')
+                    ->label('Email Address')
+                    ->placeholder('you@example.com'),
+            ]),
+        Section::make('Settings')
+            ->schema([
+                Toggle::make('active')->label('Active'),
+                Checkbox::make('notifications')->label('Enable notifications'),
+            ]),
+    ])
+        ->state(['name' => 'Jane Doe', 'email' => 'jane@example.com', 'active' => true, 'notifications' => true])
+        ->width(600)
+        ->save("$outputDir/form-section.png");
+
+    expect(file_exists("$outputDir/form-section.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with grid layout example', function () use ($outputDir) {
+    FilamentShot::form([
+        Grid::make(2)
+            ->schema([
+                TextInput::make('first_name')
+                    ->label('First Name')
+                    ->placeholder('First'),
+                TextInput::make('last_name')
+                    ->label('Last Name')
+                    ->placeholder('Last'),
+            ]),
+        Textarea::make('bio')
+            ->label('Biography')
+            ->rows(3),
+    ])
+        ->state(['first_name' => 'Jane', 'last_name' => 'Doe', 'bio' => 'Software engineer and open source contributor.'])
+        ->width(600)
+        ->save("$outputDir/form-grid.png");
+
+    expect(file_exists("$outputDir/form-grid.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with additional field types example', function () use ($outputDir) {
+    FilamentShot::form([
+        DatePicker::make('birthday')->label('Birthday'),
+        ColorPicker::make('theme_color')->label('Theme Color'),
+        TagsInput::make('skills')->label('Skills'),
+        FileUpload::make('avatar')->label('Avatar'),
+        KeyValue::make('metadata')->label('Metadata'),
+    ])
+        ->state([
+            'birthday' => '1990-06-15',
+            'theme_color' => '#3b82f6',
+            'skills' => ['Laravel', 'PHP', 'Vue.js'],
+            'metadata' => ['role' => 'admin', 'plan' => 'pro'],
+        ])
+        ->width(600)
+        ->save("$outputDir/form-fields.png");
+
+    expect(file_exists("$outputDir/form-fields.png"))->toBeTrue();
 })->group('examples');

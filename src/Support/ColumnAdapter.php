@@ -5,9 +5,12 @@ namespace CCK\FilamentShot\Support;
 use ArrayAccess;
 use BackedEnum;
 use Filament\Support\Components\Contracts\HasEmbeddedView;
+use Filament\Support\Enums\IconSize;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\View\Components\BadgeComponent;
 use Filament\Tables\Columns\Column;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\View\Components\Columns\IconColumnComponent\IconComponent;
 
 /**
  * @implements ArrayAccess<string, mixed>
@@ -72,6 +75,10 @@ class ColumnAdapter implements ArrayAccess
             } catch (\Throwable) {
                 // Fall through to manual rendering
             }
+        }
+
+        if ($this->source instanceof IconColumn) {
+            return $this->renderIconCell($record);
         }
 
         $name = is_array($this->source)
@@ -145,6 +152,40 @@ class ColumnAdapter implements ArrayAccess
     public function offsetSet(mixed $offset, mixed $value): void {}
 
     public function offsetUnset(mixed $offset): void {}
+
+    /**
+     * Render an IconColumn cell manually when toEmbeddedHtml() is unavailable.
+     */
+    private function renderIconCell(array $record): string
+    {
+        /** @var IconColumn $column */
+        $column = clone $this->source;
+        $column->record($record);
+
+        $name = $this->safeCall(fn () => $column->getName(), '');
+        $value = $record[$name] ?? null;
+
+        $isBoolean = $this->safeCall(fn () => $column->isBoolean(), false);
+
+        if ($isBoolean) {
+            $icon = $value ? $this->safeCall(fn () => $column->getTrueIcon(), null) : $this->safeCall(fn () => $column->getFalseIcon(), null);
+            $color = $value ? $this->safeCall(fn () => $column->getTrueColor(), 'success') : $this->safeCall(fn () => $column->getFalseColor(), 'danger');
+        } else {
+            $icon = $this->safeCall(fn () => $column->getIcon($value), null);
+            $color = $this->safeCall(fn () => $column->getColor($value), null);
+        }
+
+        if (blank($icon)) {
+            return '<div class="fi-ta-icon"></div>';
+        }
+
+        $iconHtml = $this->safeCall(
+            fn () => \Filament\Support\generate_icon_html($icon, attributes: (new \Illuminate\View\ComponentAttributeBag)->color(IconComponent::class, $color), size: IconSize::Large)?->toHtml(),
+            '',
+        );
+
+        return '<div class="fi-ta-icon">' . $iconHtml . '</div>';
+    }
 
     /**
      * Resolve CSS classes from column properties for array-based rendering.

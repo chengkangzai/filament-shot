@@ -2,15 +2,9 @@
 
 namespace CCK\FilamentShot\Renderers;
 
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Support\Facades\FilamentColor;
-use Filament\Support\View\Components\ToggleComponent;
+use CCK\FilamentShot\Livewire\ShotFormComponent;
+use Illuminate\Support\ViewErrorBag;
+use Livewire\Mechanisms\ExtendBlade\ExtendBlade;
 
 class FormRenderer extends BaseRenderer
 {
@@ -29,75 +23,73 @@ class FormRenderer extends BaseRenderer
 
     protected function renderContent(): string
     {
-        $fields = array_map(
-            fn ($component) => $this->extractFieldData($component),
-            $this->components,
+        $this->ensureViewErrorBag();
+
+        ShotFormComponent::prepareFor($this->components, $this->state);
+
+        $component = new ShotFormComponent;
+        $component->boot();
+        $component->mount();
+
+        // Register the component with Livewire's rendering stack so that
+        // $this resolves to our component in Filament's Blade templates
+        // (e.g., RichEditor uses $this->getId())
+        $extendBlade = app(ExtendBlade::class);
+        $extendBlade->startLivewireRendering($component);
+        app('view')->share('__livewire', $component);
+
+        try {
+            $html = $component->getSchema('form')->toHtml();
+        } finally {
+            $extendBlade->endLivewireRendering();
+            app('view')->share('__livewire', null);
+        }
+
+        return $this->injectFormValues($html, $component->data);
+    }
+
+    /**
+     * Inject value attributes into inputs that use wire:model binding.
+     *
+     * Filament's Blade templates use wire:model for data binding, which requires
+     * Livewire JS to populate values. Since we render static HTML for screenshots,
+     * we need to add explicit value attributes.
+     */
+    protected function injectFormValues(string $html, array $data): string
+    {
+        // Match input/textarea elements with wire:model="data.fieldName"
+        return preg_replace_callback(
+            '/<(input|textarea|select)(\s[^>]*?)wire:model(?:\.[\w.]+)?="data\.([^"]+)"([^>]*?)(\s*\/?>)/s',
+            function ($matches) use ($data) {
+                $tag = $matches[1];
+                $before = $matches[2];
+                $fieldPath = $matches[3];
+                $after = $matches[4];
+                $close = $matches[5];
+
+                $value = data_get($data, $fieldPath);
+
+                if ($value === null) {
+                    return $matches[0];
+                }
+
+                // Don't add value if already has one
+                if (preg_match('/\bvalue\s*=/', $before . $after)) {
+                    return $matches[0];
+                }
+
+                $escapedValue = e($value);
+
+                return "<{$tag}{$before}wire:model=\"data.{$fieldPath}\"{$after} value=\"{$escapedValue}\"{$close}";
+            },
+            $html,
         );
-
-        return view('filament-shot::components.form', [
-            'fields' => $fields,
-        ])->render();
     }
 
-    protected function extractFieldData(object $component): array
+    protected function ensureViewErrorBag(): void
     {
-        $name = $this->safeCall(fn () => $component->getName(), '');
-        $type = $this->resolveFieldType($component);
-
-        $data = [
-            'type' => $type,
-            'name' => $name,
-            'label' => $this->safeCall(fn () => $component->getLabel(), $name),
-            'value' => $this->state[$name] ?? null,
-            'disabled' => $this->safeCall(fn () => $component->isDisabled(), false),
-        ];
-
-        if (method_exists($component, 'getPlaceholder')) {
-            $data['placeholder'] = $this->safeCall(fn () => $component->getPlaceholder(), '');
+        if (! isset(app('view')->getShared()['errors'])) {
+            app('view')->share('errors', new ViewErrorBag);
         }
-
-        if ($component instanceof Select) {
-            $data['options'] = $this->safeCall(fn () => $component->getOptions(), []);
-        }
-
-        if ($component instanceof Radio) {
-            $data['options'] = $this->safeCall(fn () => $component->getOptions(), []);
-        }
-
-        if ($component instanceof TextInput) {
-            $data['input_type'] = $this->safeCall(fn () => $component->getType(), 'text');
-            $data['readonly'] = $this->safeCall(fn () => $component->isReadOnly(), false);
-        }
-
-        if ($component instanceof Textarea) {
-            $data['rows'] = $this->safeCall(fn () => $component->getRows(), 3);
-        }
-
-        if ($component instanceof Toggle) {
-            $onColor = $this->safeCall(fn () => $component->getOnColor(), 'primary') ?? 'primary';
-            $offColor = $this->safeCall(fn () => $component->getOffColor(), 'gray') ?? 'gray';
-            $data['onColorClasses'] = implode(' ', FilamentColor::getComponentClasses(ToggleComponent::class, $onColor));
-            $data['offColorClasses'] = implode(' ', FilamentColor::getComponentClasses(ToggleComponent::class, $offColor));
-        }
-
-        if ($component instanceof Placeholder) {
-            $data['content'] = $this->safeCall(fn () => $component->getContent(), '');
-        }
-
-        return $data;
-    }
-
-    protected function resolveFieldType(object $component): string
-    {
-        return match (true) {
-            $component instanceof TextInput => 'text-input',
-            $component instanceof Select => 'select',
-            $component instanceof Textarea => 'textarea',
-            $component instanceof Toggle => 'toggle',
-            $component instanceof Checkbox => 'checkbox',
-            $component instanceof Radio => 'radio',
-            $component instanceof Placeholder => 'placeholder',
-            default => 'text-input',
-        };
     }
 }
