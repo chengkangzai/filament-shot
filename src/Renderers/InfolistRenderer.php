@@ -2,8 +2,9 @@
 
 namespace CCK\FilamentShot\Renderers;
 
-use Filament\Infolists\Components\Entry;
-use Filament\Support\Components\Contracts\HasEmbeddedView;
+use CCK\FilamentShot\Livewire\ShotInfolistComponent;
+use Illuminate\Support\ViewErrorBag;
+use Livewire\Mechanisms\ExtendBlade\ExtendBlade;
 
 class InfolistRenderer extends BaseRenderer
 {
@@ -22,51 +23,30 @@ class InfolistRenderer extends BaseRenderer
 
     protected function renderContent(): string
     {
-        $renderedEntries = [];
+        $this->ensureViewErrorBag();
 
-        foreach ($this->entries as $entry) {
-            $renderedEntries[] = $this->renderEntry($entry);
+        ShotInfolistComponent::prepareFor($this->entries, $this->state);
+
+        $component = new ShotInfolistComponent;
+        $component->boot();
+        $component->mount();
+
+        $extendBlade = app(ExtendBlade::class);
+        $extendBlade->startLivewireRendering($component);
+        app('view')->share('__livewire', $component);
+
+        try {
+            return $component->getSchema('infolist')->toHtml();
+        } finally {
+            $extendBlade->endLivewireRendering();
+            app('view')->share('__livewire', null);
         }
-
-        return '<div class="fi-in" style="display: flex; flex-direction: column; gap: 1.5rem;">'
-            . implode("\n", $renderedEntries)
-            . '</div>';
     }
 
-    protected function renderEntry(object $entry): string
+    protected function ensureViewErrorBag(): void
     {
-        if ($entry instanceof Entry && $entry instanceof HasEmbeddedView) {
-            try {
-                $name = $this->safeCall(fn () => $entry->getName(), '');
-                $value = $this->state[$name] ?? $this->safeCall(fn () => $entry->getConstantState(), '');
-
-                $clone = clone $entry;
-                $clone->constantState($value);
-
-                return $clone->toEmbeddedHtml();
-            } catch (\Throwable) {
-                // Fall through to manual rendering
-            }
+        if (! isset(app('view')->getShared()['errors'])) {
+            app('view')->share('errors', new ViewErrorBag);
         }
-
-        return $this->renderEntryManually($entry);
-    }
-
-    protected function renderEntryManually(object $entry): string
-    {
-        $name = $this->safeCall(fn () => $entry->getName(), '');
-        $label = $this->safeCall(fn () => $entry->getLabel(), $name);
-        $value = $this->state[$name] ?? $this->safeCall(fn () => $entry->getConstantState(), '');
-
-        return '<div class="fi-in-entry">'
-            . '<div class="fi-in-entry-label-col">'
-            . '<div class="fi-in-entry-label-ctn">'
-            . '<dt class="fi-in-entry-label">' . e($label) . '</dt>'
-            . '</div></div>'
-            . '<div class="fi-in-entry-content-col">'
-            . '<dd class="fi-in-entry-content-ctn">'
-            . '<div class="fi-in-entry-content">'
-            . '<div class="fi-in-text"><div class="fi-in-text-item">' . e($value) . '</div></div>'
-            . '</div></dd></div></div>';
     }
 }

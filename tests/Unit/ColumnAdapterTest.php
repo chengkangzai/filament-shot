@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\Support\ColumnAdapter;
 use Filament\Support\Enums\FontFamily;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 
 // --- Array source tests ---
@@ -273,4 +274,41 @@ it('applies fontFamily to outer div for array badge columns', function () {
     expect($html)
         ->toContain('fi-ta-text-item')
         ->toMatch('/fi-ta-text-item[^"]*fi-font-mono/');
+});
+
+// --- IconColumn tests ---
+
+it('renders IconColumn boolean true as icon, not raw value', function () {
+    $column = IconColumn::make('is_active')->boolean();
+    $adapter = new ColumnAdapter($column);
+
+    $html = $adapter->renderCell(['is_active' => 1]);
+
+    expect($html)
+        ->toContain('fi-ta-icon')
+        ->not->toContain('>1<');
+});
+
+it('renders IconColumn boolean false as icon, not raw value', function () {
+    $column = IconColumn::make('is_active')->boolean();
+    $adapter = new ColumnAdapter($column);
+
+    $html = $adapter->renderCell(['is_active' => 0]);
+
+    expect($html)
+        ->toContain('fi-ta-icon')
+        ->not->toContain('>0<');
+});
+
+it('renders non-boolean IconColumn with icon callback', function () {
+    $column = IconColumn::make('status')
+        ->icon(fn (string $state) => match ($state) {
+            'active' => 'heroicon-o-check-circle',
+            default => 'heroicon-o-x-circle',
+        });
+    $adapter = new ColumnAdapter($column);
+
+    $html = $adapter->renderCell(['status' => 'active']);
+
+    expect($html)->toContain('fi-ta-icon');
 });
