@@ -30,7 +30,7 @@ abstract class BaseRenderer
     {
         $resolver = app(AssetResolver::class);
 
-        return view('filament-shot::layouts.base', [
+        $html = view('filament-shot::layouts.base', [
             'darkMode' => $this->isDarkMode(),
             'primaryColor' => $this->getPrimaryColor(),
             'colorVariables' => $this->getColorCssVariables(),
@@ -40,5 +40,24 @@ abstract class BaseRenderer
             'contentWidth' => $this->getWidth() . 'px',
             'font' => $this->getFont(),
         ])->render();
+
+        return $this->sanitizeHtml($html);
+    }
+
+    /**
+     * Remove attributes that reference localhost URLs.
+     *
+     * Filament components use x-load-src with the app URL for Alpine.js
+     * lazy-loading. In non-application contexts this resolves to
+     * http://localhost which triggers Browsershot's security check.
+     * These attributes serve no purpose in static screenshots.
+     */
+    protected function sanitizeHtml(string $html): string
+    {
+        return preg_replace(
+            '/\s*x-load-src="[^"]*"/',
+            '',
+            $html,
+        );
     }
 }
