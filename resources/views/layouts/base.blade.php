@@ -15,9 +15,13 @@
             {!! $colorVariables !!}
         }
 
+        /* Hide Alpine.js-dependent elements since JS doesn't run in screenshots */
+        [x-cloak] { display: none !important; }
+
         body {
             margin: 0;
             padding: 24px;
+            min-height: auto !important;
             font-family: '{{ $font }}', ui-sans-serif, system-ui, sans-serif;
             background-color: {{ $darkMode ? '#111827' : '#f9fafb' }};
         }
