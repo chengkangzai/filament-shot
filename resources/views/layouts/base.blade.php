@@ -18,6 +18,9 @@
         /* Hide Alpine.js-dependent elements since JS doesn't run in screenshots */
         [x-cloak] { display: none !important; }
 
+        /* Hide Livewire loading indicators — spinners visible in static HTML */
+        .fi-loading-indicator { display: none !important; }
+
         body {
             margin: 0;
             padding: 24px;
