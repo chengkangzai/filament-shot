@@ -54,10 +54,9 @@ abstract class BaseRenderer
      */
     protected function sanitizeHtml(string $html): string
     {
-        return preg_replace(
-            '/\s*x-load-src="[^"]*"/',
-            '',
-            $html,
-        );
+        // Remove x-load-src attributes (localhost URLs trigger Browsershot security)
+        $html = preg_replace('/\s*x-load-src="[^"]*"/', '', $html);
+
+        return $html;
     }
 }
