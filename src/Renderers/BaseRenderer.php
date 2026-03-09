@@ -57,6 +57,18 @@ abstract class BaseRenderer
         // Remove x-load-src attributes (localhost URLs trigger Browsershot security)
         $html = preg_replace('/\s*x-load-src="[^"]*"/', '', $html);
 
+        // Remove Livewire loading indicator elements.
+        // Elements with wire:loading (without .remove) are spinners that only show
+        // during Livewire requests. In static HTML they're visible and cause unwanted
+        // loading icons. Elements with wire:loading.remove are the normal-state icons
+        // that should remain visible.
+        $html = preg_replace('/<svg\b[^>]*wire:loading\.delay[^>]*>.*?<\/svg>/s', '', $html);
+
+        // Also strip wire:loading.remove attributes from normal icons so they render
+        // without Livewire-specific attributes that serve no purpose in static HTML.
+        $html = preg_replace('/\s*wire:loading\.remove[^"]*="[^"]*"/', '', $html);
+        $html = preg_replace('/\s*wire:target="[^"]*"/', '', $html);
+
         return $html;
     }
 }
