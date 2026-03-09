@@ -21,6 +21,38 @@
         /* Hide Livewire loading indicators — spinners visible in static HTML */
         .fi-loading-indicator { display: none !important; }
 
+        /* FileUpload: style as FilePond dropzone since JS doesn't initialize */
+        .fi-fo-file-upload {
+            position: relative;
+        }
+        .fi-fo-file-upload-input-ctn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 7rem;
+            border: 2px dashed rgb(209 213 219);
+            border-radius: 0.75rem;
+            background-color: rgb(249 250 251);
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .fi-fo-file-upload-input-ctn input[type="file"] {
+            display: none;
+        }
+        .fi-fo-file-upload-input-ctn::after {
+            content: 'Drag & drop your file or browse';
+            display: block;
+            font-size: 0.875rem;
+            color: rgb(107 114 128);
+        }
+        .dark .fi-fo-file-upload-input-ctn {
+            border-color: rgb(75 85 99);
+            background-color: rgb(31 41 55);
+        }
+        .dark .fi-fo-file-upload-input-ctn::after {
+            color: rgb(156 163 175);
+        }
+
         body {
             margin: 0;
             padding: 24px;
