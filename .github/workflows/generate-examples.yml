@@ -31,47 +31,8 @@ jobs:
       - name: Install Puppeteer
         run: npm install puppeteer
 
-      - name: Debug CSS and Chrome info
-        run: |
-          echo "=== Theme CSS file ==="
-          ls -la vendor/filament/filament/dist/theme.css || echo "MISSING!"
-          echo "=== Chrome version ==="
-          node -e "const p = require('puppeteer'); p.launch({args:['--no-sandbox']}).then(b => b.version().then(v => { console.log(v); b.close(); }))"
-          echo "=== Puppeteer version ==="
-          node -e "console.log(require('puppeteer/package.json').version)"
-
       - name: Generate example screenshots
         run: vendor/bin/pest tests/Examples/GenerateExamplesTest.php --no-coverage
-        env:
-          FILAMENT_SHOT_NO_SANDBOX: true
-
-      - name: Debug - render HTML and check styles
-        run: |
-          node -e "
-          const puppeteer = require('puppeteer');
-          const fs = require('fs');
-          (async () => {
-            const browser = await puppeteer.launch({args: ['--no-sandbox']});
-            const page = await browser.newPage();
-            await page.setViewport({width: 800, height: 768, deviceScaleFactor: 2});
-            const html = fs.readFileSync('examples/debug-output.html', 'utf8');
-            await page.setContent(html, {waitUntil: 'networkidle0'});
-            const styles = await page.evaluate(() => {
-              const el = document.querySelector('.fi-ta-ctn') || document.querySelector('.fi-input-wrp') || document.querySelector('[class*=\"fi-\"]');
-              if (!el) return {error: 'No Filament elements found', bodyHTML: document.body.innerHTML.substring(0, 500)};
-              const cs = window.getComputedStyle(el);
-              return {
-                element: el.className,
-                borderRadius: cs.borderRadius,
-                boxShadow: cs.boxShadow,
-                sheets: document.styleSheets.length,
-                rulesTotal: Array.from(document.styleSheets).reduce((t, s) => { try { return t + s.cssRules.length } catch(e) { return t } }, 0),
-              };
-            });
-            console.log(JSON.stringify(styles, null, 2));
-            await browser.close();
-          })();
-          " 2>&1 || true
         env:
           FILAMENT_SHOT_NO_SANDBOX: true
 
@@ -79,9 +40,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: example-screenshots
-          path: |
-            examples/images/*.png
-            examples/debug-output.html
+          path: examples/images/*.png
 
       - name: Check for image changes
         id: changes

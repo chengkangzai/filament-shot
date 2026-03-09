@@ -24,32 +24,6 @@ beforeAll(function () use ($outputDir) {
     }
 });
 
-it('generates debug HTML output', function () use ($outputDir) {
-    $html = FilamentShot::table()
-        ->columns([
-            TextColumn::make('name'),
-            TextColumn::make('email'),
-        ])
-        ->records([
-            ['name' => 'Alice', 'email' => 'alice@example.com'],
-        ])
-        ->heading('Debug')
-        ->width(800)
-        ->toHtml();
-
-    $debugPath = dirname($outputDir) . '/debug-output.html';
-    file_put_contents($debugPath, $html);
-
-    // Log CSS size for debugging
-    $cssSize = strlen($html);
-    $hasLayers = str_contains($html, '@layer');
-    $hasFiInput = str_contains($html, '.fi-input');
-
-    expect($cssSize)->toBeGreaterThan(100000)
-        ->and($hasLayers)->toBeTrue()
-        ->and($hasFiInput)->toBeTrue();
-})->group('examples');
-
 it('generates form light example', function () use ($outputDir) {
     FilamentShot::form([
         TextInput::make('name')
