@@ -10,6 +10,14 @@ class FormRenderer extends BaseRenderer
 {
     protected array $state = [];
 
+    protected ?string $modalHeading = null;
+
+    protected ?string $modalDescription = null;
+
+    protected string $modalSubmitLabel = 'Submit';
+
+    protected string $modalCancelLabel = 'Cancel';
+
     public function __construct(
         protected array $components = [],
     ) {}
@@ -17,6 +25,34 @@ class FormRenderer extends BaseRenderer
     public function state(array $state): static
     {
         $this->state = $state;
+
+        return $this;
+    }
+
+    public function modal(string $heading): static
+    {
+        $this->modalHeading = $heading;
+
+        return $this;
+    }
+
+    public function modalDescription(string $description): static
+    {
+        $this->modalDescription = $description;
+
+        return $this;
+    }
+
+    public function modalSubmitLabel(string $label): static
+    {
+        $this->modalSubmitLabel = $label;
+
+        return $this;
+    }
+
+    public function modalCancelLabel(string $label): static
+    {
+        $this->modalCancelLabel = $label;
 
         return $this;
     }
@@ -45,7 +81,20 @@ class FormRenderer extends BaseRenderer
             app('view')->share('__livewire', null);
         }
 
-        return $this->injectFormValues($html, $component->data);
+        $html = $this->injectFormValues($html, $component->data);
+
+        if ($this->modalHeading !== null) {
+            $html = view('filament-shot::components.modal', [
+                'heading' => $this->modalHeading,
+                'description' => $this->modalDescription,
+                'submitLabel' => $this->modalSubmitLabel,
+                'cancelLabel' => $this->modalCancelLabel,
+                'content' => $html,
+                'darkMode' => $this->isDarkMode(),
+            ])->render();
+        }
+
+        return $html;
     }
 
     /**

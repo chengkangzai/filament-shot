@@ -287,3 +287,51 @@ it('renders a repeater field with items', function () {
         ->toContain('Items')
         ->toContain('fi-fo-repeater');
 });
+
+it('renders a form inside a modal wrapper', function () {
+    $html = FilamentShot::form([
+        TextInput::make('name')->label('Full Name'),
+        Select::make('role')->label('Role')->options(['admin' => 'Admin', 'editor' => 'Editor']),
+    ])
+        ->modal('Assign Role')
+        ->modalDescription('Choose a role for this user')
+        ->modalSubmitLabel('Assign')
+        ->modalCancelLabel('Dismiss')
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-modal')
+        ->toContain('fi-modal-window')
+        ->toContain('fi-modal-header')
+        ->toContain('fi-modal-heading')
+        ->toContain('Assign Role')
+        ->toContain('Choose a role for this user')
+        ->toContain('fi-modal-content')
+        ->toContain('fi-modal-footer')
+        ->toContain('Assign')
+        ->toContain('Dismiss')
+        ->toContain('Full Name')
+        ->toContain('fi-fo-text-input');
+});
+
+it('renders a modal without description', function () {
+    $html = FilamentShot::form([
+        TextInput::make('name')->label('Name'),
+    ])
+        ->modal('Quick Edit')
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-modal')
+        ->toContain('Quick Edit')
+        ->not->toContain('<p class="fi-modal-description">');
+});
+
+it('renders a form without modal by default', function () {
+    $html = FilamentShot::form([
+        TextInput::make('name')->label('Name'),
+    ])->toHtml();
+
+    expect($html)
+        ->not->toContain('<h2 class="fi-modal-heading">');
+});
