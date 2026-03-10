@@ -12,11 +12,11 @@
     {!! $content !!}
 
     <x-slot name="footer">
-        <x-filament::button color="gray">
-            {{ $cancelLabel }}
-        </x-filament::button>
         <x-filament::button color="primary">
             {{ $submitLabel }}
+        </x-filament::button>
+        <x-filament::button color="gray">
+            {{ $cancelLabel }}
         </x-filament::button>
     </x-slot>
 </x-filament::modal>
