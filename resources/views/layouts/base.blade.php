@@ -28,15 +28,9 @@
         .fi-modal[x-cloak] {
             display: flex !important;
             position: relative !important;
-            padding: 0.25rem;
-            border-radius: 0.75rem;
-            background-color: rgba(0, 0, 0, 0.4);
         }
         .fi-modal .fi-modal-close-overlay {
-            display: block !important;
-            position: absolute !important;
-            inset: 0;
-            border-radius: 0.75rem;
+            display: none !important;
         }
         .fi-modal .fi-modal-window-ctn {
             position: relative !important;
