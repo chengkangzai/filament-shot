@@ -21,6 +21,31 @@
         /* Hide Livewire loading indicators — spinners visible in static HTML */
         .fi-loading-indicator { display: none !important; }
 
+        /* Force Filament modal visible and static for screenshots.
+           The modal component uses Alpine.js (x-cloak, x-show) which hides
+           everything by default. Override to force visibility and use relative
+           positioning so Browsershot can measure content height. */
+        .fi-modal[x-cloak] {
+            display: flex !important;
+            position: relative !important;
+            padding: 0.25rem;
+            border-radius: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .fi-modal .fi-modal-close-overlay {
+            display: block !important;
+            position: absolute !important;
+            inset: 0;
+            border-radius: 0.75rem;
+        }
+        .fi-modal .fi-modal-window-ctn {
+            position: relative !important;
+            width: 100%;
+        }
+        .fi-modal .fi-modal-window {
+            position: relative !important;
+        }
+
         /* FileUpload: style as FilePond dropzone since JS doesn't initialize */
         .fi-fo-file-upload {
             position: relative;
