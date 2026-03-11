@@ -335,3 +335,32 @@ it('renders a form without modal by default', function () {
     expect($html)
         ->not->toContain('<h2 class="fi-modal-heading">');
 });
+
+it('renders a form modal with icon', function () {
+    $html = FilamentShot::form([
+        TextInput::make('name')->label('Name'),
+    ])
+        ->modal('Edit User')
+        ->modalIcon('heroicon-o-pencil-square')
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-modal')
+        ->toContain('fi-modal-icon-ctn')
+        ->toContain('Edit User');
+});
+
+it('renders a form modal with custom button color', function () {
+    $html = FilamentShot::form([
+        TextInput::make('reason')->label('Reason'),
+    ])
+        ->modal('Delete User')
+        ->modalColor('danger')
+        ->modalSubmitLabel('Delete')
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-modal')
+        ->toContain('fi-color-danger')
+        ->toContain('Delete');
+});

@@ -4,6 +4,7 @@ namespace CCK\FilamentShot;
 
 use CCK\FilamentShot\Renderers\FormRenderer;
 use CCK\FilamentShot\Renderers\InfolistRenderer;
+use CCK\FilamentShot\Renderers\ModalRenderer;
 use CCK\FilamentShot\Renderers\StatsRenderer;
 use CCK\FilamentShot\Renderers\TableRenderer;
 
@@ -27,5 +28,10 @@ class FilamentShot
     public static function stats(array $stats): StatsRenderer
     {
         return new StatsRenderer($stats);
+    }
+
+    public static function modal(): ModalRenderer
+    {
+        return new ModalRenderer;
     }
 }

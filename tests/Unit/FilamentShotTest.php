@@ -3,6 +3,7 @@
 use CCK\FilamentShot\FilamentShot;
 use CCK\FilamentShot\Renderers\FormRenderer;
 use CCK\FilamentShot\Renderers\InfolistRenderer;
+use CCK\FilamentShot\Renderers\ModalRenderer;
 use CCK\FilamentShot\Renderers\StatsRenderer;
 use CCK\FilamentShot\Renderers\TableRenderer;
 
@@ -28,4 +29,10 @@ it('creates a stats renderer', function () {
     $renderer = FilamentShot::stats([]);
 
     expect($renderer)->toBeInstanceOf(StatsRenderer::class);
+});
+
+it('creates a modal renderer', function () {
+    $renderer = FilamentShot::modal();
+
+    expect($renderer)->toBeInstanceOf(ModalRenderer::class);
 });

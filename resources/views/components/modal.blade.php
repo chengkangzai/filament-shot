@@ -1,4 +1,4 @@
-{{-- Renders form content inside Filament's actual modal component.
+{{-- Renders content inside Filament's actual modal component.
      CSS overrides in base.blade.php force visibility and static positioning
      since Alpine.js doesn't run in screenshots. --}}
 <x-filament::modal
@@ -8,11 +8,15 @@
     width="lg"
     :heading="$heading"
     :description="$description"
+    :icon="$icon ?? null"
+    :icon-color="$iconColor ?? 'primary'"
 >
-    {!! $content !!}
+    @if($content)
+        {!! $content !!}
+    @endif
 
     <x-slot name="footer">
-        <x-filament::button color="primary">
+        <x-filament::button :color="$color ?? 'primary'">
             {{ $submitLabel }}
         </x-filament::button>
         <x-filament::button color="gray">

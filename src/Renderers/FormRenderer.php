@@ -14,6 +14,12 @@ class FormRenderer extends BaseRenderer
 
     protected ?string $modalDescription = null;
 
+    protected ?string $modalIcon = null;
+
+    protected string $modalIconColor = 'primary';
+
+    protected string $modalColor = 'primary';
+
     protected string $modalSubmitLabel = 'Submit';
 
     protected string $modalCancelLabel = 'Cancel';
@@ -46,6 +52,27 @@ class FormRenderer extends BaseRenderer
     public function modalSubmitLabel(string $label): static
     {
         $this->modalSubmitLabel = $label;
+
+        return $this;
+    }
+
+    public function modalIcon(string $icon): static
+    {
+        $this->modalIcon = $icon;
+
+        return $this;
+    }
+
+    public function modalIconColor(string $color): static
+    {
+        $this->modalIconColor = $color;
+
+        return $this;
+    }
+
+    public function modalColor(string $color): static
+    {
+        $this->modalColor = $color;
 
         return $this;
     }
@@ -87,6 +114,9 @@ class FormRenderer extends BaseRenderer
             $html = view('filament-shot::components.modal', [
                 'heading' => $this->modalHeading,
                 'description' => $this->modalDescription,
+                'icon' => $this->modalIcon,
+                'iconColor' => $this->modalIconColor,
+                'color' => $this->modalColor,
                 'submitLabel' => $this->modalSubmitLabel,
                 'cancelLabel' => $this->modalCancelLabel,
                 'content' => $html,
