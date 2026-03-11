@@ -12,6 +12,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -357,4 +358,58 @@ it('generates form with additional field types example', function () use ($outpu
         ->save("$outputDir/form-fields.png");
 
     expect(file_exists("$outputDir/form-fields.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with color column example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(FontWeight::Bold),
+            TextColumn::make('hex'),
+            ColorColumn::make('color'),
+        ])
+        ->records([
+            ['name' => 'Primary', 'hex' => '#3b82f6', 'color' => '#3b82f6'],
+            ['name' => 'Success', 'hex' => '#22c55e', 'color' => '#22c55e'],
+            ['name' => 'Danger', 'hex' => '#ef4444', 'color' => '#ef4444'],
+            ['name' => 'Warning', 'hex' => '#f59e0b', 'color' => '#f59e0b'],
+        ])
+        ->heading('Brand Colors')
+        ->width(600)
+        ->save("$outputDir/table-color-column.png");
+
+    expect(file_exists("$outputDir/table-color-column.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with multi-select example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('name')
+            ->label('Recipe Name'),
+        Select::make('ingredients')
+            ->label('Ingredients')
+            ->multiple()
+            ->options([
+                'flour' => 'Flour',
+                'sugar' => 'Sugar',
+                'butter' => 'Butter',
+                'eggs' => 'Eggs',
+                'milk' => 'Milk',
+                'vanilla' => 'Vanilla Extract',
+            ]),
+        Select::make('category')
+            ->label('Category')
+            ->options([
+                'appetizer' => 'Appetizer',
+                'main' => 'Main Course',
+                'dessert' => 'Dessert',
+            ]),
+    ])
+        ->state([
+            'name' => 'Classic Vanilla Cake',
+            'ingredients' => ['flour', 'sugar', 'butter', 'eggs', 'vanilla'],
+            'category' => 'dessert',
+        ])
+        ->width(600)
+        ->save("$outputDir/form-multi-select.png");
+
+    expect(file_exists("$outputDir/form-multi-select.png"))->toBeTrue();
 })->group('examples');
