@@ -448,6 +448,29 @@ it('generates table with record actions example', function () use ($outputDir) {
     expect(file_exists("$outputDir/table-record-actions.png"))->toBeTrue();
 })->group('examples');
 
+it('generates form with open select dropdown example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('name')
+            ->label('Customer Name'),
+        Select::make('status')
+            ->label('Status')
+            ->options([
+                'lead' => 'Lead',
+                'open' => 'Open',
+                'replied' => 'Replied',
+                'opportunity' => 'Opportunity',
+                'blocked' => 'Blocked',
+                'do_not_contact' => 'Do Not Contact',
+            ]),
+    ])
+        ->state(['name' => 'John Doe', 'status' => 'blocked'])
+        ->openFields(['status'])
+        ->width(500)
+        ->save("$outputDir/form-select-open.png");
+
+    expect(file_exists("$outputDir/form-select-open.png"))->toBeTrue();
+})->group('examples');
+
 it('generates notification example', function () use ($outputDir) {
     FilamentShot::notification()
         ->title('Status Updated')
