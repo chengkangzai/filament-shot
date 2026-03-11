@@ -12,6 +12,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontFamily;
@@ -536,34 +538,34 @@ it('generates table with bulk actions example', function () use ($outputDir) {
 it('generates navigation example', function () use ($outputDir) {
     FilamentShot::navigation()
         ->items([
-            \Filament\Navigation\NavigationItem::make('Dashboard')
+            NavigationItem::make('Dashboard')
                 ->icon('heroicon-o-home'),
-            \Filament\Navigation\NavigationGroup::make('Content')
+            NavigationGroup::make('Content')
                 ->items([
-                    \Filament\Navigation\NavigationItem::make('Posts')
+                    NavigationItem::make('Posts')
                         ->icon('heroicon-o-document-text')
                         ->isActiveWhen(fn () => true)
                         ->badge('24', 'success'),
-                    \Filament\Navigation\NavigationItem::make('Pages')
+                    NavigationItem::make('Pages')
                         ->icon('heroicon-o-document'),
-                    \Filament\Navigation\NavigationItem::make('Categories')
+                    NavigationItem::make('Categories')
                         ->icon('heroicon-o-tag'),
                 ]),
-            \Filament\Navigation\NavigationGroup::make('Shop')
+            NavigationGroup::make('Shop')
                 ->items([
-                    \Filament\Navigation\NavigationItem::make('Products')
+                    NavigationItem::make('Products')
                         ->icon('heroicon-o-shopping-bag'),
-                    \Filament\Navigation\NavigationItem::make('Orders')
+                    NavigationItem::make('Orders')
                         ->icon('heroicon-o-clipboard-document-list')
                         ->badge('3', 'danger'),
-                    \Filament\Navigation\NavigationItem::make('Customers')
+                    NavigationItem::make('Customers')
                         ->icon('heroicon-o-users'),
                 ]),
-            \Filament\Navigation\NavigationGroup::make('Settings')
+            NavigationGroup::make('Settings')
                 ->items([
-                    \Filament\Navigation\NavigationItem::make('General')
+                    NavigationItem::make('General')
                         ->icon('heroicon-o-cog-6-tooth'),
-                    \Filament\Navigation\NavigationItem::make('Roles & Permissions')
+                    NavigationItem::make('Roles & Permissions')
                         ->icon('heroicon-o-shield-check'),
                 ]),
         ])
