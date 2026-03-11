@@ -533,6 +533,47 @@ it('generates table with bulk actions example', function () use ($outputDir) {
     expect(file_exists("$outputDir/table-bulk-actions.png"))->toBeTrue();
 })->group('examples');
 
+it('generates navigation example', function () use ($outputDir) {
+    FilamentShot::navigation()
+        ->items([
+            \Filament\Navigation\NavigationItem::make('Dashboard')
+                ->icon('heroicon-o-home'),
+            \Filament\Navigation\NavigationGroup::make('Content')
+                ->items([
+                    \Filament\Navigation\NavigationItem::make('Posts')
+                        ->icon('heroicon-o-document-text')
+                        ->isActiveWhen(fn () => true)
+                        ->badge('24', 'success'),
+                    \Filament\Navigation\NavigationItem::make('Pages')
+                        ->icon('heroicon-o-document'),
+                    \Filament\Navigation\NavigationItem::make('Categories')
+                        ->icon('heroicon-o-tag'),
+                ]),
+            \Filament\Navigation\NavigationGroup::make('Shop')
+                ->items([
+                    \Filament\Navigation\NavigationItem::make('Products')
+                        ->icon('heroicon-o-shopping-bag'),
+                    \Filament\Navigation\NavigationItem::make('Orders')
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->badge('3', 'danger'),
+                    \Filament\Navigation\NavigationItem::make('Customers')
+                        ->icon('heroicon-o-users'),
+                ]),
+            \Filament\Navigation\NavigationGroup::make('Settings')
+                ->items([
+                    \Filament\Navigation\NavigationItem::make('General')
+                        ->icon('heroicon-o-cog-6-tooth'),
+                    \Filament\Navigation\NavigationItem::make('Roles & Permissions')
+                        ->icon('heroicon-o-shield-check'),
+                ]),
+        ])
+        ->heading('Admin Panel')
+        ->width(320)
+        ->save("$outputDir/navigation.png");
+
+    expect(file_exists("$outputDir/navigation.png"))->toBeTrue();
+})->group('examples');
+
 it('generates notification example', function () use ($outputDir) {
     FilamentShot::notification()
         ->title('Status Updated')

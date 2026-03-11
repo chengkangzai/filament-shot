@@ -5,6 +5,7 @@ namespace CCK\FilamentShot;
 use CCK\FilamentShot\Renderers\FormRenderer;
 use CCK\FilamentShot\Renderers\InfolistRenderer;
 use CCK\FilamentShot\Renderers\ModalRenderer;
+use CCK\FilamentShot\Renderers\NavigationRenderer;
 use CCK\FilamentShot\Renderers\NotificationRenderer;
 use CCK\FilamentShot\Renderers\StatsRenderer;
 use CCK\FilamentShot\Renderers\TableRenderer;
@@ -39,5 +40,10 @@ class FilamentShot
     public static function notification(): NotificationRenderer
     {
         return new NotificationRenderer;
+    }
+
+    public static function navigation(): NavigationRenderer
+    {
+        return new NavigationRenderer;
     }
 }
