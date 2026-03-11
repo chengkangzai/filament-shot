@@ -8,6 +8,7 @@ use Filament\Support\Components\Contracts\HasEmbeddedView;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\View\Components\BadgeComponent;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\View\Components\Columns\IconColumnComponent\IconComponent;
@@ -82,6 +83,10 @@ class ColumnAdapter implements ArrayAccess
             return $this->renderIconCell($record);
         }
 
+        if ($this->source instanceof ColorColumn) {
+            return $this->renderColorCell($record);
+        }
+
         $name = is_array($this->source)
             ? ($this->source['name'] ?? '')
             : $this->safeCall(fn () => $this->source->getName(), '');
@@ -153,6 +158,25 @@ class ColumnAdapter implements ArrayAccess
     public function offsetSet(mixed $offset, mixed $value): void {}
 
     public function offsetUnset(mixed $offset): void {}
+
+    /**
+     * Render a ColorColumn cell as a color swatch circle.
+     */
+    private function renderColorCell(array $record): string
+    {
+        $name = $this->safeCall(fn () => $this->source->getName(), '');
+        $value = $record[$name] ?? null;
+
+        if (blank($value)) {
+            return '<div class="fi-ta-color"></div>';
+        }
+
+        $escapedColor = e($value);
+
+        return '<div class="fi-ta-color">'
+            . '<div style="background-color: ' . $escapedColor . '; width: 1.5rem; height: 1.5rem; border-radius: 9999px; border: 1px solid rgba(0,0,0,0.1);"></div>'
+            . '</div>';
+    }
 
     /**
      * Render an IconColumn cell manually when toEmbeddedHtml() is unavailable.
