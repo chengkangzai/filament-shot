@@ -6,6 +6,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\MessageBag;
 use Livewire\Component;
 
@@ -13,7 +14,7 @@ class ShotStatsComponent extends Component implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    /** @var array<\Filament\Widgets\StatsOverviewWidget\Stat> */
+    /** @var array<Stat> */
     protected static array $pendingStats = [];
 
     public static function prepareFor(array $stats): void
