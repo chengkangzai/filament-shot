@@ -12,6 +12,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontFamily;
@@ -531,6 +533,47 @@ it('generates table with bulk actions example', function () use ($outputDir) {
         ->save("$outputDir/table-bulk-actions.png");
 
     expect(file_exists("$outputDir/table-bulk-actions.png"))->toBeTrue();
+})->group('examples');
+
+it('generates navigation example', function () use ($outputDir) {
+    FilamentShot::navigation()
+        ->items([
+            NavigationItem::make('Dashboard')
+                ->icon('heroicon-o-home'),
+            NavigationGroup::make('Content')
+                ->items([
+                    NavigationItem::make('Posts')
+                        ->icon('heroicon-o-document-text')
+                        ->isActiveWhen(fn () => true)
+                        ->badge('24', 'success'),
+                    NavigationItem::make('Pages')
+                        ->icon('heroicon-o-document'),
+                    NavigationItem::make('Categories')
+                        ->icon('heroicon-o-tag'),
+                ]),
+            NavigationGroup::make('Shop')
+                ->items([
+                    NavigationItem::make('Products')
+                        ->icon('heroicon-o-shopping-bag'),
+                    NavigationItem::make('Orders')
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->badge('3', 'danger'),
+                    NavigationItem::make('Customers')
+                        ->icon('heroicon-o-users'),
+                ]),
+            NavigationGroup::make('Settings')
+                ->items([
+                    NavigationItem::make('General')
+                        ->icon('heroicon-o-cog-6-tooth'),
+                    NavigationItem::make('Roles & Permissions')
+                        ->icon('heroicon-o-shield-check'),
+                ]),
+        ])
+        ->heading('Admin Panel')
+        ->width(320)
+        ->save("$outputDir/navigation.png");
+
+    expect(file_exists("$outputDir/navigation.png"))->toBeTrue();
 })->group('examples');
 
 it('generates notification example', function () use ($outputDir) {
