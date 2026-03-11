@@ -471,6 +471,30 @@ it('generates form with open select dropdown example', function () use ($outputD
     expect(file_exists("$outputDir/form-select-open.png"))->toBeTrue();
 })->group('examples');
 
+it('generates table with labeled actions example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(FontWeight::Bold),
+            TextColumn::make('email'),
+        ])
+        ->records([
+            ['name' => 'Alice Johnson', 'email' => 'alice@example.com'],
+            ['name' => 'Bob Smith', 'email' => 'bob@example.com'],
+        ])
+        ->recordActions([
+            Action::make('perks')->label('Perks')->icon('heroicon-o-gift'),
+            Action::make('automations')->label('Automations')->icon('heroicon-o-cog-6-tooth'),
+            EditAction::make(),
+            DeleteAction::make(),
+        ])
+        ->labeledActions()
+        ->heading('Team Members')
+        ->width(900)
+        ->save("$outputDir/table-labeled-actions.png");
+
+    expect(file_exists("$outputDir/table-labeled-actions.png"))->toBeTrue();
+})->group('examples');
+
 it('generates notification example', function () use ($outputDir) {
     FilamentShot::notification()
         ->title('Status Updated')

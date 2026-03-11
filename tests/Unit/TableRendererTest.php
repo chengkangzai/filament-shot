@@ -322,6 +322,28 @@ it('renders record actions from array definitions', function () {
         ->toContain('title="Delete"');
 });
 
+it('renders labeled actions with icon and text', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name'),
+        ])
+        ->records([
+            ['name' => 'Alice'],
+        ])
+        ->recordActions([
+            Action::make('perks')->label('Perks')->icon('heroicon-o-plus'),
+            Action::make('automations')->label('Automations')->icon('heroicon-o-plus'),
+        ])
+        ->labeledActions()
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-link-label')
+        ->toContain('Perks')
+        ->toContain('Automations')
+        ->not->toContain('class="fi-icon-btn');
+});
+
 it('renders table without actions column when no actions', function () {
     $html = FilamentShot::table()
         ->columns([

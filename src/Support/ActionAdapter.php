@@ -12,9 +12,18 @@ use Illuminate\View\ComponentAttributeBag;
 
 class ActionAdapter
 {
+    protected bool $labeled = false;
+
     public function __construct(
         protected mixed $source,
     ) {}
+
+    public function labeled(bool $labeled = true): static
+    {
+        $this->labeled = $labeled;
+
+        return $this;
+    }
 
     /**
      * Render the action as an icon button HTML string.
@@ -27,6 +36,10 @@ class ActionAdapter
 
         if (blank($icon) && blank($label)) {
             return '';
+        }
+
+        if (filled($icon) && $this->labeled && filled($label)) {
+            return $this->renderLabeledButton($icon, $color, $label);
         }
 
         if (filled($icon)) {
@@ -60,6 +73,28 @@ class ActionAdapter
 
         return '<button type="button" class="fi-icon-btn fi-size-md ' . $colorClasses . '"' . $titleAttr . '>'
             . $iconHtml
+            . '</button>';
+    }
+
+    /**
+     * Render as a button with both icon and label text.
+     */
+    private function renderLabeledButton(string | BackedEnum | Htmlable $icon, string $color, string $label): string
+    {
+        $colorClasses = $this->resolveIconButtonClasses($color);
+
+        $iconHtml = $this->safeCall(
+            fn () => \Filament\Support\generate_icon_html(
+                $icon,
+                attributes: new ComponentAttributeBag,
+                size: IconSize::Small,
+            )?->toHtml(),
+            '',
+        );
+
+        return '<button type="button" class="fi-link fi-size-sm ' . $colorClasses . '" style="display: inline-flex; align-items: center; gap: 0.25rem;">'
+            . $iconHtml
+            . '<span class="fi-link-label">' . e($label) . '</span>'
             . '</button>';
     }
 

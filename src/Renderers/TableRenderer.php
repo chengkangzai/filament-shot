@@ -17,6 +17,8 @@ class TableRenderer extends BaseRenderer
 
     protected array $actions = [];
 
+    protected bool $labeledActions = false;
+
     public function columns(array $columns): static
     {
         $this->columns = $columns;
@@ -52,6 +54,13 @@ class TableRenderer extends BaseRenderer
         return $this;
     }
 
+    public function labeledActions(bool $labeled = true): static
+    {
+        $this->labeledActions = $labeled;
+
+        return $this;
+    }
+
     protected function renderContent(): string
     {
         $columns = array_map(
@@ -60,7 +69,7 @@ class TableRenderer extends BaseRenderer
         );
 
         $actions = array_map(
-            fn ($action) => new ActionAdapter($action),
+            fn ($action) => (new ActionAdapter($action))->labeled($this->labeledActions),
             $this->actions,
         );
 
