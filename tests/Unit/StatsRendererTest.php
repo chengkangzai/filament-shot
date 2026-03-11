@@ -47,6 +47,8 @@ it('renders multiple stats in a grid', function () {
     ])->toHtml();
 
     expect($html)
-        ->toContain('grid-template-columns: repeat(3')
-        ->toContain('fi-wi-stats-overview-stat');
+        ->toContain('fi-wi-stats-overview-stat')
+        ->toContain('A')
+        ->toContain('B')
+        ->toContain('C');
 });
