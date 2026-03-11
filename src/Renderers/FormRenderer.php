@@ -3,6 +3,7 @@
 namespace CCK\FilamentShot\Renderers;
 
 use CCK\FilamentShot\Livewire\ShotFormComponent;
+use Filament\Forms\Components\Select;
 use Illuminate\Support\ViewErrorBag;
 use Livewire\Mechanisms\ExtendBlade\ExtendBlade;
 
@@ -138,6 +139,7 @@ class FormRenderer extends BaseRenderer
         $html = $this->injectInputValues($html, $data);
         $html = $this->injectCheckboxState($html, $data);
         $html = $this->injectSelectState($html, $data);
+        $html = $this->injectMultiSelectState($html, $data);
         $html = $this->injectTextareaContent($html, $data);
         $html = $this->injectToggleState($html, $data);
 
@@ -297,6 +299,99 @@ class FormRenderer extends BaseRenderer
             },
             $html,
         );
+    }
+
+    /**
+     * Inject selected tags into multi-select fields.
+     *
+     * Multi-selects use Alpine.js to render selected values as tags.
+     * Since JS doesn't run, we inject tag elements for each selected value.
+     */
+    protected function injectMultiSelectState(string $html, array $data): string
+    {
+        $optionMaps = $this->collectMultiSelectOptions($this->components);
+
+        // Find all multi-select components and inject tags.
+        // Match x-data="selectFormComponent({...isMultiple: true...state: $wire.$entangle('data.FIELD')...})"
+        if (preg_match_all('/x-data="selectFormComponent\(\{.*?isMultiple:\s*true.*?state:\s*\$wire\.\$entangle\(&#039;data\.([^&]+)&#039;/s', $html, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+            // Process in reverse order so offsets remain valid
+            foreach (array_reverse($matches) as $match) {
+                $fieldPath = $match[1][0];
+                $matchPos = $match[0][1];
+                $values = data_get($data, $fieldPath);
+
+                if (! is_array($values) || empty($values)) {
+                    continue;
+                }
+
+                $options = $optionMaps[$fieldPath] ?? [];
+                $tagsHtml = '';
+
+                foreach ($values as $value) {
+                    $label = $options[$value] ?? $value;
+                    $tagsHtml .= '<span class="fi-badge fi-size-sm fi-color fi-color-primary fi-bg-color-50 fi-text-color-600 dark:fi-bg-color-600 dark:fi-text-color-50" style="display: inline-flex; margin: 0.125rem;">'
+                        . '<span class="fi-badge-label">' . e($label) . '</span>'
+                        . '</span>';
+                }
+
+                $wrapper = '<div style="display: flex; flex-wrap: wrap; gap: 0.25rem; padding: 0.5rem;">' . $tagsHtml . '</div>';
+
+                // Search backwards from match position to find fi-input-wrp-content-ctn
+                $searchStart = max(0, $matchPos - 3000);
+                $searchBack = substr($html, $searchStart, $matchPos - $searchStart);
+                $ctnPos = strrpos($searchBack, 'fi-input-wrp-content-ctn');
+
+                if ($ctnPos !== false) {
+                    $insertPos = strpos($searchBack, '>', $ctnPos);
+                    if ($insertPos !== false) {
+                        $absolutePos = $searchStart + $insertPos + 1;
+                        $html = substr($html, 0, $absolutePos) . $wrapper . substr($html, $absolutePos);
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    /**
+     * Collect option maps from multi-select components recursively.
+     *
+     * @return array<string, array<string, string>>
+     */
+    protected function collectMultiSelectOptions(array $components, string $prefix = ''): array
+    {
+        $maps = [];
+
+        foreach ($components as $component) {
+            if ($component instanceof Select) {
+                try {
+                    if ($component->isMultiple()) {
+                        $name = $prefix . $component->getName();
+                        $maps[$name] = $component->getOptions();
+                    }
+                } catch (\Throwable) {
+                    // Skip if we can't resolve
+                }
+            }
+
+            // Recurse into child components (Section, Grid, Builder, etc.)
+            try {
+                $children = $component->getChildComponents();
+                if (! empty($children)) {
+                    $childPrefix = $prefix;
+
+                    // Builder blocks nest under {builder}.{uuid}.data.
+                    // Repeater items nest under {repeater}.{uuid}.
+                    // For direct children, no extra prefix needed.
+                    $maps = array_merge($maps, $this->collectMultiSelectOptions($children, $childPrefix));
+                }
+            } catch (\Throwable) {
+                // Skip if no children
+            }
+        }
+
+        return $maps;
     }
 
     protected function ensureViewErrorBag(): void

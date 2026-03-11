@@ -57,6 +57,23 @@ it('renders a select field with options', function () {
         ->toContain('fi-fo-select');
 });
 
+it('renders multi-select with selected values as tags', function () {
+    $html = FilamentShot::form([
+        Select::make('products')
+            ->label('Products')
+            ->multiple()
+            ->options(['WAG001' => 'Wagyu Steak', 'LOB002' => 'Lobster Thermidor']),
+    ])
+        ->state(['products' => ['WAG001', 'LOB002']])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('Products')
+        ->toContain('fi-badge-label')
+        ->toContain('Wagyu Steak')
+        ->toContain('Lobster Thermidor');
+});
+
 it('renders a textarea field', function () {
     $html = FilamentShot::form([
         Textarea::make('bio')->label('Biography'),
