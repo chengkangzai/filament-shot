@@ -470,3 +470,14 @@ it('generates form with open select dropdown example', function () use ($outputD
 
     expect(file_exists("$outputDir/form-select-open.png"))->toBeTrue();
 })->group('examples');
+
+it('generates notification example', function () use ($outputDir) {
+    FilamentShot::notification()
+        ->title('Status Updated')
+        ->body('The customer status has been changed to Blocked.')
+        ->success()
+        ->width(400)
+        ->save("$outputDir/notification.png");
+
+    expect(file_exists("$outputDir/notification.png"))->toBeTrue();
+})->group('examples');

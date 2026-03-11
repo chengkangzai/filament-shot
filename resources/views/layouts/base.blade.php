@@ -40,6 +40,14 @@
             position: relative !important;
         }
 
+        /* Force Filament notification visible for screenshots.
+           The notification component uses Alpine.js transitions which start
+           invisible. Override to force visibility in static HTML. */
+        .fi-no-notification {
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
         /* FileUpload: style as FilePond dropzone since JS doesn't initialize */
         .fi-fo-file-upload {
             position: relative;
