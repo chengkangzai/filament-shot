@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\Support\ColumnAdapter;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 
@@ -157,7 +158,7 @@ it('renders cell with TextColumn fontFamily Mono', function () {
 });
 
 it('renders cell with TextColumn weight Bold', function () {
-    $column = TextColumn::make('name')->weight(\Filament\Support\Enums\FontWeight::Bold);
+    $column = TextColumn::make('name')->weight(FontWeight::Bold);
     $adapter = new ColumnAdapter($column);
 
     $html = $adapter->renderCell(['name' => 'Alice']);

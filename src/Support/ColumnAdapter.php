@@ -11,6 +11,7 @@ use Filament\Support\View\Components\BadgeComponent;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\View\Components\Columns\IconColumnComponent\IconComponent;
+use Illuminate\View\ComponentAttributeBag;
 
 /**
  * @implements ArrayAccess<string, mixed>
@@ -180,7 +181,7 @@ class ColumnAdapter implements ArrayAccess
         }
 
         $iconHtml = $this->safeCall(
-            fn () => \Filament\Support\generate_icon_html($icon, attributes: (new \Illuminate\View\ComponentAttributeBag)->color(IconComponent::class, $color), size: IconSize::Large)?->toHtml(),
+            fn () => \Filament\Support\generate_icon_html($icon, attributes: (new ComponentAttributeBag)->color(IconComponent::class, $color), size: IconSize::Large)?->toHtml(),
             '',
         );
 

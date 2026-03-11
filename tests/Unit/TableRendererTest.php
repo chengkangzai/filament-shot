@@ -1,6 +1,10 @@
 <?php
 
 use CCK\FilamentShot\FilamentShot;
+use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
 
 it('renders table with columns and records', function () {
@@ -178,7 +182,7 @@ it('renders array column with color callback for dynamic per-record badge colors
 it('renders mono fontFamily from TextColumn', function () {
     $html = FilamentShot::table()
         ->columns([
-            TextColumn::make('code')->fontFamily(\Filament\Support\Enums\FontFamily::Mono),
+            TextColumn::make('code')->fontFamily(FontFamily::Mono),
         ])
         ->records([
             ['code' => 'abc123'],
@@ -216,7 +220,7 @@ it('renders custom global font in renderHtml output', function () {
 it('renders TextColumn with weight Bold', function () {
     $html = FilamentShot::table()
         ->columns([
-            TextColumn::make('name')->weight(\Filament\Support\Enums\FontWeight::Bold),
+            TextColumn::make('name')->weight(FontWeight::Bold),
         ])
         ->records([['name' => 'Alice']])
         ->toHtml();
@@ -227,7 +231,7 @@ it('renders TextColumn with weight Bold', function () {
 it('renders TextColumn with alignment End', function () {
     $html = FilamentShot::table()
         ->columns([
-            TextColumn::make('price')->alignment(\Filament\Support\Enums\Alignment::End),
+            TextColumn::make('price')->alignment(Alignment::End),
         ])
         ->records([['price' => '99.99']])
         ->toHtml();
@@ -249,7 +253,7 @@ it('renders TextColumn with wrap', function () {
 it('renders TextColumn with size Large', function () {
     $html = FilamentShot::table()
         ->columns([
-            TextColumn::make('title')->size(\Filament\Support\Enums\TextSize::Large),
+            TextColumn::make('title')->size(TextSize::Large),
         ])
         ->records([['title' => 'Hello']])
         ->toHtml();

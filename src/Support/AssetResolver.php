@@ -2,6 +2,8 @@
 
 namespace CCK\FilamentShot\Support;
 
+use Filament\FilamentServiceProvider;
+
 class AssetResolver
 {
     public function getThemeCssContent(): string
@@ -29,7 +31,7 @@ class AssetResolver
         // Resolve the path from the actual Filament package location.
         // base_path('vendor/...') fails in Testbench CI environments where
         // the vendor symlink may not exist or points to a wrong directory.
-        $filamentDir = dirname((new \ReflectionClass(\Filament\FilamentServiceProvider::class))->getFileName(), 2);
+        $filamentDir = dirname((new \ReflectionClass(FilamentServiceProvider::class))->getFileName(), 2);
 
         return $filamentDir . '/dist/theme.css';
     }
