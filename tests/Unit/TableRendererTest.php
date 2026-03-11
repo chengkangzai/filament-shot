@@ -379,12 +379,14 @@ it('renders bulk actions with checkboxes and selection indicator', function () {
         ->toHtml();
 
     expect($html)
+        ->toContain('fi-ta-header-toolbar')
+        ->toContain('fi-btn')
+        ->toContain('fi-btn-label')
         ->toContain('fi-ta-selection-indicator')
         ->toContain('2 records selected')
         ->toContain('fi-ta-record-checkbox')
         ->toContain('fi-ta-page-checkbox')
-        ->toContain('fi-checkbox-input')
-        ->toContain('fi-link-label');
+        ->toContain('fi-checkbox-input');
 });
 
 it('renders bulk action checkboxes without selection indicator when no rows selected', function () {

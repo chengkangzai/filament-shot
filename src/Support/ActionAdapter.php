@@ -6,6 +6,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Facades\FilamentColor;
+use Filament\Support\View\Components\ButtonComponent;
 use Filament\Support\View\Components\IconButtonComponent;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\View\ComponentAttributeBag;
@@ -99,6 +100,39 @@ class ActionAdapter
     }
 
     /**
+     * Render as a standard button (used for toolbar/bulk actions).
+     */
+    public function renderButton(): string
+    {
+        $icon = $this->getIcon();
+        $color = $this->getColor();
+        $label = $this->getLabel();
+
+        if (blank($label)) {
+            return '';
+        }
+
+        $colorClasses = $this->resolveButtonClasses($color);
+
+        $iconHtml = '';
+        if (filled($icon)) {
+            $iconHtml = $this->safeCall(
+                fn () => \Filament\Support\generate_icon_html(
+                    $icon,
+                    attributes: new ComponentAttributeBag,
+                    size: IconSize::Small,
+                )?->toHtml(),
+                '',
+            );
+        }
+
+        return '<button type="button" class="fi-btn fi-size-sm ' . $colorClasses . '">'
+            . $iconHtml
+            . '<span class="fi-btn-label">' . e($label) . '</span>'
+            . '</button>';
+    }
+
+    /**
      * Render as a text link button (fallback when no icon).
      */
     private function renderLinkButton(string $color, ?string $label): string
@@ -159,6 +193,13 @@ class ActionAdapter
     private function resolveIconButtonClasses(string $color): string
     {
         $classes = FilamentColor::getComponentClasses(IconButtonComponent::class, $color);
+
+        return implode(' ', $classes);
+    }
+
+    private function resolveButtonClasses(string $color): string
+    {
+        $classes = FilamentColor::getComponentClasses(ButtonComponent::class, $color);
 
         return implode(' ', $classes);
     }
