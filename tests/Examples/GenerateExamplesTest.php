@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
@@ -515,11 +516,11 @@ it('generates table with bulk actions example', function () use ($outputDir) {
             ['name' => 'Diana Prince', 'email' => 'diana@example.com', 'status' => 'Active'],
         ])
         ->bulkActions([
-            \Filament\Actions\BulkAction::make('change_status')
+            BulkAction::make('change_status')
                 ->label('Change Status')
                 ->icon('heroicon-o-bell')
                 ->color('success'),
-            \Filament\Actions\BulkAction::make('delete')
+            BulkAction::make('delete')
                 ->label('Delete')
                 ->icon('heroicon-o-trash')
                 ->color('danger'),

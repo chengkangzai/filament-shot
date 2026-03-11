@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Enums\Alignment;
@@ -369,7 +370,7 @@ it('renders bulk actions with checkboxes and selection indicator', function () {
             ['name' => 'Charlie', 'email' => 'charlie@example.com'],
         ])
         ->bulkActions([
-            \Filament\Actions\BulkAction::make('delete')
+            BulkAction::make('delete')
                 ->label('Delete')
                 ->icon('heroicon-o-trash')
                 ->color('danger'),
@@ -391,7 +392,7 @@ it('renders bulk action checkboxes without selection indicator when no rows sele
         ->columns([TextColumn::make('name')])
         ->records([['name' => 'Alice']])
         ->bulkActions([
-            \Filament\Actions\BulkAction::make('delete')->label('Delete')->icon('heroicon-o-trash'),
+            BulkAction::make('delete')->label('Delete')->icon('heroicon-o-trash'),
         ])
         ->selectedRows([])
         ->toHtml();
