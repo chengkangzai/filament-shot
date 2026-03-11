@@ -305,6 +305,58 @@ it('renders a repeater field with items', function () {
         ->toContain('fi-fo-repeater');
 });
 
+it('renders select with open dropdown showing options', function () {
+    $html = FilamentShot::form([
+        Select::make('status')
+            ->label('Status')
+            ->options([
+                'open' => 'Open',
+                'blocked' => 'Blocked',
+                'closed' => 'Closed',
+            ]),
+    ])
+        ->state(['status' => 'blocked'])
+        ->openFields(['status'])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-select-option')
+        ->toContain('Open')
+        ->toContain('Blocked')
+        ->toContain('Closed');
+});
+
+it('renders select open dropdown with selected option highlighted', function () {
+    $html = FilamentShot::form([
+        Select::make('status')
+            ->label('Status')
+            ->options([
+                'open' => 'Open',
+                'blocked' => 'Blocked',
+            ]),
+    ])
+        ->state(['status' => 'blocked'])
+        ->openFields(['status'])
+        ->toHtml();
+
+    // The selected option should have the primary color class
+    expect($html)->toContain('fi-color-primary');
+    // Should have a check icon SVG for the selected option
+    expect($html)->toContain('fill-rule="evenodd"');
+});
+
+it('does not render dropdown when field not in openFields', function () {
+    $html = FilamentShot::form([
+        Select::make('status')
+            ->label('Status')
+            ->options(['open' => 'Open', 'blocked' => 'Blocked']),
+    ])
+        ->state(['status' => 'open'])
+        ->toHtml();
+
+    expect($html)->not->toContain('fi-select-option');
+});
+
 it('renders a form inside a modal wrapper', function () {
     $html = FilamentShot::form([
         TextInput::make('name')->label('Full Name'),

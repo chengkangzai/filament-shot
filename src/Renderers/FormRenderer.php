@@ -25,6 +25,9 @@ class FormRenderer extends BaseRenderer
 
     protected string $modalCancelLabel = 'Cancel';
 
+    /** @var array<string> Field names whose select dropdowns should render open */
+    protected array $openFields = [];
+
     public function __construct(
         protected array $components = [],
     ) {}
@@ -81,6 +84,18 @@ class FormRenderer extends BaseRenderer
     public function modalCancelLabel(string $label): static
     {
         $this->modalCancelLabel = $label;
+
+        return $this;
+    }
+
+    /**
+     * Specify which select fields should render with their dropdown open.
+     *
+     * @param  array<string>  $fields  Field names to render open
+     */
+    public function openFields(array $fields): static
+    {
+        $this->openFields = $fields;
 
         return $this;
     }
@@ -142,6 +157,10 @@ class FormRenderer extends BaseRenderer
         $html = $this->injectMultiSelectState($html, $data);
         $html = $this->injectTextareaContent($html, $data);
         $html = $this->injectToggleState($html, $data);
+
+        if (! empty($this->openFields)) {
+            $html = $this->injectSelectOpenState($html, $data);
+        }
 
         return $html;
     }
@@ -385,6 +404,136 @@ class FormRenderer extends BaseRenderer
                     // Repeater items nest under {repeater}.{uuid}.
                     // For direct children, no extra prefix needed.
                     $maps = array_merge($maps, $this->collectMultiSelectOptions($children, $childPrefix));
+                }
+            } catch (\Throwable) {
+                // Skip if no children
+            }
+        }
+
+        return $maps;
+    }
+
+    /**
+     * Inject a dropdown overlay for select fields listed in openFields.
+     *
+     * Finds each native <select> by its wire:model path, collects its options,
+     * and appends a styled dropdown list after the select's input wrapper.
+     */
+    protected function injectSelectOpenState(string $html, array $data): string
+    {
+        $optionMaps = $this->collectSelectOptions($this->components);
+
+        foreach ($this->openFields as $fieldName) {
+            $options = $optionMaps[$fieldName] ?? [];
+            $selectedValue = data_get($data, $fieldName);
+
+            if (empty($options)) {
+                continue;
+            }
+
+            // Find the native select element by its wire:model attribute
+            $selectPattern = '/<select[^>]*wire:model(?:\.[\\w.]+)?="data\.' . preg_quote($fieldName, '/') . '"[^>]*>.*?<\/select>/s';
+
+            if (! preg_match($selectPattern, $html, $selectMatch, PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+
+            $selectEnd = $selectMatch[0][1] + strlen($selectMatch[0][0]);
+
+            // Find the closing </div> of the fi-input-wrp-content-ctn after the select
+            $afterSelect = substr($html, $selectEnd, 2000);
+            $closingPos = strpos($afterSelect, '</div>');
+
+            if ($closingPos === false) {
+                continue;
+            }
+
+            // Build the dropdown HTML
+            $dropdownHtml = $this->buildSelectDropdown($options, $selectedValue);
+
+            // Find the fi-input-wrp div that contains this select, and append dropdown after it
+            // Search forward from the select to find the fi-input-wrp closing divs
+            $searchAfter = substr($html, $selectEnd);
+
+            // We need to find the end of the fi-input-wrp div (2 closing divs after content-ctn)
+            // content-ctn closes first, then fi-input-wrp closes
+            $divDepth = 0;
+            $insertOffset = 0;
+            $found = false;
+
+            for ($i = 0; $i < strlen($searchAfter) - 6; $i++) {
+                if (substr($searchAfter, $i, 5) === '</div') {
+                    $divDepth++;
+                    if ($divDepth >= 2) {
+                        // Find the > after </div
+                        $closeBracket = strpos($searchAfter, '>', $i);
+                        $insertOffset = $closeBracket + 1;
+                        $found = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if (! $found) {
+                continue;
+            }
+
+            $absoluteInsertPos = $selectEnd + $insertOffset;
+            $html = substr($html, 0, $absoluteInsertPos) . $dropdownHtml . substr($html, $absoluteInsertPos);
+        }
+
+        return $html;
+    }
+
+    /**
+     * Build the dropdown overlay HTML for an open select.
+     */
+    protected function buildSelectDropdown(array $options, mixed $selectedValue): string
+    {
+        $itemsHtml = '';
+
+        foreach ($options as $value => $label) {
+            $isSelected = (string) $value === (string) $selectedValue;
+            $selectedClass = $isSelected ? ' fi-color fi-color-primary fi-bg-color-50 dark:fi-bg-color-600' : '';
+            $checkIcon = $isSelected
+                ? '<svg class="fi-icon fi-size-md" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>'
+                : '';
+
+            $itemsHtml .= '<div class="fi-select-option' . $selectedClass . '" style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; font-size: 0.875rem; cursor: pointer;">'
+                . '<span>' . e($label) . '</span>'
+                . $checkIcon
+                . '</div>';
+        }
+
+        return '<div style="margin-top: 0.25rem; background: white; border: 1px solid rgb(229 231 235); border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); overflow: hidden;">'
+            . $itemsHtml
+            . '</div>';
+    }
+
+    /**
+     * Collect option maps from all select components recursively.
+     *
+     * @return array<string, array<string, string>>
+     */
+    protected function collectSelectOptions(array $components, string $prefix = ''): array
+    {
+        $maps = [];
+
+        foreach ($components as $component) {
+            if ($component instanceof Select) {
+                try {
+                    $name = $prefix . $component->getName();
+                    $maps[$name] = $component->getOptions();
+                } catch (\Throwable) {
+                    // Skip if we can't resolve
+                }
+            }
+
+            try {
+                $children = $component->getChildComponents();
+                if (! empty($children)) {
+                    $maps = array_merge($maps, $this->collectSelectOptions($children, $prefix));
                 }
             } catch (\Throwable) {
                 // Skip if no children
