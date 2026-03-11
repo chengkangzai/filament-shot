@@ -18,7 +18,7 @@
             <span style="font-size: 0.875rem;">{{ count($selectedRows) }} {{ count($selectedRows) === 1 ? 'record' : 'records' }} selected.</span>
             <div class="fi-ta-selection-indicator-actions-ctn">
                 <button type="button" class="fi-link fi-size-sm fi-color-primary">
-                    <span class="fi-link-label">Select all</span>
+                    <span class="fi-link-label">Select all {{ count($records) }}</span>
                 </button>
                 <button type="button" class="fi-link fi-size-sm fi-color-danger">
                     <span class="fi-link-label">Deselect all</span>
