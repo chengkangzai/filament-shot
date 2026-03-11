@@ -2,6 +2,7 @@
 
 namespace CCK\FilamentShot\Renderers;
 
+use CCK\FilamentShot\Support\ActionAdapter;
 use CCK\FilamentShot\Support\ColumnAdapter;
 
 class TableRenderer extends BaseRenderer
@@ -13,6 +14,8 @@ class TableRenderer extends BaseRenderer
     protected ?string $heading = null;
 
     protected bool $striped = false;
+
+    protected array $actions = [];
 
     public function columns(array $columns): static
     {
@@ -42,6 +45,13 @@ class TableRenderer extends BaseRenderer
         return $this;
     }
 
+    public function recordActions(array $actions): static
+    {
+        $this->actions = $actions;
+
+        return $this;
+    }
+
     protected function renderContent(): string
     {
         $columns = array_map(
@@ -49,11 +59,17 @@ class TableRenderer extends BaseRenderer
             $this->columns,
         );
 
+        $actions = array_map(
+            fn ($action) => new ActionAdapter($action),
+            $this->actions,
+        );
+
         return view('filament-shot::components.table', [
             'columns' => $columns,
             'records' => $this->records,
             'heading' => $this->heading,
             'striped' => $this->striped,
+            'actions' => $actions,
         ])->render();
     }
 }

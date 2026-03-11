@@ -1,6 +1,9 @@
 <?php
 
 use CCK\FilamentShot\FilamentShot;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
@@ -259,6 +262,77 @@ it('renders TextColumn with size Large', function () {
         ->toHtml();
 
     expect($html)->toContain('fi-size-lg');
+});
+
+it('renders record actions as icon buttons', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name'),
+        ])
+        ->records([
+            ['name' => 'Alice'],
+        ])
+        ->recordActions([
+            EditAction::make(),
+            DeleteAction::make(),
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-ta-actions')
+        ->toContain('fi-icon-btn');
+});
+
+it('renders record actions with custom icon and label', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name'),
+        ])
+        ->records([
+            ['name' => 'Alice'],
+        ])
+        ->recordActions([
+            Action::make('perks')->label('Perks')->icon('heroicon-o-plus'),
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-icon-btn')
+        ->toContain('title="Perks"');
+});
+
+it('renders record actions from array definitions', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name'),
+        ])
+        ->records([
+            ['name' => 'Alice'],
+        ])
+        ->recordActions([
+            ['icon' => 'heroicon-o-pencil-square', 'label' => 'Edit', 'color' => 'primary'],
+            ['icon' => 'heroicon-o-trash', 'label' => 'Delete', 'color' => 'danger'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-ta-actions')
+        ->toContain('fi-icon-btn')
+        ->toContain('title="Edit"')
+        ->toContain('title="Delete"');
+});
+
+it('renders table without actions column when no actions', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name'),
+        ])
+        ->records([
+            ['name' => 'Alice'],
+        ])
+        ->toHtml();
+
+    expect($html)->not->toContain('<div class="fi-ta-actions"');
 });
 
 it('injects OKLCH color CSS variables', function () {
