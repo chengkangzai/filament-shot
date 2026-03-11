@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Enums\Alignment;
@@ -355,6 +356,81 @@ it('renders table without actions column when no actions', function () {
         ->toHtml();
 
     expect($html)->not->toContain('<div class="fi-ta-actions"');
+});
+
+it('renders bulk actions with checkboxes and selection indicator', function () {
+    $html = FilamentShot::table()
+        ->columns([
+            TextColumn::make('name'),
+            TextColumn::make('email'),
+        ])
+        ->records([
+            ['name' => 'Alice', 'email' => 'alice@example.com'],
+            ['name' => 'Bob', 'email' => 'bob@example.com'],
+            ['name' => 'Charlie', 'email' => 'charlie@example.com'],
+        ])
+        ->bulkActions([
+            BulkAction::make('delete')
+                ->label('Delete')
+                ->icon('heroicon-o-trash')
+                ->color('danger'),
+        ])
+        ->selectedRows([0, 2])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-ta-selection-indicator')
+        ->toContain('2 records selected')
+        ->toContain('fi-ta-record-checkbox')
+        ->toContain('fi-ta-page-checkbox')
+        ->toContain('fi-checkbox-input')
+        ->toContain('fi-link-label');
+});
+
+it('renders bulk action checkboxes without selection indicator when no rows selected', function () {
+    $html = FilamentShot::table()
+        ->columns([TextColumn::make('name')])
+        ->records([['name' => 'Alice']])
+        ->bulkActions([
+            BulkAction::make('delete')->label('Delete')->icon('heroicon-o-trash'),
+        ])
+        ->selectedRows([])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('class="fi-ta-record-checkbox fi-checkbox-input"')
+        ->not->toContain('<div class="fi-ta-selection-indicator"');
+});
+
+it('renders checked checkboxes for selected rows', function () {
+    $html = FilamentShot::table()
+        ->columns([TextColumn::make('name')])
+        ->records([
+            ['name' => 'Alice'],
+            ['name' => 'Bob'],
+            ['name' => 'Charlie'],
+        ])
+        ->bulkActions([
+            ['label' => 'Delete', 'icon' => 'heroicon-o-trash', 'color' => 'danger'],
+        ])
+        ->selectedRows([1])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-ta-selection-indicator')
+        ->toContain('1 record selected');
+});
+
+it('renders table without checkbox column when no bulk actions', function () {
+    $html = FilamentShot::table()
+        ->columns([TextColumn::make('name')])
+        ->records([['name' => 'Alice']])
+        ->toHtml();
+
+    expect($html)
+        ->not->toContain('class="fi-ta-record-checkbox')
+        ->not->toContain('class="fi-ta-page-checkbox')
+        ->not->toContain('fi-ta-selection-cell"');
 });
 
 it('injects OKLCH color CSS variables', function () {

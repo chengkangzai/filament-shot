@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
@@ -493,6 +494,43 @@ it('generates table with labeled actions example', function () use ($outputDir) 
         ->save("$outputDir/table-labeled-actions.png");
 
     expect(file_exists("$outputDir/table-labeled-actions.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with bulk actions example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(FontWeight::Bold),
+            TextColumn::make('email'),
+            TextColumn::make('status')
+                ->badge()
+                ->color(fn (string $state) => match ($state) {
+                    'Active' => 'success',
+                    'Blocked' => 'danger',
+                    default => 'primary',
+                }),
+        ])
+        ->records([
+            ['name' => 'Alice Johnson', 'email' => 'alice@example.com', 'status' => 'Active'],
+            ['name' => 'Bob Smith', 'email' => 'bob@example.com', 'status' => 'Blocked'],
+            ['name' => 'Charlie Brown', 'email' => 'charlie@example.com', 'status' => 'Active'],
+            ['name' => 'Diana Prince', 'email' => 'diana@example.com', 'status' => 'Active'],
+        ])
+        ->bulkActions([
+            BulkAction::make('change_status')
+                ->label('Change Status')
+                ->icon('heroicon-o-bell')
+                ->color('success'),
+            BulkAction::make('delete')
+                ->label('Delete')
+                ->icon('heroicon-o-trash')
+                ->color('danger'),
+        ])
+        ->selectedRows([0, 2])
+        ->heading('Customers')
+        ->width(900)
+        ->save("$outputDir/table-bulk-actions.png");
+
+    expect(file_exists("$outputDir/table-bulk-actions.png"))->toBeTrue();
 })->group('examples');
 
 it('generates notification example', function () use ($outputDir) {

@@ -5,10 +5,26 @@
         </div>
     @endif
 
+    @if(!empty($bulkActions) && !empty($selectedRows))
+        <div class="fi-ta-selection-indicator">
+            <span style="font-size: 0.875rem;">{{ count($selectedRows) }} {{ count($selectedRows) === 1 ? 'record' : 'records' }} selected.</span>
+            <div class="fi-ta-selection-indicator-actions-ctn">
+                @foreach($bulkActions as $bulkAction)
+                    {!! $bulkAction->render() !!}
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <div class="fi-ta-content-ctn">
         <table class="fi-ta-table">
             <thead>
                 <tr>
+                    @if(!empty($bulkActions))
+                        <th class="fi-ta-header-cell fi-ta-selection-cell">
+                            <input type="checkbox" class="fi-ta-page-checkbox fi-checkbox-input" {{ count($selectedRows) === count($records) && count($records) > 0 ? 'checked' : '' }} />
+                        </th>
+                    @endif
                     @foreach($columns as $column)
                         <th class="fi-ta-header-cell">
                             {{ $column['label'] }}
@@ -22,6 +38,11 @@
             <tbody>
                 @forelse($records as $index => $record)
                     <tr class="fi-ta-row {{ $striped && $index % 2 === 1 ? 'fi-striped' : '' }}">
+                        @if(!empty($bulkActions))
+                            <td class="fi-ta-cell fi-ta-selection-cell">
+                                <input type="checkbox" class="fi-ta-record-checkbox fi-checkbox-input" {{ in_array($index, $selectedRows) ? 'checked' : '' }} />
+                            </td>
+                        @endif
                         @foreach($columns as $column)
                             <td class="fi-ta-cell">
                                 {!! $column->renderCell($record) !!}
@@ -39,7 +60,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ count($columns) + (!empty($actions) ? 1 : 0) }}">
+                        <td colspan="{{ (!empty($bulkActions) ? 1 : 0) + count($columns) + (!empty($actions) ? 1 : 0) }}">
                             <div class="fi-ta-empty-state">
                                 <div class="fi-ta-empty-state-content">
                                     <p class="fi-ta-empty-state-description">No records found.</p>

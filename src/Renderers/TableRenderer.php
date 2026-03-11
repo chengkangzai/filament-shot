@@ -19,6 +19,10 @@ class TableRenderer extends BaseRenderer
 
     protected bool $labeledActions = false;
 
+    protected array $bulkActions = [];
+
+    protected array $selectedRows = [];
+
     public function columns(array $columns): static
     {
         $this->columns = $columns;
@@ -61,6 +65,20 @@ class TableRenderer extends BaseRenderer
         return $this;
     }
 
+    public function bulkActions(array $bulkActions): static
+    {
+        $this->bulkActions = $bulkActions;
+
+        return $this;
+    }
+
+    public function selectedRows(array $selectedRows): static
+    {
+        $this->selectedRows = $selectedRows;
+
+        return $this;
+    }
+
     protected function renderContent(): string
     {
         $columns = array_map(
@@ -73,12 +91,19 @@ class TableRenderer extends BaseRenderer
             $this->actions,
         );
 
+        $bulkActions = array_map(
+            fn ($action) => (new ActionAdapter($action))->labeled(true),
+            $this->bulkActions,
+        );
+
         return view('filament-shot::components.table', [
             'columns' => $columns,
             'records' => $this->records,
             'heading' => $this->heading,
             'striped' => $this->striped,
             'actions' => $actions,
+            'bulkActions' => $bulkActions,
+            'selectedRows' => $this->selectedRows,
         ])->render();
     }
 }
