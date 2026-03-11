@@ -6,12 +6,23 @@
     @endif
 
     @if(!empty($bulkActions) && !empty($selectedRows))
+        <div class="fi-ta-header-toolbar">
+            <div class="fi-ta-actions fi-align-start fi-wrapped">
+                @foreach($bulkActions as $bulkAction)
+                    {!! $bulkAction->renderButton() !!}
+                @endforeach
+            </div>
+        </div>
+
         <div class="fi-ta-selection-indicator">
             <span style="font-size: 0.875rem;">{{ count($selectedRows) }} {{ count($selectedRows) === 1 ? 'record' : 'records' }} selected.</span>
             <div class="fi-ta-selection-indicator-actions-ctn">
-                @foreach($bulkActions as $bulkAction)
-                    {!! $bulkAction->render() !!}
-                @endforeach
+                <button type="button" class="fi-link fi-size-sm fi-color-primary">
+                    <span class="fi-link-label">Select all</span>
+                </button>
+                <button type="button" class="fi-link fi-size-sm fi-color-danger">
+                    <span class="fi-link-label">Deselect all</span>
+                </button>
             </div>
         </div>
     @endif
