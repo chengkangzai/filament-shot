@@ -1,6 +1,9 @@
 <?php
 
 use CCK\FilamentShot\FilamentShot;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -412,4 +415,35 @@ it('generates form with multi-select example', function () use ($outputDir) {
         ->save("$outputDir/form-multi-select.png");
 
     expect(file_exists("$outputDir/form-multi-select.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with record actions example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(FontWeight::Bold),
+            TextColumn::make('email'),
+            TextColumn::make('role')
+                ->badge()
+                ->color(fn (string $state) => match ($state) {
+                    'Admin' => 'danger',
+                    'Editor' => 'warning',
+                    default => 'primary',
+                }),
+        ])
+        ->records([
+            ['name' => 'Alice Johnson', 'email' => 'alice@example.com', 'role' => 'Admin'],
+            ['name' => 'Bob Smith', 'email' => 'bob@example.com', 'role' => 'Editor'],
+            ['name' => 'Charlie Brown', 'email' => 'charlie@example.com', 'role' => 'Viewer'],
+        ])
+        ->recordActions([
+            Action::make('perks')->label('Perks')->icon('heroicon-o-plus'),
+            Action::make('automations')->label('Automations')->icon('heroicon-o-plus'),
+            EditAction::make(),
+            DeleteAction::make(),
+        ])
+        ->heading('Team Members')
+        ->width(900)
+        ->save("$outputDir/table-record-actions.png");
+
+    expect(file_exists("$outputDir/table-record-actions.png"))->toBeTrue();
 })->group('examples');
