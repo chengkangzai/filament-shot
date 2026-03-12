@@ -125,6 +125,8 @@ class FormRenderer extends BaseRenderer
         }
 
         $html = $this->injectFormValues($html, $component->data);
+        $html = $this->fixRichEditor($html);
+        $html = $this->fixMarkdownEditor($html);
 
         if ($this->modalHeading !== null) {
             $html = view('filament-shot::components.modal', [
@@ -541,6 +543,168 @@ class FormRenderer extends BaseRenderer
         }
 
         return $maps;
+    }
+
+    /**
+     * Make the RichEditor toolbar visible in static HTML.
+     *
+     * Filament's RichEditor toolbar is Blade-rendered but hidden behind
+     * x-cloak on the wrapper. We strip x-cloak so the toolbar and content
+     * area are visible, and remove panels/upload elements that are irrelevant
+     * in static context.
+     */
+    protected function fixRichEditor(string $html): string
+    {
+        if (! str_contains($html, 'fi-fo-rich-editor')) {
+            return $html;
+        }
+
+        // Remove x-cloak from the fi-fo-rich-editor wrapper to reveal toolbar
+        $html = preg_replace(
+            '/(<div\s[^>]*class="[^"]*fi-fo-rich-editor[^"]*"[^>]*)\s*x-cloak="x-cloak"/',
+            '$1',
+            $html,
+        );
+
+        // Remove x-cloak from inner elements (content area, floating toolbar)
+        // so they become visible without Alpine.js
+        $html = preg_replace(
+            '/(<(?:div|textarea)\s[^>]*(?:fi-fo-rich-editor-content|x-ref="editor")[^>]*)\s+x-cloak/',
+            '$1',
+            $html,
+        );
+
+        // Force toolbar-on-top layout. Filament uses column-reverse by default
+        // (toolbar below content) and switches to row (side-by-side) at wider
+        // widths via container queries. For static screenshots, toolbar-on-top
+        // is the most recognizable layout.
+        $html = preg_replace(
+            '/(<div\s[^>]*class="[^"]*fi-fo-rich-editor-main[^"]*")/',
+            '$1 style="flex-direction: column;"',
+            $html,
+        );
+
+        // Remove the upload message and file validation divs (x-show + x-cloak, irrelevant in static)
+        $html = preg_replace(
+            '/<div\s[^>]*x-show="isUploadingFile"[^>]*>.*?<\/div>/s',
+            '',
+            $html,
+        );
+        $html = preg_replace(
+            '/<div\s[^>]*x-show="!\s*isUploadingFile\s*&&\s*fileValidationMessage"[^>]*>.*?<\/div>/s',
+            '',
+            $html,
+        );
+
+        // Remove the panels section (custom blocks / merge tags, hidden by x-cloak)
+        $html = preg_replace(
+            '/<div\s[^>]*class="[^"]*fi-fo-rich-editor-panels[^"]*"[^>]*>.*?<\/div>\s*<\/div>\s*<\/div>/s',
+            '',
+            $html,
+        );
+
+        return $html;
+    }
+
+    /**
+     * Inject a static toolbar for the MarkdownEditor.
+     *
+     * Unlike RichEditor, MarkdownEditor's toolbar is rendered entirely by
+     * EasyMDE JavaScript. We parse the toolbar button config from the x-data
+     * attribute and inject a static toolbar that mimics the EasyMDE UI.
+     */
+    protected function fixMarkdownEditor(string $html): string
+    {
+        if (! str_contains($html, 'fi-fo-markdown-editor')) {
+            return $html;
+        }
+
+        // Find the markdown editor x-data to extract toolbar buttons and min height
+        return preg_replace_callback(
+            '/<div\s[^>]*class="fi-input-wrp fi-fo-markdown-editor"[^>]*>(.*?)<\/div>\s*<\/div>\s*<\/div>/s',
+            function ($matches) {
+                $inner = $matches[1];
+
+                // Extract toolbar buttons from JSON
+                $buttons = [];
+                if (preg_match('/toolbarButtons:\s*JSON\.parse\(\'(\[.*?\])\'\)/', $inner, $btnMatch)) {
+                    $decoded = json_decode(str_replace(['\u0022'], ['"'], $btnMatch[1]), true);
+                    if (is_array($decoded)) {
+                        $buttons = $decoded;
+                    }
+                }
+
+                // Extract min height
+                $minHeight = '11.25rem';
+                if (preg_match('/minHeight:\s*\'([^\']+)\'/', $inner, $hMatch)) {
+                    $minHeight = $hMatch[1];
+                }
+
+                // Build static toolbar + editor area
+                return $this->buildMarkdownEditorHtml($buttons, $minHeight);
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Build static HTML that mimics EasyMDE's rendered UI.
+     */
+    protected function buildMarkdownEditorHtml(array $buttonGroups, string $minHeight): string
+    {
+        $toolbarIcons = [
+            'bold' => ['label' => 'Bold', 'svg' => '<path fill-rule="evenodd" d="M4 3a1 1 0 0 1 1-1h6a4.5 4.5 0 0 1 3.274 7.587A4.75 4.75 0 0 1 11.25 18H5a1 1 0 0 1-1-1V3Zm2.5 5.5v-4H11a2 2 0 1 1 0 4H6.5Zm0 2.5v4.5h4.75a2.25 2.25 0 0 0 0-4.5H6.5Z" clip-rule="evenodd"/>'],
+            'italic' => ['label' => 'Italic', 'svg' => '<path fill-rule="evenodd" d="M8 2.75A.75.75 0 0 1 8.75 2h7.5a.75.75 0 0 1 0 1.5h-3.215l-4.483 13h2.698a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5h3.215l4.483-13H8.75A.75.75 0 0 1 8 2.75Z" clip-rule="evenodd"/>'],
+            'strike' => ['label' => 'Strikethrough', 'svg' => '<path fill-rule="evenodd" d="M2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm4.72-4.72a2.5 2.5 0 0 1 3.56 0 .75.75 0 0 0 1.06-1.06 4 4 0 0 0-5.68 0 .75.75 0 0 0 1.06 1.06ZM10 15.5a2.49 2.49 0 0 0 1.78-.74.75.75 0 1 1 1.06 1.06A4 4 0 0 1 6 13.5a.75.75 0 0 1 1.5 0 2.5 2.5 0 0 0 2.5 2.5Z" clip-rule="evenodd"/>'],
+            'link' => ['label' => 'Link', 'svg' => '<path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z"/><path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z"/>'],
+            'heading' => ['label' => 'Heading', 'svg' => '<path fill-rule="evenodd" d="M3.75 2a.75.75 0 0 1 .75.75V9h7V2.75a.75.75 0 0 1 1.5 0v14.5a.75.75 0 0 1-1.5 0V10.5h-7v6.75a.75.75 0 0 1-1.5 0V2.75A.75.75 0 0 1 3.75 2Zm12 3a.75.75 0 0 1 .75.75v2.5h1.75a.75.75 0 0 1 0 1.5H16.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-1.75a.75.75 0 0 1 0-1.5H15v-2.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"/>'],
+            'blockquote' => ['label' => 'Blockquote', 'svg' => '<path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h.208a.25.25 0 0 1 .248.22l.46 3.677A.75.75 0 0 0 5.91 13.5h1.18a.75.75 0 0 0 .744-.648l.46-3.676A.25.25 0 0 1 8.542 9h.208A2.25 2.25 0 0 0 11 6.75v-2.5A2.25 2.25 0 0 0 8.75 2h-4.5Zm7 0A2.25 2.25 0 0 0 9 4.25v2.5A2.25 2.25 0 0 0 11.25 9h.208a.25.25 0 0 1 .248.22l.46 3.677a.75.75 0 0 0 .744.603h1.18a.75.75 0 0 0 .744-.648l.46-3.676A.25.25 0 0 1 15.542 9h.208A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-4.5Z" clip-rule="evenodd"/>'],
+            'codeBlock' => ['label' => 'Code block', 'svg' => '<path fill-rule="evenodd" d="M6.28 5.22a.75.75 0 0 1 0 1.06L2.56 10l3.72 3.72a.75.75 0 0 1-1.06 1.06L.97 10.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Zm7.44 0a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L17.44 10l-3.72-3.72a.75.75 0 0 1 0-1.06ZM11.377 2.011a.75.75 0 0 1 .612.867l-2.5 14.5a.75.75 0 0 1-1.478-.255l2.5-14.5a.75.75 0 0 1 .866-.612Z" clip-rule="evenodd"/>'],
+            'bulletList' => ['label' => 'Bullet list', 'svg' => '<path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm0 10.5a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1-.75-.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Z" clip-rule="evenodd"/>'],
+            'orderedList' => ['label' => 'Numbered list', 'svg' => '<path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd"/>'],
+            'table' => ['label' => 'Table', 'svg' => '<path fill-rule="evenodd" d="M.99 5.24A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25v9.5A2.25 2.25 0 0 1 16.75 17H3.25A2.25 2.25 0 0 1 1 14.75v-9.5Zm1.5 0v2.25h15v-2.25a.75.75 0 0 0-.75-.75H3.25a.75.75 0 0 0-.75.75Zm15 3.75H9.5v3h7.5v-3Zm0 4.5H9.5v3h7.25a.75.75 0 0 0 .75-.75v-2.25Zm-9 3v-3h-6v2.25c0 .414.336.75.75.75H8.5Zm-6-4.5h6v-3h-6v3Z" clip-rule="evenodd"/>'],
+            'attachFiles' => ['label' => 'Attach files', 'svg' => '<path fill-rule="evenodd" d="M15.621 4.379a3.06 3.06 0 0 0-4.328 0l-6.414 6.414a4.59 4.59 0 0 0 6.494 6.494l6.06-6.06a.75.75 0 1 1 1.06 1.06l-6.06 6.06a6.09 6.09 0 0 1-8.614-8.614l6.414-6.414a4.56 4.56 0 0 1 6.45 6.45l-6.415 6.414a3.03 3.03 0 0 1-4.285-4.285l5.657-5.657a.75.75 0 0 1 1.061 1.06L11.018 12.87a1.53 1.53 0 0 0 2.164 2.164l6.414-6.414a3.06 3.06 0 0 0 0-4.242Z" clip-rule="evenodd"/>'],
+            'undo' => ['label' => 'Undo', 'svg' => '<path fill-rule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clip-rule="evenodd"/>'],
+            'redo' => ['label' => 'Redo', 'svg' => '<path fill-rule="evenodd" d="M12.207 2.232a.75.75 0 0 1 1.06-.025l5.5 5.25a.75.75 0 0 1 0 1.085l-5.5 5.25a.75.75 0 0 1-1.036-1.085l4.146-3.957H6.375a3.875 3.875 0 0 0 0 7.75H9.25a.75.75 0 0 1 0 1.5H6.375a5.375 5.375 0 0 1 0-10.75h10.003L12.232 3.293a.75.75 0 0 1-.025-1.06Z" clip-rule="evenodd"/>'],
+        ];
+
+        $toolbarHtml = '';
+        foreach ($buttonGroups as $group) {
+            if (! is_array($group)) {
+                continue;
+            }
+
+            $groupHtml = '';
+            foreach ($group as $button) {
+                $tool = $toolbarIcons[$button] ?? null;
+                if (! $tool) {
+                    continue;
+                }
+
+                $groupHtml .= '<button class="fi-fo-rich-editor-tool" tabindex="-1" type="button" aria-label="' . e($tool['label']) . '">'
+                    . '<svg class="fi-icon fi-size-md" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">'
+                    . $tool['svg']
+                    . '</svg>'
+                    . '</button>';
+            }
+
+            if ($groupHtml !== '') {
+                $toolbarHtml .= '<div class="fi-fo-rich-editor-toolbar-group">' . $groupHtml . '</div>';
+            }
+        }
+
+        $toolbar = $toolbarHtml !== ''
+            ? '<div class="fi-fo-rich-editor-toolbar">' . $toolbarHtml . '</div>'
+            : '';
+
+        return '<div class="fi-input-wrp fi-fo-markdown-editor fi-fo-rich-editor">'
+            . '<div class="fi-input-wrp-content-ctn">'
+            . '<div class="fi-fo-rich-editor-main" style="flex-direction: column;">'
+            . $toolbar
+            . '<div class="fi-fo-rich-editor-content fi-prose" style="min-height: ' . e($minHeight) . ';"></div>'
+            . '</div>'
+            . '</div>'
+            . '</div>';
     }
 
     protected function ensureViewErrorBag(): void

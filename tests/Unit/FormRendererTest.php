@@ -271,24 +271,40 @@ it('renders a key value field', function () {
         ->toContain('fi-fo-key-value');
 });
 
-it('renders a rich editor field', function () {
+it('renders a rich editor field with toolbar', function () {
     $html = FilamentShot::form([
-        RichEditor::make('content')->label('Content'),
+        RichEditor::make('content')->label('Content')->toolbarButtons(['bold', 'italic', 'link']),
     ])->toHtml();
 
     expect($html)
         ->toContain('Content')
-        ->toContain('fi-fo-rich-editor');
+        ->toContain('fi-fo-rich-editor')
+        ->toContain('fi-fo-rich-editor-toolbar')
+        ->toContain('aria-label="Bold"')
+        ->toContain('aria-label="Italic"')
+        ->toContain('fi-fo-rich-editor-content');
 });
 
-it('renders a markdown editor field', function () {
+it('renders rich editor without x-cloak on wrapper', function () {
+    $html = FilamentShot::form([
+        RichEditor::make('content')->label('Content'),
+    ])->toHtml();
+
+    // The fi-fo-rich-editor wrapper should NOT have x-cloak
+    expect($html)->not->toMatch('/fi-fo-rich-editor[^>]*x-cloak/');
+});
+
+it('renders a markdown editor field with toolbar', function () {
     $html = FilamentShot::form([
         MarkdownEditor::make('notes')->label('Notes'),
     ])->toHtml();
 
     expect($html)
         ->toContain('Notes')
-        ->toContain('fi-fo-markdown-editor');
+        ->toContain('fi-fo-markdown-editor')
+        ->toContain('fi-fo-rich-editor-toolbar')
+        ->toContain('aria-label="Bold"')
+        ->toContain('fi-fo-rich-editor-content');
 });
 
 it('renders a repeater field with items', function () {
