@@ -7,6 +7,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -574,6 +576,38 @@ it('generates navigation example', function () use ($outputDir) {
         ->save("$outputDir/navigation.png");
 
     expect(file_exists("$outputDir/navigation.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with rich editor example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('title')
+            ->label('Title'),
+        RichEditor::make('content')
+            ->label('Content'),
+    ])
+        ->state([
+            'title' => 'Getting Started with Filament',
+        ])
+        ->width(700)
+        ->save("$outputDir/form-rich-editor.png");
+
+    expect(file_exists("$outputDir/form-rich-editor.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with markdown editor example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('title')
+            ->label('Title'),
+        MarkdownEditor::make('body')
+            ->label('Body'),
+    ])
+        ->state([
+            'title' => 'Release Notes v2.0',
+        ])
+        ->width(700)
+        ->save("$outputDir/form-markdown-editor.png");
+
+    expect(file_exists("$outputDir/form-markdown-editor.png"))->toBeTrue();
 })->group('examples');
 
 it('generates notification example', function () use ($outputDir) {
