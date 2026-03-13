@@ -1,49 +1,47 @@
 <aside class="fi-sidebar fi-main-sidebar fi-sidebar-open" style="position: relative; display: flex; flex-direction: column; height: auto; width: 100%;">
     @if($heading)
-        <div class="fi-sidebar-header-ctn" style="overflow-x: clip;">
-            <header class="fi-sidebar-header" style="display: flex; height: 4rem; align-items: center; padding-left: 1.5rem; padding-right: 1.5rem;">
-                <div class="fi-sidebar-header-logo-ctn" style="flex: 1;">
+        <div class="fi-sidebar-header-ctn">
+            <header class="fi-sidebar-header" style="justify-content: flex-start; padding-left: 1.5rem; padding-right: 1.5rem;">
+                <div class="fi-sidebar-header-logo-ctn">
                     <span style="font-size: 1.125rem; font-weight: 700;">{{ $heading }}</span>
                 </div>
             </header>
         </div>
     @endif
 
-    <nav class="fi-sidebar-nav" style="display: flex; flex-grow: 1; flex-direction: column; gap: 1.5rem; padding: 1rem 1.5rem;">
-        <ul class="fi-sidebar-nav-groups" style="display: flex; flex-direction: column; gap: 1rem; list-style: none; margin: 0; padding: 0;">
+    <nav class="fi-sidebar-nav">
+        <ul class="fi-sidebar-nav-groups">
             @foreach($groups as $group)
-                <li class="fi-sidebar-group fi-collapsible {{ !empty($group['items']) && collect($group['items'])->contains('isActive', true) ? 'fi-active' : '' }}" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                <li class="fi-sidebar-group fi-collapsible {{ !empty($group['items']) && collect($group['items'])->contains('isActive', true) ? 'fi-active' : '' }}">
                     @if($group['label'])
-                        <div class="fi-sidebar-group-btn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem;">
+                        <div class="fi-sidebar-group-btn">
                             @if($group['icon'])
                                 {!! $group['icon'] !!}
                             @endif
                             <span class="fi-sidebar-group-label">{{ $group['label'] }}</span>
-                            <button type="button" class="fi-icon-btn fi-size-sm fi-color-gray fi-sidebar-group-collapse-btn" style="margin-left: auto;">
-                                <span class="fi-icon-btn-icon-ctn">
-                                    <svg class="fi-icon fi-size-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z" clip-rule="evenodd"/>
-                                    </svg>
-                                </span>
+                            <button type="button" class="fi-icon-btn fi-size-sm fi-color-gray fi-sidebar-group-collapse-btn">
+                                <svg class="fi-icon fi-size-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z" clip-rule="evenodd"/>
+                                </svg>
                             </button>
                         </div>
                     @endif
 
                     @if(!$group['isCollapsed'])
-                        <ul class="fi-sidebar-group-items" style="display: flex; flex-direction: column; gap: 0.25rem; list-style: none; margin: 0; padding: 0;">
+                        <ul class="fi-sidebar-group-items">
                             @foreach($group['items'] as $itemIndex => $item)
-                                <li class="fi-sidebar-item {{ $item['isActive'] ? 'fi-active' : '' }} {{ !empty($item['childItems']) && collect($item['childItems'])->contains('isActive', true) ? 'fi-sidebar-item-has-active-child-items' : '' }}">
-                                    <a class="fi-sidebar-item-btn" style="display: flex; align-items: center; gap: 0.75rem; border-radius: 0.5rem; padding: 0.5rem;">
+                                <li class="fi-sidebar-item fi-sidebar-item-has-url {{ $item['isActive'] ? 'fi-active' : '' }} {{ !empty($item['childItems']) && collect($item['childItems'])->contains('isActive', true) ? 'fi-sidebar-item-has-active-child-items' : '' }}">
+                                    <a class="fi-sidebar-item-btn">
                                         @if($item['icon'])
                                             {!! $item['icon'] !!}
                                         @elseif($group['label'])
-                                            <div class="fi-sidebar-item-grouped-border" style="display: flex; flex-direction: column; align-items: center; width: 1.5rem;">
+                                            <div class="fi-sidebar-item-grouped-border">
                                                 @if($itemIndex > 0)
-                                                    <div class="fi-sidebar-item-grouped-border-part fi-sidebar-item-grouped-border-part-not-first" style="width: 2px; height: 0.5rem; background: var(--gray-300);"></div>
+                                                    <div class="fi-sidebar-item-grouped-border-part-not-first"></div>
                                                 @endif
-                                                <div class="fi-sidebar-item-grouped-border-part" style="width: 6px; height: 6px; border-radius: 50%; background: {{ $item['isActive'] ? 'var(--primary-600)' : 'var(--gray-300)' }};"></div>
+                                                <div class="fi-sidebar-item-grouped-border-part"></div>
                                                 @if($itemIndex < count($group['items']) - 1)
-                                                    <div class="fi-sidebar-item-grouped-border-part fi-sidebar-item-grouped-border-part-not-last" style="width: 2px; flex-grow: 1; background: var(--gray-300);"></div>
+                                                    <div class="fi-sidebar-item-grouped-border-part-not-last"></div>
                                                 @endif
                                             </div>
                                         @endif
@@ -60,20 +58,20 @@
                                     </a>
 
                                     @if($item['isActive'] && !empty($item['childItems']))
-                                        <ul class="fi-sidebar-sub-group-items" style="display: flex; flex-direction: column; gap: 0.25rem; list-style: none; margin: 0; padding: 0; padding-left: 1rem;">
+                                        <ul class="fi-sidebar-sub-group-items">
                                             @foreach($item['childItems'] as $childIndex => $child)
-                                                <li class="fi-sidebar-item {{ $child['isActive'] ? 'fi-active' : '' }}">
-                                                    <a class="fi-sidebar-item-btn" style="display: flex; align-items: center; gap: 0.75rem; border-radius: 0.5rem; padding: 0.5rem;">
+                                                <li class="fi-sidebar-item fi-sidebar-item-has-url {{ $child['isActive'] ? 'fi-active' : '' }}">
+                                                    <a class="fi-sidebar-item-btn">
                                                         @if($child['icon'])
                                                             {!! $child['icon'] !!}
                                                         @else
-                                                            <div class="fi-sidebar-item-grouped-border" style="display: flex; flex-direction: column; align-items: center; width: 1.5rem;">
+                                                            <div class="fi-sidebar-item-grouped-border">
                                                                 @if($childIndex > 0)
-                                                                    <div class="fi-sidebar-item-grouped-border-part fi-sidebar-item-grouped-border-part-not-first" style="width: 2px; height: 0.5rem; background: var(--gray-300);"></div>
+                                                                    <div class="fi-sidebar-item-grouped-border-part-not-first"></div>
                                                                 @endif
-                                                                <div class="fi-sidebar-item-grouped-border-part" style="width: 6px; height: 6px; border-radius: 50%; background: {{ $child['isActive'] ? 'var(--primary-600)' : 'var(--gray-300)' }};"></div>
+                                                                <div class="fi-sidebar-item-grouped-border-part"></div>
                                                                 @if($childIndex < count($item['childItems']) - 1)
-                                                                    <div class="fi-sidebar-item-grouped-border-part fi-sidebar-item-grouped-border-part-not-last" style="width: 2px; flex-grow: 1; background: var(--gray-300);"></div>
+                                                                    <div class="fi-sidebar-item-grouped-border-part-not-last"></div>
                                                                 @endif
                                                             </div>
                                                         @endif
