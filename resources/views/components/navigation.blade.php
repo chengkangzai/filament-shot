@@ -12,13 +12,20 @@
     <nav class="fi-sidebar-nav" style="display: flex; flex-grow: 1; flex-direction: column; gap: 1.5rem; padding: 1rem 1.5rem;">
         <ul class="fi-sidebar-nav-groups" style="display: flex; flex-direction: column; gap: 1rem; list-style: none; margin: 0; padding: 0;">
             @foreach($groups as $group)
-                <li class="fi-sidebar-group {{ !empty($group['items']) && collect($group['items'])->contains('isActive', true) ? 'fi-active' : '' }}" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                <li class="fi-sidebar-group fi-collapsible {{ !empty($group['items']) && collect($group['items'])->contains('isActive', true) ? 'fi-active' : '' }}" style="display: flex; flex-direction: column; gap: 0.25rem;">
                     @if($group['label'])
                         <div class="fi-sidebar-group-btn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem;">
                             @if($group['icon'])
                                 {!! $group['icon'] !!}
                             @endif
                             <span class="fi-sidebar-group-label">{{ $group['label'] }}</span>
+                            <button type="button" class="fi-icon-btn fi-size-sm fi-color-gray fi-sidebar-group-collapse-btn" style="margin-left: auto;">
+                                <span class="fi-icon-btn-icon-ctn">
+                                    <svg class="fi-icon fi-size-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z" clip-rule="evenodd"/>
+                                    </svg>
+                                </span>
+                            </button>
                         </div>
                     @endif
 
