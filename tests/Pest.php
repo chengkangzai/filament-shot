@@ -13,7 +13,7 @@ uses(TestCase::class)->in(__DIR__);
  *
  * @param  string  $snapshotName  Unique name (no extension)
  * @param  string  $actualPngPath  Path to the generated PNG
- * @param  float   $threshold     Max fraction of differing pixels (default 0.001 = 0.1%)
+ * @param  float  $threshold  Max fraction of differing pixels (default 0.001 = 0.1%)
  */
 function assertImageMatchesSnapshot(string $snapshotName, string $actualPngPath, float $threshold = 0.001): void
 {
@@ -67,6 +67,6 @@ function assertImageMatchesSnapshot(string $snapshotName, string $actualPngPath,
     expect($diffFraction)->toBeLessThanOrEqual(
         $threshold,
         "Image snapshot '{$snapshotName}' mismatch: {$diffPixels}/{$totalPixels} pixels differ ({$diffPct}%). "
-        . "Run with UPDATE_SNAPSHOTS=true to regenerate."
+        . 'Run with UPDATE_SNAPSHOTS=true to regenerate.'
     );
 }

@@ -1,6 +1,8 @@
 <?php
 
 use CCK\FilamentShot\FilamentShot;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
@@ -41,9 +43,9 @@ it('html snapshot: table with badges', function () {
 
 it('html snapshot: form with inputs', function () {
     $html = FilamentShot::form([
-        \Filament\Forms\Components\TextInput::make('name')->label('Full Name'),
-        \Filament\Forms\Components\TextInput::make('email')->label('Email'),
-        \Filament\Forms\Components\Select::make('role')
+        TextInput::make('name')->label('Full Name'),
+        TextInput::make('email')->label('Email'),
+        Select::make('role')
             ->label('Role')
             ->options(['admin' => 'Admin', 'editor' => 'Editor']),
     ])
