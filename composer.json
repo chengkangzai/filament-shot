@@ -37,7 +37,8 @@
         "pestphp/pest-plugin-arch": "^3.0|^4.0",
         "pestphp/pest-plugin-laravel": "^3.0|^4.0",
         "pestphp/pest-plugin-livewire": "^3.0|^4.0",
-        "spatie/laravel-ray": "^1.26"
+        "spatie/laravel-ray": "^1.26",
+        "spatie/pest-plugin-snapshots": "^2.3"
     },
     "autoload": {
         "psr-4": {
