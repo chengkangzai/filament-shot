@@ -80,12 +80,19 @@
             color: rgb(156 163 175);
         }
 
+        /* Table rows: ensure white background so they don't inherit gray from grid context */
+        @layer base {
+            .fi-ta-table > tbody > tr:not(.fi-striped) {
+                background-color: #ffffff;
+            }
+        }
+
         body {
             margin: 0;
             padding: 24px;
             min-height: auto !important;
             font-family: '{{ $font }}', ui-sans-serif, system-ui, sans-serif;
-            background-color: {{ $darkMode ? '#111827' : '#f9fafb' }};
+            background-color: {{ $darkMode ? '#111827' : '#ffffff' }};
         }
     </style>
     @if($extraCss)
