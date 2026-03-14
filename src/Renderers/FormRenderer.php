@@ -125,6 +125,7 @@ class FormRenderer extends BaseRenderer
         }
 
         $html = $this->injectFormValues($html, $component->data);
+        $html = $this->fixTabs($html);
         $html = $this->fixRichEditor($html);
         $html = $this->fixMarkdownEditor($html);
 
@@ -543,6 +544,77 @@ class FormRenderer extends BaseRenderer
         }
 
         return $maps;
+    }
+
+    /**
+     * Make Tabs components visible and set the active tab in static HTML.
+     *
+     * Filament's Tabs use Alpine.js (x-bind:class, x-cloak) to toggle
+     * the active tab. We resolve this statically by:
+     * 1. Removing x-cloak from the tab nav bar
+     * 2. Adding fi-active to the correct tab button and content pane
+     */
+    protected function fixTabs(string $html): string
+    {
+        if (! str_contains($html, 'fi-sc-tabs')) {
+            return $html;
+        }
+
+        // Remove x-cloak from fi-tabs nav elements to make tab bars visible
+        $html = preg_replace(
+            '/(class="fi-tabs[^"]*"[^>]*)\s*x-cloak="x-cloak"/',
+            '$1',
+            $html,
+        );
+
+        // Find each tabsSchemaComponent and resolve its active tab
+        if (preg_match_all('/tabsSchemaComponent\(\{[^}]*\}\)/', $html, $xDataMatches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+            // Process in reverse to preserve offsets
+            foreach (array_reverse($xDataMatches) as $xDataMatch) {
+                $xData = $xDataMatch[0][0];
+                $offset = $xDataMatch[0][1];
+
+                // Extract activeTab (1-indexed, default 1)
+                $activeTabIndex = 1;
+                if (preg_match('/activeTab:\s*(\d+)/', $xData, $m)) {
+                    $activeTabIndex = (int) $m[1];
+                }
+
+                // Find the hidden input with tab keys near this component
+                $searchRegion = substr($html, $offset, 2000);
+                $tabKeys = [];
+                if (preg_match('/value="([^"]*)"[^>]*x-ref="tabsData"/', $searchRegion, $m)) {
+                    $decoded = json_decode(html_entity_decode($m[1]), true);
+                    if (is_array($decoded)) {
+                        $tabKeys = $decoded;
+                    }
+                }
+
+                if (empty($tabKeys)) {
+                    continue;
+                }
+
+                $activeKey = $tabKeys[max(0, $activeTabIndex - 1)] ?? $tabKeys[0];
+                $escapedKey = preg_quote($activeKey, '/');
+
+                // Add fi-active to the matching tab button
+                // class= comes before data-tab-key= in the HTML
+                $html = preg_replace(
+                    '/(<button[^>]*class="fi-tabs-item)("[^>]*data-tab-key="' . $escapedKey . '")/s',
+                    '$1 fi-active$2',
+                    $html,
+                );
+
+                // Add fi-active to the matching tab content pane
+                $html = preg_replace(
+                    '/(<div[^>]*x-bind:class="\{[^}]*\'' . $escapedKey . '\'[^}]*\}"[^>]*class="fi-sc-tabs-tab)(")/s',
+                    '$1 fi-active$2',
+                    $html,
+                );
+            }
+        }
+
+        return $html;
     }
 
     /**

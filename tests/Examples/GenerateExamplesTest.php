@@ -18,6 +18,8 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ColorColumn;
@@ -608,6 +610,59 @@ it('generates form with markdown editor example', function () use ($outputDir) {
         ->save("$outputDir/form-markdown-editor.png");
 
     expect(file_exists("$outputDir/form-markdown-editor.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with tabs example', function () use ($outputDir) {
+    FilamentShot::form([
+        Tabs::make('Settings')
+            ->tabs([
+                Tab::make('General')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->schema([
+                        TextInput::make('site_name')
+                            ->label('Site Name'),
+                        TextInput::make('site_url')
+                            ->label('Site URL'),
+                        Toggle::make('maintenance')
+                            ->label('Maintenance Mode'),
+                    ]),
+                Tab::make('Notifications')
+                    ->icon('heroicon-o-bell')
+                    ->schema([
+                        Toggle::make('email_notifications')
+                            ->label('Email Notifications'),
+                        Toggle::make('sms_notifications')
+                            ->label('SMS Notifications'),
+                    ]),
+                Tab::make('Security')
+                    ->icon('heroicon-o-shield-check')
+                    ->schema([
+                        Toggle::make('two_factor')
+                            ->label('Two Factor Authentication'),
+                        Select::make('session_lifetime')
+                            ->label('Session Lifetime')
+                            ->options([
+                                '30' => '30 minutes',
+                                '60' => '1 hour',
+                                '120' => '2 hours',
+                                '480' => '8 hours',
+                            ]),
+                    ]),
+            ]),
+    ])
+        ->state([
+            'site_name' => 'My Application',
+            'site_url' => 'https://myapp.example.com',
+            'maintenance' => false,
+            'email_notifications' => true,
+            'sms_notifications' => false,
+            'two_factor' => true,
+            'session_lifetime' => '120',
+        ])
+        ->width(700)
+        ->save("$outputDir/form-tabs.png");
+
+    expect(file_exists("$outputDir/form-tabs.png"))->toBeTrue();
 })->group('examples');
 
 it('generates notification example', function () use ($outputDir) {
