@@ -17,9 +17,9 @@ class FilamentShot
         return new FormRenderer($components);
     }
 
-    public static function table(): TableRenderer
+    public static function table(array $columns = []): TableRenderer
     {
-        return new TableRenderer;
+        return (new TableRenderer)->columns($columns);
     }
 
     public static function infolist(array $entries): InfolistRenderer
