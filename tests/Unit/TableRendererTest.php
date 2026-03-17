@@ -435,6 +435,23 @@ it('renders table without checkbox column when no bulk actions', function () {
         ->not->toContain('fi-ta-selection-cell"');
 });
 
+it('accepts columns as constructor argument', function () {
+    $html = FilamentShot::table([
+        TextColumn::make('name'),
+        TextColumn::make('email'),
+    ])
+        ->records([
+            ['name' => 'Alice', 'email' => 'alice@example.com'],
+        ])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('Name')
+        ->toContain('Email')
+        ->toContain('Alice')
+        ->toContain('alice@example.com');
+});
+
 it('injects OKLCH color CSS variables', function () {
     $html = FilamentShot::table()
         ->columns([TextColumn::make('name')])
