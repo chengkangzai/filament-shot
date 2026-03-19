@@ -4,6 +4,7 @@ namespace CCK\FilamentShot\Renderers;
 
 use CCK\FilamentShot\Support\ActionAdapter;
 use CCK\FilamentShot\Support\ColumnAdapter;
+use Filament\Actions\ActionGroup;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\View\Components\LinkComponent;
 
@@ -107,6 +108,8 @@ class TableRenderer extends BaseRenderer
             $this->bulkActions,
         );
 
+        $hasActionGroup = collect($this->actions)->contains(fn ($a) => $a instanceof ActionGroup);
+
         $linkPrimaryClasses = implode(' ', FilamentColor::getComponentClasses(LinkComponent::class, 'primary'));
         $linkDangerClasses = implode(' ', FilamentColor::getComponentClasses(LinkComponent::class, 'danger'));
 
@@ -119,6 +122,7 @@ class TableRenderer extends BaseRenderer
             'bulkActions' => $bulkActions,
             'selectedRows' => $this->selectedRows,
             'reorderable' => $this->reorderable,
+            'hasActionGroup' => $hasActionGroup,
             'linkPrimaryClasses' => $linkPrimaryClasses,
             'linkDangerClasses' => $linkDangerClasses,
         ])->render();

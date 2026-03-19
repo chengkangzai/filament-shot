@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -697,6 +698,52 @@ it('generates form with wizard example', function () use ($outputDir) {
         ->save("$outputDir/form-wizard.png");
 
     expect(file_exists("$outputDir/form-wizard.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with reorderable example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(FontWeight::Bold),
+            TextColumn::make('email'),
+            TextColumn::make('role'),
+        ])
+        ->records([
+            ['name' => 'Alice Johnson', 'email' => 'alice@example.com', 'role' => 'Admin'],
+            ['name' => 'Bob Smith', 'email' => 'bob@example.com', 'role' => 'Editor'],
+            ['name' => 'Charlie Brown', 'email' => 'charlie@example.com', 'role' => 'Viewer'],
+        ])
+        ->reorderable()
+        ->heading('Reorderable Table')
+        ->width(800)
+        ->save("$outputDir/table-reorderable.png");
+
+    expect(file_exists("$outputDir/table-reorderable.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with action group example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->weight(FontWeight::Bold),
+            TextColumn::make('email'),
+            TextColumn::make('role'),
+        ])
+        ->records([
+            ['name' => 'Alice Johnson', 'email' => 'alice@example.com', 'role' => 'Admin'],
+        ])
+        ->recordActions([
+            Action::make('view')->label('View')->icon('heroicon-o-eye'),
+            ActionGroup::make([
+                Action::make('edit')->label('Edit')->icon('heroicon-o-pencil-square'),
+                Action::make('duplicate')->label('Duplicate')->icon('heroicon-o-document-duplicate'),
+                Action::make('delete')->label('Delete')->icon('heroicon-o-trash')->color('danger'),
+            ]),
+        ])
+        ->heading('Action Group Dropdown')
+        ->width(900)
+        ->height(350)
+        ->save("$outputDir/table-action-group.png");
+
+    expect(file_exists("$outputDir/table-action-group.png"))->toBeTrue();
 })->group('examples');
 
 it('generates notification example', function () use ($outputDir) {
