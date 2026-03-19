@@ -20,6 +20,8 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ColorColumn;
@@ -663,6 +665,38 @@ it('generates form with tabs example', function () use ($outputDir) {
         ->save("$outputDir/form-tabs.png");
 
     expect(file_exists("$outputDir/form-tabs.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with wizard example', function () use ($outputDir) {
+    FilamentShot::form([
+        Wizard::make([
+            Step::make('Account')
+                ->description('Your credentials')
+                ->schema([
+                    TextInput::make('email')
+                        ->label('Email'),
+                    TextInput::make('password')
+                        ->label('Password'),
+                ]),
+            Step::make('Profile')
+                ->description('Personal info')
+                ->schema([
+                    TextInput::make('name')
+                        ->label('Full Name'),
+                ]),
+            Step::make('Review')
+                ->description('Confirm details')
+                ->schema([
+                    Toggle::make('terms')
+                        ->label('I accept the terms'),
+                ]),
+        ]),
+    ])
+        ->state(['email' => 'jane@example.com', 'password' => 'secret123'])
+        ->width(900)
+        ->save("$outputDir/form-wizard.png");
+
+    expect(file_exists("$outputDir/form-wizard.png"))->toBeTrue();
 })->group('examples');
 
 it('generates notification example', function () use ($outputDir) {
