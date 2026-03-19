@@ -4,6 +4,7 @@ namespace CCK\FilamentShot\Support;
 
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\View\Components\ButtonComponent;
@@ -31,6 +32,10 @@ class ActionAdapter
      */
     public function render(): string
     {
+        if ($this->source instanceof ActionGroup) {
+            return $this->renderActionGroup();
+        }
+
         $icon = $this->getIcon();
         $color = $this->getColor();
         $label = $this->getLabel();
@@ -48,6 +53,80 @@ class ActionAdapter
         }
 
         return $this->renderLinkButton($color, $label);
+    }
+
+    /**
+     * Render an ActionGroup as a dropdown trigger + panel.
+     */
+    private function renderActionGroup(): string
+    {
+        /** @var ActionGroup $group */
+        $group = $this->source;
+
+        $actions = $this->safeCall(fn () => $group->getActions(), []);
+        if (empty($actions)) {
+            return '';
+        }
+
+        // Build trigger button (three-dot ellipsis icon)
+        $triggerColor = $this->safeCall(fn () => $group->getColor(), null) ?? 'gray';
+        $triggerClasses = $this->resolveIconButtonClasses($triggerColor);
+        $trigger = '<button type="button" class="fi-icon-btn fi-size-md ' . $triggerClasses . '">'
+            . '<svg class="fi-icon fi-size-lg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">'
+            . '<path d="M10 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM10 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM11.5 15.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z"/>'
+            . '</svg>'
+            . '</button>';
+
+        // Build dropdown list items
+        $itemsHtml = '';
+        foreach ($actions as $action) {
+            if (! ($action instanceof Action)) {
+                continue;
+            }
+
+            $visible = $this->safeCall(fn () => $action->isVisible(), true);
+            if (! $visible) {
+                continue;
+            }
+
+            $label = $this->safeCall(fn () => $action->getLabel(), null);
+            if (blank($label)) {
+                continue;
+            }
+
+            $icon = $this->safeCall(fn () => $action->getIcon(), null)
+                ?? $this->safeCall(fn () => $action->getGroupedIcon(), null);
+            $color = $this->safeCall(fn () => $action->getColor(), null) ?? 'gray';
+            $colorClasses = $this->resolveDropdownItemClasses($color);
+
+            $iconHtml = '';
+            if (filled($icon)) {
+                $iconHtml = $this->safeCall(
+                    fn () => \Filament\Support\generate_icon_html(
+                        $icon,
+                        attributes: new ComponentAttributeBag,
+                        size: IconSize::Medium,
+                    )?->toHtml(),
+                    '',
+                );
+            }
+
+            $itemsHtml .= '<button type="button" class="fi-dropdown-list-item ' . $colorClasses . '">'
+                . $iconHtml
+                . '<span class="fi-dropdown-list-item-label">' . e($label) . '</span>'
+                . '</button>';
+        }
+
+        if ($itemsHtml === '') {
+            return '';
+        }
+
+        return '<div class="fi-dropdown" style="position: relative;">'
+            . '<div class="fi-dropdown-trigger">' . $trigger . '</div>'
+            . '<div class="fi-dropdown-panel" style="position: absolute; top: 100%; right: 0; z-index: 10; margin-top: 0.25rem;">'
+            . '<div class="fi-dropdown-list">' . $itemsHtml . '</div>'
+            . '</div>'
+            . '</div>';
     }
 
     /**
@@ -202,6 +281,15 @@ class ActionAdapter
         $classes = FilamentColor::getComponentClasses(ButtonComponent::class, $color);
 
         return implode(' ', $classes);
+    }
+
+    private function resolveDropdownItemClasses(string $color): string
+    {
+        if ($color === 'gray' || $color === 'primary') {
+            return '';
+        }
+
+        return 'fi-color fi-color-' . $color;
     }
 
     private function safeCall(callable $callback, mixed $default): mixed
