@@ -175,7 +175,7 @@
             <table class="fi-ta-table">
                 <thead>
                     <tr>
-                                                                            <th class="fi-ta-header-cell">
+                                                                                                    <th class="fi-ta-header-cell">
                                 Name
                             </th>
                                                     <th class="fi-ta-header-cell">
@@ -185,7 +185,7 @@
                 </thead>
                 <tbody>
                                             <tr class="fi-ta-row ">
-                                                                                        <td class="fi-ta-cell">
+                                                                                                                    <td class="fi-ta-cell">
                                     <div class="fi-ta-text"><span class="fi-ta-text-item fi-size-sm fi-size-sm">Alice</span></div>
                                 </td>
                                                             <td class="fi-ta-cell">
@@ -193,7 +193,7 @@
                                 </td>
                                                                                 </tr>
                                             <tr class="fi-ta-row fi-striped">
-                                                                                        <td class="fi-ta-cell">
+                                                                                                                    <td class="fi-ta-cell">
                                     <div class="fi-ta-text"><span class="fi-ta-text-item fi-size-sm fi-size-sm">Bob</span></div>
                                 </td>
                                                             <td class="fi-ta-cell">
@@ -201,7 +201,7 @@
                                 </td>
                                                                                 </tr>
                                             <tr class="fi-ta-row ">
-                                                                                        <td class="fi-ta-cell">
+                                                                                                                    <td class="fi-ta-cell">
                                     <div class="fi-ta-text"><span class="fi-ta-text-item fi-size-sm fi-size-sm">Charlie</span></div>
                                 </td>
                                                             <td class="fi-ta-cell">

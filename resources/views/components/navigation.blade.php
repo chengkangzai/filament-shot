@@ -12,7 +12,7 @@
     <nav class="fi-sidebar-nav">
         <ul class="fi-sidebar-nav-groups">
             @foreach($groups as $group)
-                <li class="fi-sidebar-group fi-collapsible {{ !empty($group['items']) && collect($group['items'])->contains('isActive', true) ? 'fi-active' : '' }}">
+                <li class="fi-sidebar-group fi-collapsible {{ !empty($group['items']) && collect($group['items'])->contains('isActive', true) ? 'fi-active' : '' }} {{ $group['isCollapsed'] ? 'fi-collapsed' : '' }}">
                     @if($group['label'])
                         <div class="fi-sidebar-group-btn">
                             @if($group['icon'])
