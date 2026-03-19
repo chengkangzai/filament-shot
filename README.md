@@ -123,7 +123,74 @@ FilamentShot::form([
 
 Supported field types: `TextInput`, `Select`, `Textarea`, `Toggle`, `Checkbox`, `Radio`, `Placeholder`, `DatePicker`, `DateTimePicker`, `FileUpload`, `ColorPicker`, `TagsInput`, `KeyValue`, `RichEditor`, `MarkdownEditor`, `Repeater`.
 
-Layout components: `Section`, `Grid`, `Fieldset`.
+Layout components: `Section`, `Grid`, `Fieldset`, `Tabs`, `Wizard`.
+
+#### Forms with Tabs
+
+```php
+use CCK\FilamentShot\FilamentShot;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+
+FilamentShot::form([
+    Tabs::make('Settings')
+        ->tabs([
+            Tab::make('General')
+                ->icon('heroicon-o-cog-6-tooth')
+                ->schema([
+                    TextInput::make('site_name')->label('Site Name'),
+                    TextInput::make('site_url')->label('Site URL'),
+                ]),
+            Tab::make('Notifications')
+                ->icon('heroicon-o-bell')
+                ->schema([
+                    Toggle::make('email_notifications')->label('Email Notifications'),
+                ]),
+        ]),
+])
+->state(['site_name' => 'My App', 'site_url' => 'https://myapp.com'])
+->save('form-tabs.png');
+```
+
+Use `->activeTab(2)` to render a specific tab as active.
+
+#### Forms with Wizard Steps
+
+```php
+use CCK\FilamentShot\FilamentShot;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+
+FilamentShot::form([
+    Wizard::make([
+        Step::make('Account')
+            ->description('Your credentials')
+            ->schema([
+                TextInput::make('email')->label('Email'),
+                TextInput::make('password')->label('Password'),
+            ]),
+        Step::make('Profile')
+            ->description('Personal info')
+            ->schema([
+                TextInput::make('name')->label('Full Name'),
+            ]),
+        Step::make('Review')
+            ->description('Confirm details')
+            ->schema([
+                Toggle::make('terms')->label('I accept the terms'),
+            ]),
+    ]),
+])
+->state(['email' => 'jane@example.com'])
+->width(900)
+->save('form-wizard.png');
+```
+
+Use `->startOnStep(2)` to render a specific step as active (previous steps show as completed).
 
 #### Forms with Layout Components
 
@@ -168,6 +235,49 @@ FilamentShot::table()
     ->heading('Team Members')
     ->striped()
     ->save('table.png');
+```
+
+#### Tables with Action Groups (Dropdowns)
+
+```php
+use CCK\FilamentShot\FilamentShot;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Tables\Columns\TextColumn;
+
+FilamentShot::table()
+    ->columns([
+        TextColumn::make('name'),
+        TextColumn::make('email'),
+    ])
+    ->records([
+        ['name' => 'Alice', 'email' => 'alice@example.com'],
+        ['name' => 'Bob', 'email' => 'bob@example.com'],
+    ])
+    ->recordActions([
+        Action::make('view')->label('View')->icon('heroicon-o-eye'),
+        ActionGroup::make([
+            Action::make('edit')->label('Edit')->icon('heroicon-o-pencil-square'),
+            Action::make('delete')->label('Delete')->icon('heroicon-o-trash')->color('danger'),
+        ]),
+    ])
+    ->save('table-action-group.png');
+```
+
+#### Reorderable Tables
+
+```php
+FilamentShot::table()
+    ->columns([
+        TextColumn::make('name'),
+        TextColumn::make('email'),
+    ])
+    ->records([
+        ['name' => 'Alice', 'email' => 'alice@example.com'],
+        ['name' => 'Bob', 'email' => 'bob@example.com'],
+    ])
+    ->reorderable()
+    ->save('table-reorderable.png');
 ```
 
 #### Tables with Bulk Actions
@@ -272,6 +382,19 @@ FilamentShot::stats([
         ->color('danger'),
 ])
 ->save('stats.png');
+```
+
+### Notifications
+
+```php
+use CCK\FilamentShot\FilamentShot;
+
+FilamentShot::notification()
+    ->title('Status Updated')
+    ->body('The customer status has been changed to Active.')
+    ->success()
+    ->width(400)
+    ->save('notification.png');
 ```
 
 ## Output Methods
