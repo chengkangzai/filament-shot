@@ -1,6 +1,7 @@
 <?php
 
 use CCK\FilamentShot\FilamentShot;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Wizard;
@@ -63,7 +64,7 @@ it('renders wizard with second step active and first completed', function () {
 
 it('renders file upload with dropzone placeholder', function () {
     $html = FilamentShot::form([
-        \Filament\Forms\Components\FileUpload::make('avatar')
+        FileUpload::make('avatar')
             ->label('Avatar'),
     ])
         ->state([])
