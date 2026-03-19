@@ -126,6 +126,7 @@ class FormRenderer extends BaseRenderer
 
         $html = $this->injectFormValues($html, $component->data);
         $html = $this->fixTabs($html);
+        $html = $this->fixWizard($html);
         $html = $this->fixRichEditor($html);
         $html = $this->fixMarkdownEditor($html);
 
@@ -544,6 +545,94 @@ class FormRenderer extends BaseRenderer
         }
 
         return $maps;
+    }
+
+    /**
+     * Make Wizard steps visible and set the active/completed steps in static HTML.
+     *
+     * Filament's Wizard uses Alpine.js to toggle step visibility. We resolve
+     * this statically by adding fi-active/fi-completed to the correct steps.
+     */
+    protected function fixWizard(string $html): string
+    {
+        if (! str_contains($html, 'fi-sc-wizard')) {
+            return $html;
+        }
+
+        // Remove x-cloak from wizard header and step elements
+        $html = preg_replace(
+            '/(<ol[^>]*?)\s*x-cloak\b([^>]*?class="fi-sc-wizard-header")/s',
+            '$1$2',
+            $html,
+        );
+        $html = preg_replace(
+            '/(<(?:div|form)[^>]*?)\s*x-cloak\b([^>]*?class="fi-sc-wizard-step)/s',
+            '$1$2',
+            $html,
+        );
+
+        // Find each wizardSchemaComponent and resolve its active step
+        if (preg_match_all('/wizardSchemaComponent\(\{[^}]*\}\)/', $html, $xDataMatches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+            foreach (array_reverse($xDataMatches) as $xDataMatch) {
+                $xData = $xDataMatch[0][0];
+                $offset = $xDataMatch[0][1];
+
+                // Extract startStep (1-indexed, default 1)
+                $startStep = 1;
+                if (preg_match('/startStep:\s*(\d+)/', $xData, $m)) {
+                    $startStep = (int) $m[1];
+                }
+
+                // Find the hidden input with step keys near this component
+                $searchRegion = substr($html, $offset, 3000);
+                $stepKeys = [];
+                if (preg_match('/value="([^"]*)"[^>]*x-ref="stepsData"/', $searchRegion, $m)) {
+                    $decoded = json_decode(html_entity_decode($m[1]), true);
+                    if (is_array($decoded)) {
+                        $stepKeys = $decoded;
+                    }
+                }
+
+                if (empty($stepKeys)) {
+                    continue;
+                }
+
+                $activeIndex = max(0, $startStep - 1);
+
+                // Add fi-active and fi-completed to header step <li> elements
+                // Header steps use x-bind:class with getStepIndex() comparisons
+                $html = preg_replace_callback(
+                    '/<li[^>]*class="fi-sc-wizard-header-step"[^>]*>/s',
+                    function ($match) use (&$headerStepCounter, $activeIndex) {
+                        static $counter = -1;
+                        $counter++;
+
+                        $tag = $match[0];
+                        if ($counter === $activeIndex) {
+                            $tag = str_replace('fi-sc-wizard-header-step"', 'fi-sc-wizard-header-step fi-active"', $tag);
+                        } elseif ($counter < $activeIndex) {
+                            $tag = str_replace('fi-sc-wizard-header-step"', 'fi-sc-wizard-header-step fi-completed"', $tag);
+                        }
+
+                        return $tag;
+                    },
+                    $html,
+                );
+
+                // Add fi-active to the matching step content pane
+                $activeKey = $stepKeys[$activeIndex] ?? $stepKeys[0];
+                $escapedKey = preg_quote($activeKey, '/');
+
+                // Step panes use x-ref="step-{key}" and class="fi-sc-wizard-step"
+                $html = preg_replace(
+                    '/(x-ref="step-' . $escapedKey . '"[^>]*class="fi-sc-wizard-step)(")/s',
+                    '$1 fi-active$2',
+                    $html,
+                );
+            }
+        }
+
+        return $html;
     }
 
     /**
