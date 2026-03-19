@@ -1,4 +1,4 @@
-<div class="fi-ta-ctn {{ $heading ? 'fi-ta-ctn-with-header' : '' }}" style="flex-direction: column; overflow: hidden;">
+<div class="fi-ta-ctn {{ $heading ? 'fi-ta-ctn-with-header' : '' }}" style="flex-direction: column; {{ $hasActionGroup ? 'overflow: visible;' : 'overflow: hidden;' }}">
     @if($heading)
         <div class="fi-ta-header-ctn">
             <div class="fi-ta-header">
