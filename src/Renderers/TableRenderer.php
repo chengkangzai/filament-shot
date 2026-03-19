@@ -25,6 +25,8 @@ class TableRenderer extends BaseRenderer
 
     protected array $selectedRows = [];
 
+    protected bool $reorderable = false;
+
     public function columns(array $columns): static
     {
         $this->columns = $columns;
@@ -81,6 +83,13 @@ class TableRenderer extends BaseRenderer
         return $this;
     }
 
+    public function reorderable(bool $reorderable = true): static
+    {
+        $this->reorderable = $reorderable;
+
+        return $this;
+    }
+
     protected function renderContent(): string
     {
         $columns = array_map(
@@ -109,6 +118,7 @@ class TableRenderer extends BaseRenderer
             'actions' => $actions,
             'bulkActions' => $bulkActions,
             'selectedRows' => $this->selectedRows,
+            'reorderable' => $this->reorderable,
             'linkPrimaryClasses' => $linkPrimaryClasses,
             'linkDangerClasses' => $linkDangerClasses,
         ])->render();
