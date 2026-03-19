@@ -91,7 +91,6 @@ class NotificationRenderer extends BaseRenderer
 
         if ($this->status !== null) {
             $notification->status($this->status);
-            $notification->color($this->status);
         }
 
         if ($this->icon !== null) {
