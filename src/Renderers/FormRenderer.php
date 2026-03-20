@@ -161,6 +161,7 @@ class FormRenderer extends BaseRenderer
         $html = $this->injectMultiSelectState($html, $data);
         $html = $this->injectTextareaContent($html, $data);
         $html = $this->injectToggleState($html, $data);
+        $html = $this->injectColorPickerState($html, $data);
 
         if (! empty($this->openFields)) {
             $html = $this->injectSelectOpenState($html, $data);
@@ -319,6 +320,44 @@ class FormRenderer extends BaseRenderer
                 $result = preg_replace('/aria-checked="[^"]*"/', 'aria-checked="' . $ariaValue . '"', $result);
 
                 return $result;
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Apply background-color to color picker preview swatches.
+     *
+     * ColorPicker uses x-bind:style to set background-color via Alpine.js.
+     * We inject the color value as an inline style on the preview div.
+     */
+    protected function injectColorPickerState(string $html, array $data): string
+    {
+        if (! str_contains($html, 'fi-fo-color-picker')) {
+            return $html;
+        }
+
+        // Match each colorPickerFormComponent x-data, extract the field path,
+        // then inject background-color on the nearby preview swatch div.
+        return preg_replace_callback(
+            '/colorPickerFormComponent\(\{[^}]*\$entangle\([\'"]data\.([^\'"]+)[\'"]\)[^}]*\}\).*?(<div[^>]*class=")(fi-fo-color-picker-preview[^"]*)(")[^>]*/s',
+            function ($matches) use ($data) {
+                $fieldPath = $matches[1];
+                $value = data_get($data, $fieldPath);
+                $full = $matches[0];
+
+                if (blank($value)) {
+                    return $full;
+                }
+
+                // Inject background-color style on the preview div
+                $styled = str_replace(
+                    $matches[2] . $matches[3] . $matches[4],
+                    $matches[2] . $matches[3] . $matches[4] . ' style="background-color: ' . e($value) . ';"',
+                    $full,
+                );
+
+                return $styled;
             },
             $html,
         );
@@ -603,7 +642,7 @@ class FormRenderer extends BaseRenderer
                 // Header steps use x-bind:class with getStepIndex() comparisons
                 $html = preg_replace_callback(
                     '/<li[^>]*class="fi-sc-wizard-header-step"[^>]*>/s',
-                    function ($match) use (&$headerStepCounter, $activeIndex) {
+                    function ($match) use ($activeIndex) {
                         static $counter = -1;
                         $counter++;
 
