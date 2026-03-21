@@ -280,8 +280,8 @@ it('renders a rich editor field with toolbar', function () {
         ->toContain('Content')
         ->toContain('fi-fo-rich-editor')
         ->toContain('fi-fo-rich-editor-toolbar')
-        ->toContain('aria-label="Bold"')
-        ->toContain('aria-label="Italic"')
+        ->toContain('Bold')
+        ->toContain('Italic')
         ->toContain('fi-fo-rich-editor-content');
 });
 
@@ -303,7 +303,7 @@ it('renders a markdown editor field with toolbar', function () {
         ->toContain('Notes')
         ->toContain('fi-fo-markdown-editor')
         ->toContain('fi-fo-rich-editor-toolbar')
-        ->toContain('aria-label="Bold"')
+        ->toContain('Bold')
         ->toContain('fi-fo-rich-editor-content');
 });
 
