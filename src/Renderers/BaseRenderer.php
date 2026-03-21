@@ -110,7 +110,7 @@ abstract class BaseRenderer
      */
     protected function extractAlpineComponentRegistrations(string $html, array $alpineRelativePaths): array
     {
-        $resolver = app(\CCK\FilamentShot\Support\AssetResolver::class);
+        $resolver = app(AssetResolver::class);
         $pathToJs = $resolver->getPluginAlpineComponentJsByPath();
         $registrations = [];
 
