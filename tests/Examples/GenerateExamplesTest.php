@@ -777,3 +777,32 @@ it('generates notification example', function () use ($outputDir) {
 
     expect(file_exists("$outputDir/notification.png"))->toBeTrue();
 })->group('examples');
+
+it('generates form with custom css injection example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('name')->label('Full Name'),
+        TextInput::make('phone')
+            ->label('Phone Number')
+            ->prefix('+60')
+            ->placeholder('12-345 6789'),
+        TextInput::make('email')->label('Email'),
+    ])
+        ->state([
+            'name' => 'Jane Doe',
+            'phone' => '12-345 6789',
+            'email' => 'jane@example.com',
+        ])
+        ->css('
+            /* Example: custom styles injected via ->css(), as a 3rd-party plugin would provide */
+            .fi-fo-field:has([id$="phone"]) .fi-input-prefix {
+                background: #f0f9ff;
+                color: #0369a1;
+                font-weight: 600;
+                border-right: 1px solid #bae6fd;
+            }
+        ')
+        ->width(600)
+        ->save("$outputDir/form-custom-css.png");
+
+    expect(file_exists("$outputDir/form-custom-css.png"))->toBeTrue();
+})->group('examples');
