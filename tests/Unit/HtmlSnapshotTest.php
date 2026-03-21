@@ -15,11 +15,13 @@ use function Spatie\Snapshots\assertMatchesSnapshot;
  * - replaces random Livewire component IDs with a fixed placeholder
  * - strips embedded <style> tag contents (Filament's compiled CSS changes
  *   between minor releases and is not part of our rendering logic)
+ * - normalizes absolute file:// paths to be machine-independent
  */
 function normalizeHtml(string $html): string
 {
     $html = preg_replace('/shot-(form|infolist|stats|table)-[A-Za-z0-9]{8}/', 'shot-$1-SNAPSHOT_ID', $html);
     $html = preg_replace('/<style[^>]*>.*?<\/style>/s', '<style>/* CSS stripped */</style>', $html);
+    $html = preg_replace('#file:///[^"]*vendor/#', 'file:///[path]/vendor/', $html);
 
     return $html;
 }

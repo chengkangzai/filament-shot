@@ -197,11 +197,11 @@
     
     
     
-        <script src="file:///home/cck/filament-shot/vendor/livewire/livewire/dist/livewire.min.js"></script>
-        <script src="file:///home/cck/filament-shot/vendor/filament/support/dist/index.js"></script>
-        <script src="file:///home/cck/filament-shot/vendor/filament/tables/dist/index.js"></script>
-        <script src="file:///home/cck/filament-shot/vendor/filament/notifications/dist/index.js"></script>
-        <script src="file:///home/cck/filament-shot/vendor/filament/schemas/dist/index.js"></script>
-        <script src="file:///home/cck/filament-shot/vendor/filament/actions/dist/index.js"></script>
+        <script src="file:///[path]/vendor/livewire/livewire/dist/livewire.min.js"></script>
+        <script src="file:///[path]/vendor/filament/support/dist/index.js"></script>
+        <script src="file:///[path]/vendor/filament/tables/dist/index.js"></script>
+        <script src="file:///[path]/vendor/filament/notifications/dist/index.js"></script>
+        <script src="file:///[path]/vendor/filament/schemas/dist/index.js"></script>
+        <script src="file:///[path]/vendor/filament/actions/dist/index.js"></script>
     </body>
 </html>
