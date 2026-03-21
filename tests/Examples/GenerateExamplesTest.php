@@ -7,6 +7,7 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\RichEditor;
@@ -666,6 +667,26 @@ it('generates form with tabs example', function () use ($outputDir) {
         ->save("$outputDir/form-tabs.png");
 
     expect(file_exists("$outputDir/form-tabs.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with color picker example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('brand_name')
+            ->label('Brand Name'),
+        ColorPicker::make('primary_color')
+            ->label('Primary Color'),
+        ColorPicker::make('secondary_color')
+            ->label('Secondary Color'),
+    ])
+        ->state([
+            'brand_name' => 'Acme Corp',
+            'primary_color' => '#3b82f6',
+            'secondary_color' => '#22c55e',
+        ])
+        ->width(600)
+        ->save("$outputDir/form-color-picker.png");
+
+    expect(file_exists("$outputDir/form-color-picker.png"))->toBeTrue();
 })->group('examples');
 
 it('generates form with wizard example', function () use ($outputDir) {
