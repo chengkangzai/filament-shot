@@ -11,8 +11,12 @@ use Filament\Forms\Components\TextInput;
 // ---------------------------------------------------------------------------
 
 it('strips all x-load-src attributes regardless of URL', function () {
-    $renderer = new class extends BaseRenderer {
-        protected function renderContent(): string { return ''; }
+    $renderer = new class extends BaseRenderer
+    {
+        protected function renderContent(): string
+        {
+            return '';
+        }
 
         public function callSanitize(string $html): string
         {
@@ -31,8 +35,12 @@ it('strips all x-load-src attributes regardless of URL', function () {
 });
 
 it('strips x-load-css attributes', function () {
-    $renderer = new class extends BaseRenderer {
-        protected function renderContent(): string { return ''; }
+    $renderer = new class extends BaseRenderer
+    {
+        protected function renderContent(): string
+        {
+            return '';
+        }
 
         public function callSanitize(string $html): string
         {
@@ -45,8 +53,12 @@ it('strips x-load-css attributes', function () {
 });
 
 it('removes Livewire loading indicator elements', function () {
-    $renderer = new class extends BaseRenderer {
-        protected function renderContent(): string { return ''; }
+    $renderer = new class extends BaseRenderer
+    {
+        protected function renderContent(): string
+        {
+            return '';
+        }
 
         public function callSanitize(string $html): string
         {
@@ -62,8 +74,12 @@ it('removes Livewire loading indicator elements', function () {
 });
 
 it('replaces __FILAMENT_SHOT_PLUGIN_JS__ placeholder with empty string when no alpine paths', function () {
-    $renderer = new class extends BaseRenderer {
-        protected function renderContent(): string { return ''; }
+    $renderer = new class extends BaseRenderer
+    {
+        protected function renderContent(): string
+        {
+            return '';
+        }
 
         public function callSanitize(string $html): string
         {
@@ -82,8 +98,12 @@ it('replaces __FILAMENT_SHOT_PLUGIN_JS__ placeholder with empty string when no a
 // ---------------------------------------------------------------------------
 
 it('transforms export{X as default} into Alpine.data() registration', function () {
-    $renderer = new class extends BaseRenderer {
-        protected function renderContent(): string { return ''; }
+    $renderer = new class extends BaseRenderer
+    {
+        protected function renderContent(): string
+        {
+            return '';
+        }
 
         public function callBuild(string $name, string $js): string
         {
@@ -96,13 +116,17 @@ it('transforms export{X as default} into Alpine.data() registration', function (
 
     expect($result)
         ->toContain("Alpine.data('myComponent',F0)")
-        ->toContain("alpine:init")
+        ->toContain('alpine:init')
         ->not->toContain('export{');
 });
 
 it('buildAlpineRegistration uses the provided component name not the exported variable', function () {
-    $renderer = new class extends BaseRenderer {
-        protected function renderContent(): string { return ''; }
+    $renderer = new class extends BaseRenderer
+    {
+        protected function renderContent(): string
+        {
+            return '';
+        }
 
         public function callBuild(string $name, string $js): string
         {
@@ -117,8 +141,12 @@ it('buildAlpineRegistration uses the provided component name not the exported va
 });
 
 it('buildAlpineRegistration returns raw content when export pattern not found', function () {
-    $renderer = new class extends BaseRenderer {
-        protected function renderContent(): string { return ''; }
+    $renderer = new class extends BaseRenderer
+    {
+        protected function renderContent(): string
+        {
+            return '';
+        }
 
         public function callBuild(string $name, string $js): string
         {
