@@ -105,7 +105,9 @@
                 Alpine.magic('wire', () => ({
                     $entangle: (path) => state[path] ?? null,
                     $commit: () => {},
-                    callSchemaComponentMethod: () => Promise.resolve({}),
+                    // Never resolve — prevents ITI's geoip completion handler from
+                    // overriding the country that setNumber() already detected correctly.
+                    callSchemaComponentMethod: () => new Promise(() => {}),
                     get __instance() { return { canonical: state, ephemeral: state }; },
                 }));
             }

@@ -35,6 +35,9 @@ class AssetResolver
      * 3rd-party plugins register their CSS via FilamentAsset::register().
      * This reads those source files directly so their styles are included
      * in screenshots without requiring `php artisan filament:assets` to be run.
+     *
+     * URL references (flag sprites, icons) are rewritten to base64 data URIs so
+     * the images load correctly when the CSS is inlined in a static HTML file.
      */
     public function getPluginCssContent(): string
     {
@@ -43,12 +46,79 @@ class AssetResolver
         foreach (FilamentAsset::getStyles() as $asset) {
             $path = $asset->getPath();
 
-            if ($path && ! $asset->isRemote() && file_exists($path)) {
-                $css .= file_get_contents($path) . "\n";
+            if (! $path || $asset->isRemote() || ! file_exists($path)) {
+                continue;
             }
+
+            $css .= $this->rewriteCssUrls(file_get_contents($path), $path) . "\n";
         }
 
         return $css;
+    }
+
+    /**
+     * Rewrite CSS url() references to base64 data URIs so they work when inlined.
+     *
+     * Handles two cases:
+     * - Relative paths (e.g. `../img/flags.webp`): resolved relative to the CSS file
+     * - Absolute /vendor/package-name/file paths: looked up in the package source tree
+     */
+    protected function rewriteCssUrls(string $css, string $cssFilePath): string
+    {
+        // Normalize the path to resolve any `../` segments before computing dirs
+        $realCssDir = realpath(dirname($cssFilePath)) ?: dirname($cssFilePath);
+        $packageRoot = dirname($realCssDir, 2);
+
+        return preg_replace_callback(
+            '/url\(([\'"]?)([^)\'"\n]+)\1\)/',
+            function (array $match) use ($realCssDir, $packageRoot): string {
+                $url = trim($match[2]);
+                $quote = $match[1];
+
+                if (str_starts_with($url, 'data:') || preg_match('/^https?:\/\//', $url)) {
+                    return $match[0];
+                }
+
+                $resolved = null;
+
+                if (! str_starts_with($url, '/')) {
+                    // Relative path: resolve relative to CSS file directory
+                    $candidate = realpath($realCssDir . '/' . $url);
+
+                    if ($candidate && file_exists($candidate)) {
+                        $resolved = $candidate;
+                    }
+                } elseif (preg_match('/^\/vendor\/[^\/]+\/(.+)$/', $url, $vendorMatch)) {
+                    // Absolute /vendor/package-name/file path — find it in the package source.
+                    // Packages publish assets from their source tree; search common image dirs.
+                    // PHP glob() doesn't support **, so we list explicit candidate paths.
+                    $filename = basename($vendorMatch[1]);
+                    $candidates = [
+                        $packageRoot . '/images/vendor/intl-tel-input/build/' . $filename,
+                        $packageRoot . '/resources/images/' . $filename,
+                        $packageRoot . '/dist/img/' . $filename,
+                    ];
+
+                    foreach ($candidates as $candidate) {
+                        if (file_exists($candidate)) {
+                            $resolved = $candidate;
+
+                            break;
+                        }
+                    }
+                }
+
+                if (! $resolved) {
+                    return $match[0];
+                }
+
+                $mime = mime_content_type($resolved) ?: 'application/octet-stream';
+                $data = base64_encode((string) file_get_contents($resolved));
+
+                return "url({$quote}data:{$mime};base64,{$data}{$quote})";
+            },
+            $css,
+        );
     }
 
     /**
