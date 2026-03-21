@@ -44,12 +44,24 @@ vendor/bin/pint --test                 # Check code style without fixing
 - For array-path non-badge columns: extra CSS classes (font, weight, size) go on the inner `<span class="fi-ta-text-item">`, matching Filament's `.fi-ta-text-item.fi-font-mono` selectors
 - For array-path badge columns: extra CSS classes go on the outer `<div>` with `fi-ta-text-item`, since font cascades down to the badge `<span>`
 
+### Alpine.js / JS-Driven Components
+
+Filament v4/v5 ships JS-driven components (PhoneInput, etc.) that use Alpine.js. Since we render standalone HTML without a running server, Alpine must be bootstrapped manually:
+
+- **Alpine.js source**: Bundled inside `livewire/livewire/dist/livewire.min.js` — NOT in Filament's own JS bundles. `AssetResolver::getCoreJsFileUrls()` includes this as the first script so Alpine is available when Filament's component bundles run.
+- **`file://` blocking**: Chromium silently blocks `<script src="file:///...">` across directories when the page loads from `/tmp/`. `BrowsershotFactory::inlineFileScripts()` reads and inlines all `file://` script tags before writing the temp HTML file.
+- **Plugin Alpine components** (e.g. `phoneInputFormComponent`): Registered as ES modules via `x-load`/`x-load-src`. Since dynamic `import()` of `file://` URLs is blocked, `BaseRenderer::extractAlpineComponentRegistrations()` extracts the `(x-data componentName, x-load-src relativePath)` pairs, transforms the ES module export into an `Alpine.data()` registration via `buildAlpineRegistration()`, and injects it before Alpine starts.
+- **`$wire` stub**: `base.blade.php` registers an `Alpine.magic('wire', ...)` stub on `alpine:init` so Livewire-dependent components don't crash. `$entangle()` reads from `window.__filamentShotWireState` seeded by `FormRenderer::injectWireStateScript()`. `callSchemaComponentMethod` returns a never-resolving `Promise` to prevent intl-tel-input's geoip lookup from overriding the country set by `setNumber()`.
+- **CSS URL rewriting**: Plugin CSS often references flag sprites via `url()`. `AssetResolver::rewriteCssUrls()` converts these to base64 data URIs so images load when CSS is inlined. Handles both relative paths (resolved against CSS file dir) and absolute `/vendor/package/file` paths (searched in the package source tree).
+- **`x-load` / `x-load-src` / `x-load-css`**: Always stripped from sanitized HTML. Plugin CSS is already inlined; `x-load-src` Alpine modules are pre-registered via the mechanism above.
+- **Modal visibility**: `.fi-modal { display: flex !important; }` is unconditional (no `[x-cloak]`) because Alpine now runs and removes `x-cloak`, then hides the modal via `x-show="isOpen"` (starts `false`). The `!important` overrides Alpine's inline `display: none`.
+
 ### Key Files
 
 - `src/Support/ColumnAdapter.php` — unified column interface with `renderCell()` and `resolveBadgeClasses()`
-- `src/Support/AssetResolver.php` — resolves Filament theme CSS and extra CSS from config
-- `src/Support/BrowsershotFactory.php` — creates configured Browsershot instances; supports `fitContent` mode via `select('body')`
-- `resources/views/layouts/base.blade.php` — HTML document wrapper (theme CSS, colors, fonts)
+- `src/Support/AssetResolver.php` — resolves theme CSS, plugin CSS (with URL rewriting), core JS file URLs (livewire first), and plugin Alpine component JS by path
+- `src/Support/BrowsershotFactory.php` — creates configured Browsershot instances; inlines `file://` scripts; supports `fitContent` mode via `select('body')`
+- `resources/views/layouts/base.blade.php` — HTML document wrapper (theme CSS, colors, fonts, `$wire` stub, `<!-- __FILAMENT_SHOT_PLUGIN_JS__ -->` placeholder)
 - `resources/views/components/` — Blade templates for each renderer type
 
 ### Traits (in `src/Concerns/`)
