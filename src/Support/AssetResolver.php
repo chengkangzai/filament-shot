@@ -3,6 +3,7 @@
 namespace CCK\FilamentShot\Support;
 
 use Filament\FilamentServiceProvider;
+use Filament\Support\Facades\FilamentAsset;
 
 class AssetResolver
 {
@@ -20,6 +21,28 @@ class AssetResolver
     public function getExtraCss(): string
     {
         return config('filament-shot.css.extra', '');
+    }
+
+    /**
+     * Auto-discover and return CSS from all Filament plugin assets.
+     *
+     * 3rd-party plugins register their CSS via FilamentAsset::register().
+     * This reads those source files directly so their styles are included
+     * in screenshots without requiring `php artisan filament:assets` to be run.
+     */
+    public function getPluginCssContent(): string
+    {
+        $css = '';
+
+        foreach (FilamentAsset::getStyles() as $asset) {
+            $path = $asset->getPath();
+
+            if ($path && ! $asset->isRemote() && file_exists($path)) {
+                $css .= file_get_contents($path) . "\n";
+            }
+        }
+
+        return $css;
     }
 
     protected function getThemeCssPath(): string

@@ -6,7 +6,7 @@ return [
     'viewport' => [
         'width' => 1024,
         'height' => 768,
-        'device_scale_factor' => 2,
+        'device_scale_factor' => 1,
     ],
 
     'theme' => [

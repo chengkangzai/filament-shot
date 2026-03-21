@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Actions\Action;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
@@ -776,4 +777,21 @@ it('generates notification example', function () use ($outputDir) {
         ->save("$outputDir/notification.png");
 
     expect(file_exists("$outputDir/notification.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with phone input (3rd-party plugin) example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('name')->label('Full Name'),
+        PhoneInput::make('phone')->label('Phone Number'),
+        TextInput::make('email')->label('Email'),
+    ])
+        ->state([
+            'name' => 'Jane Doe',
+            'phone' => '+60123456789',
+            'email' => 'jane@example.com',
+        ])
+        ->width(600)
+        ->save("$outputDir/form-phone-input.png");
+
+    expect(file_exists("$outputDir/form-phone-input.png"))->toBeTrue();
 })->group('examples');

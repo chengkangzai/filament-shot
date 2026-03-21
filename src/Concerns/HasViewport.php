@@ -43,6 +43,6 @@ trait HasViewport
 
     public function getDeviceScale(): int
     {
-        return $this->deviceScaleFactor ?? config('filament-shot.viewport.device_scale_factor', 2);
+        return $this->deviceScaleFactor ?? config('filament-shot.viewport.device_scale_factor', 1);
     }
 }

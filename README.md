@@ -460,6 +460,42 @@ FilamentShot::form([...])
     ->save('dark-form.png');
 ```
 
+### 3rd-Party Plugin Support
+
+FilamentShot automatically includes CSS from any Filament plugin registered via `FilamentAsset::register()`. If the plugin's service provider is loaded, its styles will appear in your screenshots — no extra configuration needed.
+
+```php
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+
+FilamentShot::form([
+    TextInput::make('name')->label('Name'),
+    PhoneInput::make('phone')->label('Phone Number'),
+])
+    ->state(['name' => 'Jane Doe', 'phone' => '+60123456789'])
+    ->width(600)
+    ->save('form-with-phone.png');
+```
+
+If a plugin's CSS isn't auto-discovered (e.g. it doesn't use Filament's asset pipeline), you can inject it manually using `->css()` or `->cssFile()`:
+
+```php
+FilamentShot::form([
+    TextInput::make('name')->label('Full Name'),
+    TextInput::make('phone')->label('Phone Number')->prefix('+60'),
+    TextInput::make('email')->label('Email'),
+])
+    ->state(['name' => 'Jane Doe', 'phone' => '12-345 6789', 'email' => 'jane@example.com'])
+    ->css('
+        /* Custom plugin styles injected directly */
+        .my-plugin-input { border-color: #3b82f6; }
+    ')
+    ->cssFile('/path/to/vendor/my-plugin/dist/plugin.css')
+    ->width(600)
+    ->save('form-with-phone.png');
+```
+
+![Form with custom CSS](examples/images/form-custom-css.png)
+
 ### Artisan Command
 
 Capture screenshots from a config file:
