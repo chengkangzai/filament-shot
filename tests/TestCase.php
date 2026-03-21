@@ -16,9 +16,9 @@ use Filament\Tables\TablesServiceProvider;
 use Filament\Widgets\WidgetsServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
-use Ysfkaya\FilamentPhoneInput\FilamentPhoneInputServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
+use Ysfkaya\FilamentPhoneInput\FilamentPhoneInputServiceProvider;
 
 class TestCase extends Orchestra
 {
