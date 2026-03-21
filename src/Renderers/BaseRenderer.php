@@ -2,6 +2,7 @@
 
 namespace CCK\FilamentShot\Renderers;
 
+use CCK\FilamentShot\Concerns\HasCss;
 use CCK\FilamentShot\Concerns\HasFont;
 use CCK\FilamentShot\Concerns\HasHighlight;
 use CCK\FilamentShot\Concerns\HasOutput;
@@ -11,6 +12,7 @@ use CCK\FilamentShot\Support\AssetResolver;
 
 abstract class BaseRenderer
 {
+    use HasCss;
     use HasFont;
     use HasHighlight;
     use HasOutput;
@@ -37,7 +39,12 @@ abstract class BaseRenderer
             'primaryColor' => $this->getPrimaryColor(),
             'colorVariables' => $this->getColorCssVariables(),
             'themeCss' => $resolver->getThemeCssContent(),
-            'extraCss' => $resolver->getExtraCss() . "\n" . $this->getHighlightCss(),
+            'extraCss' => implode("\n", array_filter([
+                $resolver->getExtraCss(),
+                $resolver->getPluginCssContent(),
+                $this->getCustomCss(),
+                $this->getHighlightCss(),
+            ])),
             'content' => $this->renderContent(),
             'contentWidth' => $this->getWidth() . 'px',
             'font' => $this->getFont(),

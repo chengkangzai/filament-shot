@@ -162,8 +162,6 @@
             background-color: #ffffff;
         }
     </style>
-        <style>
-</style>
     </head>
 <body class="fi-body antialiased ">
     <div style="max-width: 1024px; margin: 0 auto;">
