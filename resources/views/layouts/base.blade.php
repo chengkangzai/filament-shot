@@ -15,9 +15,6 @@
             {!! $colorVariables !!}
         }
 
-        /* Hide Alpine.js-dependent elements since JS doesn't run in screenshots */
-        [x-cloak] { display: none !important; }
-
         /* Hide Livewire loading indicators — spinners visible in static HTML */
         .fi-loading-indicator { display: none !important; }
 
@@ -98,10 +95,35 @@
     @if($extraCss)
     <style>{!! $extraCss !!}</style>
     @endif
+    {{-- Stub $wire Alpine magic so Livewire-dependent components don't crash.
+         State values are seeded from PHP rendering context so x-data components
+         that use $wire.$entangle() receive the correct initial values. --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (typeof Alpine !== 'undefined' && !Alpine._magics?.wire) {
+                const state = window.__filamentShotWireState || {};
+                Alpine.magic('wire', () => ({
+                    $entangle: (path) => state[path] ?? null,
+                    $commit: () => {},
+                    callSchemaComponentMethod: () => Promise.resolve({}),
+                    get __instance() { return { canonical: state, ephemeral: state }; },
+                }));
+            }
+        });
+    </script>
 </head>
 <body class="fi-body antialiased {{ $darkMode ? 'dark' : '' }}">
     <div style="max-width: {{ $contentWidth ?? '100%' }}; margin: 0 auto;">
         {!! $content !!}
     </div>
+    {{-- Placeholder replaced by BaseRenderer with plugin Alpine.data() registrations
+         extracted from rendered HTML. Must appear BEFORE coreJsUrls so the registrations
+         are queued on 'alpine:init' before Alpine.start() fires. --}}
+    <!-- __FILAMENT_SHOT_PLUGIN_JS__ -->
+    {{-- Core Filament JS bundles: includes Alpine.js. Loads last so plugin
+         Alpine.data() registrations above are already queued when Alpine starts. --}}
+    @foreach($coreJsUrls as $url)
+    <script src="{{ $url }}"></script>
+    @endforeach
 </body>
 </html>
