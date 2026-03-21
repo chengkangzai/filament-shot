@@ -15,17 +15,15 @@
             {!! $colorVariables !!}
         }
 
-        /* Hide Alpine.js-dependent elements since JS doesn't run in screenshots */
-        [x-cloak] { display: none !important; }
-
         /* Hide Livewire loading indicators — spinners visible in static HTML */
         .fi-loading-indicator { display: none !important; }
 
         /* Force Filament modal visible and static for screenshots.
-           The modal component uses Alpine.js (x-cloak, x-show) which hides
-           everything by default. Override to force visibility and use relative
-           positioning so Browsershot can measure content height. */
-        .fi-modal[x-cloak] {
+           Alpine.js evaluates x-show="isOpen" (starts false) and removes x-cloak,
+           so we must override unconditionally. !important beats inline display:none
+           set by x-show, keeping the modal visible in screenshots regardless of
+           Alpine's state. */
+        .fi-modal {
             display: flex !important;
             position: relative !important;
         }
@@ -98,10 +96,37 @@
     @if($extraCss)
     <style>{!! $extraCss !!}</style>
     @endif
+    {{-- Stub $wire Alpine magic so Livewire-dependent components don't crash.
+         State values are seeded from PHP rendering context so x-data components
+         that use $wire.$entangle() receive the correct initial values. --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (typeof Alpine !== 'undefined' && !Alpine._magics?.wire) {
+                const state = window.__filamentShotWireState || {};
+                Alpine.magic('wire', () => ({
+                    $entangle: (path) => state[path] ?? null,
+                    $commit: () => {},
+                    // Never resolve — prevents ITI's geoip completion handler from
+                    // overriding the country that setNumber() already detected correctly.
+                    callSchemaComponentMethod: () => new Promise(() => {}),
+                    get __instance() { return { canonical: state, ephemeral: state }; },
+                }));
+            }
+        });
+    </script>
 </head>
 <body class="fi-body antialiased {{ $darkMode ? 'dark' : '' }}">
     <div style="max-width: {{ $contentWidth ?? '100%' }}; margin: 0 auto;">
         {!! $content !!}
     </div>
+    {{-- Placeholder replaced by BaseRenderer with plugin Alpine.data() registrations
+         extracted from rendered HTML. Must appear BEFORE coreJsUrls so the registrations
+         are queued on 'alpine:init' before Alpine.start() fires. --}}
+    <!-- __FILAMENT_SHOT_PLUGIN_JS__ -->
+    {{-- Core Filament JS bundles: includes Alpine.js. Loads last so plugin
+         Alpine.data() registrations above are already queued when Alpine starts. --}}
+    @foreach($coreJsUrls as $url)
+    <script src="{{ $url }}"></script>
+    @endforeach
 </body>
 </html>

@@ -125,6 +125,7 @@ class FormRenderer extends BaseRenderer
         }
 
         $html = $this->injectFormValues($html, $component->data);
+        $html = $this->injectWireStateScript($html, $component->data);
         $html = $this->fixTabs($html);
         $html = $this->fixWizard($html);
         $html = $this->fixRichEditor($html);
@@ -145,6 +146,28 @@ class FormRenderer extends BaseRenderer
         }
 
         return $html;
+    }
+
+    /**
+     * Inject form state as a global JS object for the $wire Alpine magic stub.
+     *
+     * JS-driven components like PhoneInput use `$wire.$entangle('data.phone')`
+     * to get their initial value. The $wire stub in base.blade.php reads from
+     * `window.__filamentShotWireState` to provide those values at init time.
+     */
+    protected function injectWireStateScript(string $html, array $data): string
+    {
+        // Build data.* paths (Filament uses 'data.fieldName' as wire:model paths)
+        $wireState = [];
+        foreach ($data as $key => $value) {
+            if (! is_array($value)) {
+                $wireState["data.{$key}"] = $value;
+            }
+        }
+
+        $json = json_encode($wireState, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+        return "<script>window.__filamentShotWireState = {$json};</script>\n" . $html;
     }
 
     /**
