@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use Filament\Actions\Action;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
@@ -778,31 +779,19 @@ it('generates notification example', function () use ($outputDir) {
     expect(file_exists("$outputDir/notification.png"))->toBeTrue();
 })->group('examples');
 
-it('generates form with custom css injection example', function () use ($outputDir) {
+it('generates form with phone input (3rd-party plugin) example', function () use ($outputDir) {
     FilamentShot::form([
         TextInput::make('name')->label('Full Name'),
-        TextInput::make('phone')
-            ->label('Phone Number')
-            ->prefix('+60')
-            ->placeholder('12-345 6789'),
+        PhoneInput::make('phone')->label('Phone Number'),
         TextInput::make('email')->label('Email'),
     ])
         ->state([
             'name' => 'Jane Doe',
-            'phone' => '12-345 6789',
+            'phone' => '+60123456789',
             'email' => 'jane@example.com',
         ])
-        ->css('
-            /* Example: custom styles injected via ->css(), as a 3rd-party plugin would provide */
-            .fi-fo-field:has([id$="phone"]) .fi-input-prefix {
-                background: #f0f9ff;
-                color: #0369a1;
-                font-weight: 600;
-                border-right: 1px solid #bae6fd;
-            }
-        ')
         ->width(600)
-        ->save("$outputDir/form-custom-css.png");
+        ->save("$outputDir/form-phone-input.png");
 
-    expect(file_exists("$outputDir/form-custom-css.png"))->toBeTrue();
+    expect(file_exists("$outputDir/form-phone-input.png"))->toBeTrue();
 })->group('examples');
