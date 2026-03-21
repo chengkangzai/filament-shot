@@ -84,7 +84,7 @@ abstract class BaseRenderer
             $html = preg_replace('/\s*x-load-src="[^"]*"/', '', $html);
             $html = preg_replace('/\s*x-load\b(?!-)(?:\s*=\s*"[^"]*")?/', '', $html);
         } else {
-            $html = preg_replace('/\s*x-load-src="[^"]*localhost[^"]*"/', '', $html);
+            $html = preg_replace('/\s*x-load-src="[^"]*"/', '', $html);
             $html = str_replace('<!-- __FILAMENT_SHOT_PLUGIN_JS__ -->', '', $html);
         }
 
