@@ -12,11 +12,16 @@ use function Spatie\Snapshots\assertMatchesSnapshot;
 
 /**
  * Normalize volatile parts of Filament HTML before snapshotting:
- * replaces random Livewire component IDs with a fixed placeholder.
+ * - replaces random Livewire component IDs with a fixed placeholder
+ * - strips embedded <style> tag contents (Filament's compiled CSS changes
+ *   between minor releases and is not part of our rendering logic)
  */
 function normalizeHtml(string $html): string
 {
-    return preg_replace('/shot-(form|infolist|stats|table)-[A-Za-z0-9]{8}/', 'shot-$1-SNAPSHOT_ID', $html);
+    $html = preg_replace('/shot-(form|infolist|stats|table)-[A-Za-z0-9]{8}/', 'shot-$1-SNAPSHOT_ID', $html);
+    $html = preg_replace('/<style[^>]*>.*?<\/style>/s', '<style>/* CSS stripped */</style>', $html);
+
+    return $html;
 }
 
 it('html snapshot: table with badges', function () {
