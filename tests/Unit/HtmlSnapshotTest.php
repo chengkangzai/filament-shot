@@ -25,7 +25,7 @@ function normalizeHtml(string $html): string
     $html = preg_replace('/<style[^>]*>.*?<\/style>/s', '<style>/* CSS stripped */</style>', $html);
     // Normalize backslashes in file:// URLs (Windows uses \ as path separator)
     $html = preg_replace_callback('#file://[^"]+#', fn ($m) => str_replace('\\', '/', $m[0]), $html);
-    $html = preg_replace('#file:///[^"]*/vendor/#', 'file:///[path]/vendor/', $html);
+    $html = preg_replace('#file://[^"]*/vendor/#', 'file:///[path]/vendor/', $html);
 
     return $html;
 }
