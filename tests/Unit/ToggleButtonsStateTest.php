@@ -118,3 +118,48 @@ it('does not mark any Radio option checked when state is empty', function () {
     preg_match_all('/<input[^>]*type=["\']radio["\'][^>]*checked[^>]*\/?>/', $html, $checkedInputs);
     expect(count($checkedInputs[0]))->toBe(0);
 });
+
+it('form with both ToggleButtons and Radio does not cross-contaminate checked state', function () {
+    $html = FilamentShot::form([
+        ToggleButtons::make('status')
+            ->options(['active' => 'Active', 'blocked' => 'Blocked', 'pending' => 'Pending']),
+        Radio::make('role')
+            ->options(['admin' => 'Admin', 'editor' => 'Editor', 'viewer' => 'Viewer']),
+    ])->state(['status' => 'pending', 'role' => 'admin'])->toHtml();
+
+    expect($html)->toContain('fi-fo-toggle-buttons');
+    expect($html)->toContain('fi-fo-radio');
+
+    // Only one ToggleButtons radio should be checked
+    preg_match_all('/<input[^>]*fi-fo-toggle-buttons-input[^>]*checked[^>]*\/?>/', $html, $tbChecked);
+    expect(count($tbChecked[0]))->toBe(1);
+    expect($tbChecked[0][0])->toContain('value="pending"');
+
+    // Only one Radio input should be checked, and it must be 'admin'
+    // Filter out ToggleButtons inputs from the radio check count
+    preg_match_all('/<input[^>]*type=["\']radio["\'][^>]*checked[^>]*\/?>/', $html, $allChecked);
+    $radioOnly = array_filter($allChecked[0], fn ($i) => ! str_contains($i, 'fi-fo-toggle-buttons-input'));
+    expect(count($radioOnly))->toBe(1);
+    expect(array_values($radioOnly)[0])->toContain('value="admin"');
+});
+
+it('ToggleButtons with wire:model prefix that is a substring of another field name does not misassign state', function () {
+    // 'status' is a prefix of 'sub_status' — the regex must not confuse them
+    $html = FilamentShot::form([
+        ToggleButtons::make('status')
+            ->options(['active' => 'Active', 'blocked' => 'Blocked']),
+        ToggleButtons::make('sub_status')
+            ->options(['open' => 'Open', 'closed' => 'Closed']),
+    ])->state(['status' => 'active', 'sub_status' => 'closed'])->toHtml();
+
+    preg_match_all('/<input[^>]*fi-fo-toggle-buttons-input[^>]*checked[^>]*\/?>/', $html, $checkedInputs);
+    expect(count($checkedInputs[0]))->toBe(2);
+
+    $checkedHtml = implode(' ', $checkedInputs[0]);
+    expect($checkedHtml)->toContain('value="active"');
+    expect($checkedHtml)->toContain('value="closed"');
+    // 'blocked' and 'open' must NOT be checked
+    preg_match_all('/value="([^"]+)"/', $checkedHtml, $vals);
+    expect($vals[1])->not->toContain('blocked');
+    expect($vals[1])->not->toContain('open');
+});
