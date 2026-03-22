@@ -101,3 +101,19 @@ it('renders a blade component (heroicon) inside a blade string', function () {
 
     expect($html)->toContain('<svg');
 });
+
+it('empty blade string renders without crash', function () {
+    $html = FilamentShot::blade('')->toHtml();
+
+    expect($html)
+        ->toBeString()
+        ->toContain('<html');
+});
+
+it('blade syntax error throws an exception containing the syntax error message', function () {
+    // An unclosed @if compiles to PHP with a dangling if block,
+    // which causes a PHP parse error wrapped in an ErrorException at render time.
+    // Note: the exception message includes "syntax error" and references the compiled view file.
+    expect(fn () => FilamentShot::blade('@if(true)unclosed')->toHtml())
+        ->toThrow('syntax error');
+});
