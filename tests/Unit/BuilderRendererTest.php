@@ -122,3 +122,41 @@ it('renders builder move and delete buttons', function () {
     // Delete button should be present
     expect($html)->toContain('fi-color-danger');
 });
+
+it('fixBuilder removes x-show when builder item content div has extra CSS classes (blockPreviews)', function () {
+    // When ->blockPreviews() is enabled, Filament adds extra classes to the content div,
+    // e.g. class="fi-fo-builder-item-content fi-fo-builder-item-content-has-preview".
+    // The regex patterns must tolerate extra classes and still remove x-show.
+    $renderer = FilamentShot::form([
+        Builder::make('content')
+            ->blocks([
+                Block::make('heading')
+                    ->label('Heading')
+                    ->schema([TextInput::make('text')->label('Text')]),
+            ]),
+    ]);
+
+    $reflection = new ReflectionClass($renderer);
+    $method = $reflection->getMethod('fixBuilder');
+    $method->setAccessible(true);
+
+    // Simulate x-show before class (with extra class appended after fi-fo-builder-item-content)
+    $htmlXShowBeforeClass = '<div' . "\n" .
+        '    x-show="! isCollapsed"' . "\n" .
+        '    class="fi-fo-builder-item-content fi-fo-builder-item-content-has-preview"' . "\n" .
+        '>';
+    $resultXShowBeforeClass = $method->invoke($renderer, $htmlXShowBeforeClass);
+    expect($resultXShowBeforeClass)
+        ->not->toContain('x-show="! isCollapsed"')
+        ->toContain('style="display:block"');
+
+    // Simulate class before x-show (with extra class appended after fi-fo-builder-item-content)
+    $htmlClassBeforeXShow = '<div' . "\n" .
+        '    class="fi-fo-builder-item-content fi-fo-builder-item-content-has-preview"' . "\n" .
+        '    x-show="! isCollapsed"' . "\n" .
+        '>';
+    $resultClassBeforeXShow = $method->invoke($renderer, $htmlClassBeforeXShow);
+    expect($resultClassBeforeXShow)
+        ->not->toContain('x-show="! isCollapsed"')
+        ->toContain('style="display:block"');
+});
