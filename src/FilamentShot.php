@@ -11,6 +11,8 @@ use CCK\FilamentShot\Renderers\NotificationRenderer;
 use CCK\FilamentShot\Renderers\StatsRenderer;
 use CCK\FilamentShot\Renderers\TableRenderer;
 use CCK\FilamentShot\Renderers\ViewRenderer;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 
 class FilamentShot
 {
@@ -60,7 +62,7 @@ class FilamentShot
     }
 
     /**
-     * @param  array<\Filament\Actions\Action|\Filament\Actions\ActionGroup>  $actions
+     * @param  array<Action|ActionGroup>  $actions
      */
     public static function headerActions(array $actions): HeaderActionsRenderer
     {
