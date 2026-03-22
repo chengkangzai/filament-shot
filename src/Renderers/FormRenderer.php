@@ -186,6 +186,7 @@ class FormRenderer extends BaseRenderer
         $html = $this->injectTextareaContent($html, $data);
         $html = $this->injectToggleState($html, $data);
         $html = $this->injectToggleButtonsState($html, $data);
+        $html = $this->injectRadioState($html, $data);
         $html = $this->injectColorPickerState($html, $data);
 
         if (! empty($this->openFields)) {
@@ -394,6 +395,54 @@ class FormRenderer extends BaseRenderer
                 $optionValue = $valueMatch[1];
 
                 // Add checked if this option matches the state
+                if ((string) $optionValue === (string) $stateValue) {
+                    return str_replace('/>', ' checked />', $full);
+                }
+
+                return $full;
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Add checked attribute to the selected Radio input.
+     *
+     * Radio renders one <input type="radio"> per option, each with a distinct
+     * value attribute and the same wire:model. We add `checked` to the one
+     * whose value matches the current state.
+     */
+    protected function injectRadioState(string $html, array $data): string
+    {
+        if (! str_contains($html, 'fi-fo-radio')) {
+            return $html;
+        }
+
+        return preg_replace_callback(
+            '/<input(\s[^>]*?)type=["\']radio["\']([^>]*?)wire:model(?:\.[\w.]+)?="data\.([^"]+)"([^>]*?)\s*\/?>/s',
+            function ($matches) use ($data) {
+                $full = $matches[0];
+
+                // Skip ToggleButtons radio — handled by injectToggleButtonsState
+                $allAttrs = $matches[1] . $matches[2] . $matches[4];
+                if (str_contains($allAttrs, 'fi-fo-toggle-buttons-input')) {
+                    return $full;
+                }
+
+                $fieldPath = $matches[3];
+                $stateValue = data_get($data, $fieldPath);
+
+                if ($stateValue === null) {
+                    return $full;
+                }
+
+                // Extract the option value from this radio input's value attribute
+                if (! preg_match('/\bvalue="([^"]*)"/', $allAttrs, $valueMatch)) {
+                    return $full;
+                }
+
+                $optionValue = $valueMatch[1];
+
                 if ((string) $optionValue === (string) $stateValue) {
                     return str_replace('/>', ' checked />', $full);
                 }
@@ -690,13 +739,14 @@ class FormRenderer extends BaseRenderer
         // The attribute appears as a standalone attribute on the <div> tag that wraps the
         // block's schema content.
         $html = preg_replace(
-            '/(<div\s[^>]*)x-show="!\s*isCollapsed"([^>]*class="fi-fo-builder-item-content")/s',
+            '/(<div\s[^>]*)x-show="!\s*isCollapsed"([^>]*class="[^"]*fi-fo-builder-item-content[^"]*")/s',
             '$1style="display:block"$2',
             $html,
         );
-        // Also handle the reverse attribute order (class before x-show)
+        // Also handle the reverse attribute order (class before x-show).
+        // Uses [^"]* around the class name to tolerate extra classes (e.g. when ->blockPreviews() is enabled).
         $html = preg_replace(
-            '/(<div\s[^>]*class="fi-fo-builder-item-content"[^>]*)\s+x-show="!\s*isCollapsed"/s',
+            '/(<div\s[^>]*class="[^"]*fi-fo-builder-item-content[^"]*"[^>]*)\s+x-show="!\s*isCollapsed"/s',
             '$1 style="display:block"',
             $html,
         );
