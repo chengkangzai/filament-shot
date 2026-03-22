@@ -2,6 +2,7 @@
 
 use CCK\FilamentShot\FilamentShot;
 use CCK\FilamentShot\Renderers\FormRenderer;
+use CCK\FilamentShot\Renderers\HeaderActionsRenderer;
 use CCK\FilamentShot\Renderers\InfolistRenderer;
 use CCK\FilamentShot\Renderers\ModalRenderer;
 use CCK\FilamentShot\Renderers\NotificationRenderer;
@@ -55,4 +56,10 @@ it('creates a view renderer from blade template', function () {
     $renderer = FilamentShot::blade('<div>test</div>');
 
     expect($renderer)->toBeInstanceOf(ViewRenderer::class);
+});
+
+it('creates a header actions renderer', function () {
+    $renderer = FilamentShot::headerActions([]);
+
+    expect($renderer)->toBeInstanceOf(HeaderActionsRenderer::class);
 });
