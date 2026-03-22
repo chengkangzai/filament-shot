@@ -947,8 +947,8 @@ it('generates form with builder example', function () use ($outputDir) {
 
 it('generates form with highlight on rich editor example', function () use ($outputDir) {
     FilamentShot::form([
-        \Filament\Forms\Components\TextInput::make('title')->label('Title'),
-        \Filament\Forms\Components\RichEditor::make('description')
+        TextInput::make('title')->label('Title'),
+        RichEditor::make('description')
             ->label('Description')
             ->columnSpanFull(),
     ])
