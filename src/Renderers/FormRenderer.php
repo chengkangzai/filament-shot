@@ -184,6 +184,7 @@ class FormRenderer extends BaseRenderer
         $html = $this->injectMultiSelectState($html, $data);
         $html = $this->injectTextareaContent($html, $data);
         $html = $this->injectToggleState($html, $data);
+        $html = $this->injectToggleButtonsState($html, $data);
         $html = $this->injectColorPickerState($html, $data);
 
         if (! empty($this->openFields)) {
@@ -208,6 +209,11 @@ class FormRenderer extends BaseRenderer
 
                 // Skip checkboxes — handled separately
                 if (preg_match('/type=["\']checkbox["\']/', $before . $after)) {
+                    return $full;
+                }
+
+                // Skip radio inputs — ToggleButtons use radio with fixed option values
+                if (preg_match('/type=["\']radio["\']/', $before . $after)) {
                     return $full;
                 }
 
@@ -343,6 +349,55 @@ class FormRenderer extends BaseRenderer
                 $result = preg_replace('/aria-checked="[^"]*"/', 'aria-checked="' . $ariaValue . '"', $result);
 
                 return $result;
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Add checked attribute to the selected ToggleButtons radio input.
+     *
+     * ToggleButtons renders hidden radio inputs alongside styled <label> buttons.
+     * CSS selectors like `input:checked + label` apply the active visual style.
+     * We add `checked` to the radio input whose value matches the current state.
+     */
+    protected function injectToggleButtonsState(string $html, array $data): string
+    {
+        if (! str_contains($html, 'fi-fo-toggle-buttons-input')) {
+            return $html;
+        }
+
+        return preg_replace_callback(
+            '/<input(\s[^>]*?)class="([^"]*fi-fo-toggle-buttons-input[^"]*)"([^>]*?)\s*\/?>/s',
+            function ($matches) use ($data) {
+                $full = $matches[0];
+                $attrs = $matches[1] . $matches[3];
+
+                // Extract wire:model field path
+                if (! preg_match('/wire:model(?:\.[\w.]+)?="data\.([^"]+)"/', $attrs, $wireMatch)) {
+                    return $full;
+                }
+
+                $fieldPath = $wireMatch[1];
+                $stateValue = data_get($data, $fieldPath);
+
+                if ($stateValue === null) {
+                    return $full;
+                }
+
+                // Extract the option value from this radio input's value attribute
+                if (! preg_match('/\bvalue="([^"]*)"/', $attrs, $valueMatch)) {
+                    return $full;
+                }
+
+                $optionValue = $valueMatch[1];
+
+                // Add checked if this option matches the state
+                if ((string) $optionValue === (string) $stateValue) {
+                    return str_replace('/>', ' checked />', $full);
+                }
+
+                return $full;
             },
             $html,
         );

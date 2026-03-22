@@ -6,6 +6,8 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Builder;
+use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
@@ -882,4 +884,63 @@ it('generates form with phone input (3rd-party plugin) example', function () use
         ->save("$outputDir/form-phone-input.png");
 
     expect(file_exists("$outputDir/form-phone-input.png"))->toBeTrue();
+})->group('examples');
+
+it('generates header actions example', function () use ($outputDir) {
+    FilamentShot::headerActions([
+        Action::make('simulate')
+            ->label('Simulate')
+            ->icon('heroicon-o-play')
+            ->color('primary'),
+        Action::make('export')
+            ->label('Export')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->color('gray'),
+        Action::make('create')
+            ->label('Create')
+            ->icon('heroicon-o-plus')
+            ->color('primary'),
+    ])
+        ->pageTitle('Tier Configurations')
+        ->breadcrumbs(['Settings', 'Tier Configurations'])
+        ->width(900)
+        ->save("$outputDir/header-actions.png");
+
+    expect(file_exists("$outputDir/header-actions.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with builder example', function () use ($outputDir) {
+    FilamentShot::form([
+        Builder::make('content')
+            ->label('Page Content')
+            ->blocks([
+                Block::make('heading')
+                    ->label('Heading')
+                    ->schema([
+                        TextInput::make('text')->label('Heading Text'),
+                        Select::make('level')
+                            ->label('Level')
+                            ->options(['h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3'])
+                            ->default('h2'),
+                    ]),
+                Block::make('paragraph')
+                    ->label('Paragraph')
+                    ->schema([
+                        Textarea::make('content')
+                            ->label('Content')
+                            ->rows(3),
+                    ]),
+            ]),
+    ])
+        ->state([
+            'content' => [
+                ['type' => 'heading', 'data' => ['text' => 'Welcome to Our Platform', 'level' => 'h1']],
+                ['type' => 'paragraph', 'data' => ['content' => 'We help teams build better software together.']],
+                ['type' => 'heading', 'data' => ['text' => 'Key Features', 'level' => 'h2']],
+            ],
+        ])
+        ->width(700)
+        ->save("$outputDir/form-builder.png");
+
+    expect(file_exists("$outputDir/form-builder.png"))->toBeTrue();
 })->group('examples');
