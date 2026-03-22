@@ -15,7 +15,7 @@ class ViewRenderer extends BaseRenderer
 
     public function data(array $data): static
     {
-        $this->viewData = $data;
+        $this->viewData = array_merge($this->viewData, $data);
 
         return $this;
     }

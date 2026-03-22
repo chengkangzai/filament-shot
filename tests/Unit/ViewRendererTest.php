@@ -72,3 +72,32 @@ it('data method is chainable', function () {
 
     expect($chained)->toBe($renderer);
 });
+
+it('data method merges when called multiple times', function () {
+    $html = FilamentShot::blade('<div>{{ $a }} {{ $b }}</div>')
+        ->data(['a' => 'first'])
+        ->data(['b' => 'second'])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('first')
+        ->toContain('second');
+});
+
+it('data method later call overwrites earlier key', function () {
+    $html = FilamentShot::blade('<div>{{ $name }}</div>')
+        ->data(['name' => 'Original'])
+        ->data(['name' => 'Overwritten'])
+        ->toHtml();
+
+    expect($html)
+        ->toContain('Overwritten')
+        ->not->toContain('Original');
+});
+
+it('renders a blade component (heroicon) inside a blade string', function () {
+    $html = FilamentShot::blade('<div><x-heroicon-o-check class="w-5 h-5" /></div>')
+        ->toHtml();
+
+    expect($html)->toContain('<svg');
+});
