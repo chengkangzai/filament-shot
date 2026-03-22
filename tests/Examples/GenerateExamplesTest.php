@@ -779,6 +779,94 @@ it('generates notification example', function () use ($outputDir) {
     expect(file_exists("$outputDir/notification.png"))->toBeTrue();
 })->group('examples');
 
+it('generates view blade string example', function () use ($outputDir) {
+    FilamentShot::blade(<<<'BLADE'
+<div class="space-y-6 p-6">
+    <div class="rounded-xl p-6 shadow-sm"
+         style="background-color: #6B728015; border-left: 4px solid #6B7280">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Current Tier</p>
+                <h3 class="text-2xl font-bold" style="color: #6B7280">Silver</h3>
+            </div>
+            <div class="flex gap-6 text-right">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Tier Points</p>
+                    <p class="text-2xl font-bold text-gray-900">600</p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Redeemable Points</p>
+                    <p class="text-2xl font-bold text-gray-900">500</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+        <h4 class="mb-4 text-sm font-semibold text-gray-700">Tier Progress</h4>
+        <div class="relative pb-8">
+            <div class="h-3 w-full rounded-full bg-gray-200">
+                <div class="h-3 rounded-full" style="width: 60%; background-color: #6B7280"></div>
+            </div>
+            <div class="mt-3 flex justify-between text-xs text-gray-500">
+                <span style="color: #CD7F32">Bronze (0)</span>
+                <span style="color: #6B7280; font-weight: 600">Silver (500) ✓</span>
+                <span>Gold (1,000)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr class="text-left text-xs font-semibold uppercase text-gray-500">
+                    <th class="px-4 py-3">Date</th>
+                    <th class="px-4 py-3">Event</th>
+                    <th class="px-4 py-3 text-right">Points</th>
+                    <th class="px-4 py-3 text-right">Total</th>
+                    <th class="px-4 py-3">Tier</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <tr>
+                    <td class="px-4 py-3 text-gray-500">2026-01-15</td>
+                    <td class="px-4 py-3">Purchase</td>
+                    <td class="px-4 py-3 text-right font-medium text-green-600">+200</td>
+                    <td class="px-4 py-3 text-right">200</td>
+                    <td class="px-4 py-3" style="color: #CD7F32">Bronze</td>
+                </tr>
+                <tr class="bg-green-50">
+                    <td class="px-4 py-3 text-gray-500">2026-02-10</td>
+                    <td class="px-4 py-3 font-medium text-green-700">↑ Tier Upgrade: Bronze → Silver</td>
+                    <td class="px-4 py-3"></td>
+                    <td class="px-4 py-3"></td>
+                    <td class="px-4 py-3" style="color: #6B7280">Silver</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 text-gray-500">2026-02-10</td>
+                    <td class="px-4 py-3">Purchase</td>
+                    <td class="px-4 py-3 text-right font-medium text-green-600">+350</td>
+                    <td class="px-4 py-3 text-right">550</td>
+                    <td class="px-4 py-3" style="color: #6B7280">Silver</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 text-gray-500">2026-02-20</td>
+                    <td class="px-4 py-3">Redemption</td>
+                    <td class="px-4 py-3 text-right font-medium text-red-600">-50</td>
+                    <td class="px-4 py-3 text-right">600</td>
+                    <td class="px-4 py-3" style="color: #6B7280">Silver</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+BLADE)
+        ->width(900)
+        ->save("$outputDir/view-blade.png");
+
+    expect(file_exists("$outputDir/view-blade.png"))->toBeTrue();
+})->group('examples');
+
 it('generates form with phone input (3rd-party plugin) example', function () use ($outputDir) {
     FilamentShot::form([
         TextInput::make('name')->label('Full Name'),

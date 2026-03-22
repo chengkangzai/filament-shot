@@ -9,6 +9,7 @@ use CCK\FilamentShot\Renderers\NavigationRenderer;
 use CCK\FilamentShot\Renderers\NotificationRenderer;
 use CCK\FilamentShot\Renderers\StatsRenderer;
 use CCK\FilamentShot\Renderers\TableRenderer;
+use CCK\FilamentShot\Renderers\ViewRenderer;
 
 class FilamentShot
 {
@@ -45,5 +46,15 @@ class FilamentShot
     public static function navigation(): NavigationRenderer
     {
         return new NavigationRenderer;
+    }
+
+    public static function view(string $view): ViewRenderer
+    {
+        return new ViewRenderer(viewName: $view);
+    }
+
+    public static function blade(string $template): ViewRenderer
+    {
+        return new ViewRenderer(bladeTemplate: $template);
     }
 }

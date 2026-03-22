@@ -7,6 +7,7 @@ use CCK\FilamentShot\Renderers\ModalRenderer;
 use CCK\FilamentShot\Renderers\NotificationRenderer;
 use CCK\FilamentShot\Renderers\StatsRenderer;
 use CCK\FilamentShot\Renderers\TableRenderer;
+use CCK\FilamentShot\Renderers\ViewRenderer;
 
 it('creates a form renderer', function () {
     $renderer = FilamentShot::form([]);
@@ -42,4 +43,16 @@ it('creates a notification renderer', function () {
     $renderer = FilamentShot::notification();
 
     expect($renderer)->toBeInstanceOf(NotificationRenderer::class);
+});
+
+it('creates a view renderer from view name', function () {
+    $renderer = FilamentShot::view('some.view');
+
+    expect($renderer)->toBeInstanceOf(ViewRenderer::class);
+});
+
+it('creates a view renderer from blade template', function () {
+    $renderer = FilamentShot::blade('<div>test</div>');
+
+    expect($renderer)->toBeInstanceOf(ViewRenderer::class);
 });
