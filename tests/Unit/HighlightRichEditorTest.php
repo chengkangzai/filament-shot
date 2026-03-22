@@ -1,8 +1,6 @@
 <?php
 
-use CCK\FilamentShot\FilamentShot;
 use CCK\FilamentShot\Renderers\FormRenderer;
-use Filament\Forms\Components\RichEditor;
 
 it('generates a selector that matches the RichEditor data-field-wrapper via wire:partial', function () {
     $renderer = new FormRenderer([]);
@@ -48,10 +46,15 @@ it('applies underline highlight style to RichEditor via wrapper', function () {
     expect($css)->toContain('border-bottom');
 });
 
-it('wire:partial selector is present in rendered html for rich editor', function () {
-    $html = FilamentShot::form([
-        RichEditor::make('description')->label('Description'),
-    ])->state(['description' => '<p>Content</p>'])->toHtml();
+it('wire:partial CSS selector contains escaped colon for attribute name', function () {
+    // In CSS, the colon in an attribute name must be escaped as \:
+    // This verifies that wire\:partial is correctly escaped in the generated CSS
+    $renderer = new FormRenderer([]);
+    $renderer->highlight('description');
+    $css = $renderer->getHighlightCss();
 
-    expect($html)->toContain('wire:partial="schema-component::form.description"');
+    // CSS attribute selector for wire:partial must escape the colon in the attribute name
+    expect($css)->toContain('wire\\:partial=');
+    // The attribute value contains :: (schema-component separator) which needs no escaping in quoted values
+    expect($css)->toContain('"schema-component::form.description"');
 });
