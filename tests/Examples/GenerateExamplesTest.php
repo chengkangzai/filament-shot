@@ -984,3 +984,32 @@ it('generates form with code editor example', function () use ($outputDir) {
 
     expect(file_exists("$outputDir/form-code-editor.png"))->toBeTrue();
 })->group('examples');
+
+it('generates form with toggle buttons example', function () use ($outputDir) {
+    FilamentShot::form([
+        ToggleButtons::make('status')
+            ->label('Status')
+            ->options([
+                'active' => 'Active',
+                'blocked' => 'Blocked',
+                'pending' => 'Pending',
+            ])
+            ->colors([
+                'active' => 'success',
+                'blocked' => 'danger',
+                'pending' => 'warning',
+            ]),
+        ToggleButtons::make('priority')
+            ->label('Priority')
+            ->options([
+                'low' => 'Low',
+                'medium' => 'Medium',
+                'high' => 'High',
+            ]),
+    ])
+        ->state(['status' => 'active', 'priority' => 'high'])
+        ->width(500)
+        ->save("$outputDir/form-toggle-buttons.png");
+
+    expect(file_exists("$outputDir/form-toggle-buttons.png"))->toBeTrue();
+})->group('examples');
