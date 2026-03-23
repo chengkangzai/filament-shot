@@ -9,8 +9,10 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -963,4 +965,39 @@ it('generates form with highlight on rich editor example', function () use ($out
         ->save("$outputDir/form-highlight-rich-editor.png");
 
     expect(file_exists("$outputDir/form-highlight-rich-editor.png"))->toBeTrue();
+})->group('examples');
+
+it('generates radio example with pre-selected option', function () use ($outputDir) {
+    FilamentShot::form([
+        Radio::make('status')
+            ->label('Account Status')
+            ->options([
+                'active' => 'Active',
+                'pending' => 'Pending Review',
+                'blocked' => 'Blocked',
+            ]),
+    ])
+        ->state(['status' => 'pending'])
+        ->width(500)
+        ->save("$outputDir/form-radio.png");
+
+    expect(file_exists("$outputDir/form-radio.png"))->toBeTrue();
+})->group('examples');
+
+it('generates checkboxlist example with pre-selected options', function () use ($outputDir) {
+    FilamentShot::form([
+        CheckboxList::make('permissions')
+            ->label('Permissions')
+            ->options([
+                'view' => 'View Records',
+                'create' => 'Create Records',
+                'edit' => 'Edit Records',
+                'delete' => 'Delete Records',
+            ]),
+    ])
+        ->state(['permissions' => ['view', 'create']])
+        ->width(500)
+        ->save("$outputDir/form-checkbox-list.png");
+
+    expect(file_exists("$outputDir/form-checkbox-list.png"))->toBeTrue();
 })->group('examples');
