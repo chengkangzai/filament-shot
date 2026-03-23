@@ -945,3 +945,22 @@ it('generates form with builder example', function () use ($outputDir) {
 
     expect(file_exists("$outputDir/form-builder.png"))->toBeTrue();
 })->group('examples');
+
+it('generates form with highlight on rich editor example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('title')->label('Title'),
+        RichEditor::make('description')
+            ->label('Description')
+            ->columnSpanFull(),
+    ])
+        ->state([
+            'title' => 'My Article',
+            'description' => '<p>Edit this description...</p>',
+        ])
+        ->highlight('title')
+        ->highlight('description', '#ef4444', 'box')
+        ->width(700)
+        ->save("$outputDir/form-highlight-rich-editor.png");
+
+    expect(file_exists("$outputDir/form-highlight-rich-editor.png"))->toBeTrue();
+})->group('examples');

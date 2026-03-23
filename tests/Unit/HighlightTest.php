@@ -41,7 +41,9 @@ it('supports multiple highlights', function () {
 it('supports box style', function () {
     $renderer = new FormRenderer([]);
     $renderer->highlight('name', '#ef4444', 'box');
-    expect($renderer->getHighlightCss())->toContain('background-color');
+    $css = $renderer->getHighlightCss();
+    expect($css)->toContain('outline');
+    expect($css)->not()->toContain('background-color');
 });
 
 it('supports underline style', function () {
@@ -54,4 +56,56 @@ it('supports fluent chaining', function () {
     $renderer = new FormRenderer([]);
     $result = $renderer->highlight('name');
     expect($result)->toBeInstanceOf(FormRenderer::class);
+});
+
+it('handles field names with hyphens correctly', function () {
+    $renderer = new FormRenderer([]);
+    $renderer->highlight('first-name');
+    $css = $renderer->getHighlightCss();
+
+    // Hyphens are valid in CSS IDs without escaping
+    expect($css)->toContain('#form\\.first-name');
+    // wire:partial attribute value includes the hyphen as-is (quoted string, no escaping needed)
+    expect($css)->toContain('schema-component::form.first-name');
+    expect($css)->toContain('[data-field-wrapper]');
+});
+
+it('outline style generates both wire:partial and :has selectors', function () {
+    $renderer = new FormRenderer([]);
+    $renderer->highlight('title', '#ef4444', 'outline');
+    $css = $renderer->getHighlightCss();
+
+    expect($css)->toContain('[wire\\:partial="schema-component::form.title"] [data-field-wrapper]');
+    expect($css)->toContain('[data-field-wrapper]:has(#form\\.title)');
+});
+
+it('box style generates both wire:partial and :has selectors', function () {
+    $renderer = new FormRenderer([]);
+    $renderer->highlight('title', '#ef4444', 'box');
+    $css = $renderer->getHighlightCss();
+
+    expect($css)->toContain('[wire\\:partial="schema-component::form.title"] [data-field-wrapper]');
+    expect($css)->toContain('[data-field-wrapper]:has(#form\\.title)');
+});
+
+it('underline style generates wire:partial selector for rich editor content area', function () {
+    $renderer = new FormRenderer([]);
+    $renderer->highlight('body', '#ef4444', 'underline');
+    $css = $renderer->getHighlightCss();
+
+    // Underline targets [x-ref="editor"] inside the wire:partial container for RichEditor
+    expect($css)->toContain('[wire\\:partial="schema-component::form.body"] [data-field-wrapper] [x-ref="editor"]');
+    // Fallback selector uses the field CSS id
+    expect($css)->toContain('#form\\.body');
+});
+
+it('nested field key dots in wire:partial value are unescaped (quoted attribute value)', function () {
+    $renderer = new FormRenderer([]);
+    $renderer->highlight('address.street');
+    $css = $renderer->getHighlightCss();
+
+    // In an attribute value string, dots need no CSS escaping
+    expect($css)->toContain('"schema-component::form.address.street"');
+    // But in the CSS ID selector, dots must be escaped
+    expect($css)->toContain('#form\\.address\\.street');
 });
