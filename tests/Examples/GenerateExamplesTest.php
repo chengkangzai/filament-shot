@@ -6,6 +6,8 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Builder;
+use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
@@ -779,6 +781,95 @@ it('generates notification example', function () use ($outputDir) {
     expect(file_exists("$outputDir/notification.png"))->toBeTrue();
 })->group('examples');
 
+it('generates view blade string example', function () use ($outputDir) {
+    FilamentShot::blade(<<<'BLADE'
+<div style="display:flex; flex-direction:column; gap:16px; padding:24px; font-family:sans-serif; font-size:14px; color:#111827;">
+
+    {{-- Tier card --}}
+    <div style="border-radius:12px; padding:24px; background-color:#6B728014; border-left:4px solid #6B7280;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+            <div>
+                <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:#6B7280;">Current Tier</p>
+                <h3 style="margin:0; font-size:24px; font-weight:700; color:#6B7280;">Silver</h3>
+            </div>
+            <div style="display:flex; gap:32px;">
+                <div style="text-align:right;">
+                    <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:#6B7280;">Tier Points</p>
+                    <p style="margin:0; font-size:24px; font-weight:700; color:#111827;">600</p>
+                </div>
+                <div style="text-align:right;">
+                    <p style="margin:0 0 4px; font-size:12px; font-weight:500; color:#6B7280;">Redeemable Points</p>
+                    <p style="margin:0; font-size:24px; font-weight:700; color:#111827;">500</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Progress bar --}}
+    <div style="border-radius:12px; border:1px solid #e5e7eb; background:#fff; padding:16px;">
+        <h4 style="margin:0 0 12px; font-size:13px; font-weight:600; color:#374151;">Tier Progress</h4>
+        <div style="height:12px; width:100%; border-radius:999px; background:#e5e7eb; margin-bottom:10px;">
+            <div style="height:12px; width:60%; border-radius:999px; background:#6B7280;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
+            <span style="color:#CD7F32;">Bronze (0)</span>
+            <span style="color:#6B7280; font-weight:600;">Silver (500) ✓</span>
+            <span>Gold (1,000)</span>
+        </div>
+    </div>
+
+    {{-- Timeline table --}}
+    <div style="border-radius:12px; border:1px solid #e5e7eb; overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+                <tr style="background:#f9fafb;">
+                    <th style="text-align:left; padding:10px 16px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280; letter-spacing:0.05em;">Date</th>
+                    <th style="text-align:left; padding:10px 16px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280; letter-spacing:0.05em;">Event</th>
+                    <th style="text-align:right; padding:10px 16px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280; letter-spacing:0.05em;">Points</th>
+                    <th style="text-align:right; padding:10px 16px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280; letter-spacing:0.05em;">Total</th>
+                    <th style="text-align:left; padding:10px 16px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280; letter-spacing:0.05em;">Tier</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-top:1px solid #f3f4f6;">
+                    <td style="padding:10px 16px; color:#6B7280;">2026-01-15</td>
+                    <td style="padding:10px 16px;">Purchase</td>
+                    <td style="padding:10px 16px; text-align:right; font-weight:500; color:#16a34a;">+200</td>
+                    <td style="padding:10px 16px; text-align:right;">200</td>
+                    <td style="padding:10px 16px; color:#CD7F32;">Bronze</td>
+                </tr>
+                <tr style="border-top:1px solid #f3f4f6; background:#f0fdf4;">
+                    <td style="padding:10px 16px; color:#6B7280;">2026-02-10</td>
+                    <td style="padding:10px 16px; font-weight:500; color:#15803d;">↑ Tier Upgrade: Bronze → Silver</td>
+                    <td style="padding:10px 16px;"></td>
+                    <td style="padding:10px 16px;"></td>
+                    <td style="padding:10px 16px; color:#6B7280;">Silver</td>
+                </tr>
+                <tr style="border-top:1px solid #f3f4f6;">
+                    <td style="padding:10px 16px; color:#6B7280;">2026-02-10</td>
+                    <td style="padding:10px 16px;">Purchase</td>
+                    <td style="padding:10px 16px; text-align:right; font-weight:500; color:#16a34a;">+350</td>
+                    <td style="padding:10px 16px; text-align:right;">550</td>
+                    <td style="padding:10px 16px; color:#6B7280;">Silver</td>
+                </tr>
+                <tr style="border-top:1px solid #f3f4f6;">
+                    <td style="padding:10px 16px; color:#6B7280;">2026-02-20</td>
+                    <td style="padding:10px 16px;">Redemption</td>
+                    <td style="padding:10px 16px; text-align:right; font-weight:500; color:#dc2626;">-50</td>
+                    <td style="padding:10px 16px; text-align:right;">600</td>
+                    <td style="padding:10px 16px; color:#6B7280;">Silver</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+BLADE)
+        ->width(900)
+        ->save("$outputDir/view-blade.png");
+
+    expect(file_exists("$outputDir/view-blade.png"))->toBeTrue();
+})->group('examples');
+
 it('generates form with phone input (3rd-party plugin) example', function () use ($outputDir) {
     FilamentShot::form([
         TextInput::make('name')->label('Full Name'),
@@ -794,4 +885,82 @@ it('generates form with phone input (3rd-party plugin) example', function () use
         ->save("$outputDir/form-phone-input.png");
 
     expect(file_exists("$outputDir/form-phone-input.png"))->toBeTrue();
+})->group('examples');
+
+it('generates header actions example', function () use ($outputDir) {
+    FilamentShot::headerActions([
+        Action::make('simulate')
+            ->label('Simulate')
+            ->icon('heroicon-o-play')
+            ->color('primary'),
+        Action::make('export')
+            ->label('Export')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->color('gray'),
+        Action::make('create')
+            ->label('Create')
+            ->icon('heroicon-o-plus')
+            ->color('primary'),
+    ])
+        ->pageTitle('Tier Configurations')
+        ->breadcrumbs(['Settings', 'Tier Configurations'])
+        ->width(900)
+        ->save("$outputDir/header-actions.png");
+
+    expect(file_exists("$outputDir/header-actions.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with builder example', function () use ($outputDir) {
+    FilamentShot::form([
+        Builder::make('content')
+            ->label('Page Content')
+            ->blocks([
+                Block::make('heading')
+                    ->label('Heading')
+                    ->schema([
+                        TextInput::make('text')->label('Heading Text'),
+                        Select::make('level')
+                            ->label('Level')
+                            ->options(['h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3'])
+                            ->default('h2'),
+                    ]),
+                Block::make('paragraph')
+                    ->label('Paragraph')
+                    ->schema([
+                        Textarea::make('content')
+                            ->label('Content')
+                            ->rows(3),
+                    ]),
+            ]),
+    ])
+        ->state([
+            'content' => [
+                ['type' => 'heading', 'data' => ['text' => 'Welcome to Our Platform', 'level' => 'h1']],
+                ['type' => 'paragraph', 'data' => ['content' => 'We help teams build better software together.']],
+                ['type' => 'heading', 'data' => ['text' => 'Key Features', 'level' => 'h2']],
+            ],
+        ])
+        ->width(700)
+        ->save("$outputDir/form-builder.png");
+
+    expect(file_exists("$outputDir/form-builder.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with highlight on rich editor example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('title')->label('Title'),
+        RichEditor::make('description')
+            ->label('Description')
+            ->columnSpanFull(),
+    ])
+        ->state([
+            'title' => 'My Article',
+            'description' => '<p>Edit this description...</p>',
+        ])
+        ->highlight('title')
+        ->highlight('description', '#ef4444', 'box')
+        ->width(700)
+        ->save("$outputDir/form-highlight-rich-editor.png");
+
+    expect(file_exists("$outputDir/form-highlight-rich-editor.png"))->toBeTrue();
 })->group('examples');

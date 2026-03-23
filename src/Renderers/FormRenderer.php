@@ -128,6 +128,7 @@ class FormRenderer extends BaseRenderer
         $html = $this->injectWireStateScript($html, $component->data);
         $html = $this->fixTabs($html);
         $html = $this->fixWizard($html);
+        $html = $this->fixBuilder($html);
         $html = $this->fixRichEditor($html);
         $html = $this->fixMarkdownEditor($html);
 
@@ -184,6 +185,8 @@ class FormRenderer extends BaseRenderer
         $html = $this->injectMultiSelectState($html, $data);
         $html = $this->injectTextareaContent($html, $data);
         $html = $this->injectToggleState($html, $data);
+        $html = $this->injectToggleButtonsState($html, $data);
+        $html = $this->injectRadioState($html, $data);
         $html = $this->injectColorPickerState($html, $data);
 
         if (! empty($this->openFields)) {
@@ -208,6 +211,11 @@ class FormRenderer extends BaseRenderer
 
                 // Skip checkboxes — handled separately
                 if (preg_match('/type=["\']checkbox["\']/', $before . $after)) {
+                    return $full;
+                }
+
+                // Skip radio inputs — ToggleButtons use radio with fixed option values
+                if (preg_match('/type=["\']radio["\']/', $before . $after)) {
                     return $full;
                 }
 
@@ -343,6 +351,103 @@ class FormRenderer extends BaseRenderer
                 $result = preg_replace('/aria-checked="[^"]*"/', 'aria-checked="' . $ariaValue . '"', $result);
 
                 return $result;
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Add checked attribute to the selected ToggleButtons radio input.
+     *
+     * ToggleButtons renders hidden radio inputs alongside styled <label> buttons.
+     * CSS selectors like `input:checked + label` apply the active visual style.
+     * We add `checked` to the radio input whose value matches the current state.
+     */
+    protected function injectToggleButtonsState(string $html, array $data): string
+    {
+        if (! str_contains($html, 'fi-fo-toggle-buttons-input')) {
+            return $html;
+        }
+
+        return preg_replace_callback(
+            '/<input(\s[^>]*?)class="([^"]*fi-fo-toggle-buttons-input[^"]*)"([^>]*?)\s*\/?>/s',
+            function ($matches) use ($data) {
+                $full = $matches[0];
+                $attrs = $matches[1] . $matches[3];
+
+                // Extract wire:model field path
+                if (! preg_match('/wire:model(?:\.[\w.]+)?="data\.([^"]+)"/', $attrs, $wireMatch)) {
+                    return $full;
+                }
+
+                $fieldPath = $wireMatch[1];
+                $stateValue = data_get($data, $fieldPath);
+
+                if ($stateValue === null) {
+                    return $full;
+                }
+
+                // Extract the option value from this radio input's value attribute
+                if (! preg_match('/\bvalue="([^"]*)"/', $attrs, $valueMatch)) {
+                    return $full;
+                }
+
+                $optionValue = $valueMatch[1];
+
+                // Add checked if this option matches the state
+                if ((string) $optionValue === (string) $stateValue) {
+                    return str_replace('/>', ' checked />', $full);
+                }
+
+                return $full;
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Add checked attribute to the selected Radio input.
+     *
+     * Radio renders one <input type="radio"> per option, each with a distinct
+     * value attribute and the same wire:model. We add `checked` to the one
+     * whose value matches the current state.
+     */
+    protected function injectRadioState(string $html, array $data): string
+    {
+        if (! str_contains($html, 'fi-fo-radio')) {
+            return $html;
+        }
+
+        return preg_replace_callback(
+            '/<input(\s[^>]*?)type=["\']radio["\']([^>]*?)wire:model(?:\.[\w.]+)?="data\.([^"]+)"([^>]*?)\s*\/?>/s',
+            function ($matches) use ($data) {
+                $full = $matches[0];
+
+                // Skip ToggleButtons radio — handled by injectToggleButtonsState
+                $allAttrs = $matches[1] . $matches[2] . $matches[4];
+                if (str_contains($allAttrs, 'fi-fo-toggle-buttons-input')) {
+                    return $full;
+                }
+
+                $fieldPath = $matches[3];
+                $stateValue = data_get($data, $fieldPath);
+
+                if ($stateValue === null) {
+                    return $full;
+                }
+
+                // Extract the option value from this radio input's value attribute
+                if (! preg_match('/\bvalue="([^"]*)"/', $allAttrs, $valueMatch)) {
+                    return $full;
+                }
+
+                $optionValue = $valueMatch[1];
+
+                if ((string) $optionValue === (string) $stateValue) {
+                    return str_replace('/>', ' checked />', $full);
+                }
+
+                return $full;
             },
             $html,
         );
@@ -607,6 +712,55 @@ class FormRenderer extends BaseRenderer
         }
 
         return $maps;
+    }
+
+    /**
+     * Make Builder component blocks fully visible in static HTML.
+     *
+     * Filament's Builder uses Alpine.js in two ways that need fixing:
+     *
+     * 1. Block content (`fi-fo-builder-item-content`) uses `x-show="! isCollapsed"`.
+     *    Alpine initialises `isCollapsed = false` so the content shows in a live browser,
+     *    but in a static `toHtml()` context the element would remain hidden. We replace the
+     *    `x-show` attribute with an explicit `style="display:block"` so it is always visible.
+     *
+     * 2. The "Insert between blocks" container (`fi-fo-builder-add-between-items-ctn`) is
+     *    hidden by Filament CSS (`visibility:hidden; height:0; opacity:0`) and only revealed
+     *    on hover via CSS selectors. We inject an inline style to make it statically visible
+     *    so the "insert" affordance appears between every pair of blocks in the screenshot.
+     */
+    protected function fixBuilder(string $html): string
+    {
+        if (! str_contains($html, 'fi-fo-builder')) {
+            return $html;
+        }
+
+        // Replace x-show="! isCollapsed" on builder item content divs with a visible style.
+        // The attribute appears as a standalone attribute on the <div> tag that wraps the
+        // block's schema content.
+        $html = preg_replace(
+            '/(<div\s[^>]*)x-show="!\s*isCollapsed"([^>]*class="[^"]*fi-fo-builder-item-content[^"]*")/s',
+            '$1style="display:block"$2',
+            $html,
+        );
+        // Also handle the reverse attribute order (class before x-show).
+        // Uses [^"]* around the class name to tolerate extra classes (e.g. when ->blockPreviews() is enabled).
+        $html = preg_replace(
+            '/(<div\s[^>]*class="[^"]*fi-fo-builder-item-content[^"]*"[^>]*)\s+x-show="!\s*isCollapsed"/s',
+            '$1 style="display:block"',
+            $html,
+        );
+
+        // Make "Insert between blocks" containers visible by injecting an inline style.
+        // The class sits directly on a <li> element rendered as:
+        //   <li class="fi-fo-builder-add-between-items-ctn">
+        $html = preg_replace(
+            '/(<li\s[^>]*class=")(fi-fo-builder-add-between-items-ctn)(")/s',
+            '$1$2$3 style="visibility:visible;opacity:1;height:auto;pointer-events:auto;"',
+            $html,
+        );
+
+        return $html;
     }
 
     /**
