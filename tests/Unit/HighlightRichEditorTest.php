@@ -32,7 +32,8 @@ it('applies box highlight style to RichEditor', function () {
 
     expect($css)->toContain('#3b82f6');
     expect($css)->toContain('schema-component::form.content');
-    expect($css)->toContain('background-color');
+    expect($css)->toContain('outline');
+    expect($css)->not()->toContain('background-color');
 });
 
 it('applies underline highlight style to RichEditor via wrapper', function () {

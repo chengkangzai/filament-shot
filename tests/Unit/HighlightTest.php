@@ -41,7 +41,9 @@ it('supports multiple highlights', function () {
 it('supports box style', function () {
     $renderer = new FormRenderer([]);
     $renderer->highlight('name', '#ef4444', 'box');
-    expect($renderer->getHighlightCss())->toContain('background-color');
+    $css = $renderer->getHighlightCss();
+    expect($css)->toContain('outline');
+    expect($css)->not()->toContain('background-color');
 });
 
 it('supports underline style', function () {

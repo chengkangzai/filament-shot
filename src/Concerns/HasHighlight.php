@@ -35,7 +35,7 @@ trait HasHighlight
             $color = $h['color'];
 
             return match ($h['style']) {
-                'box' => "{$partialSelector}, {$wrapperSelector} { outline: 3px solid {$color} !important; outline-offset: 4px; border-radius: 4px; background-color: {$color}22 !important; }",
+                'box' => "{$partialSelector}, {$wrapperSelector} { outline: 3px solid {$color} !important; outline-offset: 4px; border-radius: 4px; }",
                 'underline' => "{$partialSelector} [x-ref=\"editor\"], {$cssId} { border-bottom: 3px solid {$color} !important; }",
                 default => "{$partialSelector}, {$wrapperSelector} { outline: 3px solid {$color} !important; outline-offset: 4px; border-radius: 4px; }",
             };
