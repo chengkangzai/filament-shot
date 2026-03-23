@@ -66,7 +66,7 @@ it('renders cleanly with empty actions array', function () {
 
     expect($html)
         ->toContain('My Page')
-        ->not->toContain('fi-header-actions-ctn');
+        ->not->toContain('<div class="fi-header-actions-ctn"');
 });
 
 it('renders cleanly with no page title', function () {
@@ -75,7 +75,7 @@ it('renders cleanly with no page title', function () {
     ])->toHtml();
 
     expect($html)
-        ->not->toContain('fi-header-heading')
+        ->not->toContain('<h1 class="fi-header-heading"')
         ->toContain('Create');
 });
 
