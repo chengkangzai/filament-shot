@@ -9,6 +9,8 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CodeEditor;
+use Filament\Forms\Components\CodeEditor\Enums\Language;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\MarkdownEditor;
@@ -963,4 +965,22 @@ it('generates form with highlight on rich editor example', function () use ($out
         ->save("$outputDir/form-highlight-rich-editor.png");
 
     expect(file_exists("$outputDir/form-highlight-rich-editor.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with code editor example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('filename')->label('Filename'),
+        CodeEditor::make('content')
+            ->label('Content')
+            ->language(Language::Php)
+            ->columnSpanFull(),
+    ])
+        ->state([
+            'filename' => 'greeting.php',
+            'content' => "<?php\n\nfunction greet(string \$name): string\n{\n    return \"Hello, {\$name}!\";\n}\n\necho greet('World');",
+        ])
+        ->width(700)
+        ->save("$outputDir/form-code-editor.png");
+
+    expect(file_exists("$outputDir/form-code-editor.png"))->toBeTrue();
 })->group('examples');

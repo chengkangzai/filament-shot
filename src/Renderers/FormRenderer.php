@@ -131,6 +131,7 @@ class FormRenderer extends BaseRenderer
         $html = $this->fixBuilder($html);
         $html = $this->fixRichEditor($html);
         $html = $this->fixMarkdownEditor($html);
+        $html = $this->fixCodeEditor($html, $component->data);
 
         if ($this->modalHeading !== null) {
             $html = view('filament-shot::components.modal', [
@@ -1080,6 +1081,119 @@ class FormRenderer extends BaseRenderer
             . $toolbar
             . '<div class="fi-fo-rich-editor-content fi-prose" style="min-height: ' . e($minHeight) . ';"></div>'
             . '</div>'
+            . '</div>'
+            . '</div>';
+    }
+
+    /**
+     * Replace the Alpine-driven CodeEditor with a static, styled code block.
+     *
+     * Filament's CodeEditor uses CodeMirror (via Alpine.js) to render a full
+     * code editor UI. Since we render static HTML without JavaScript, the editor
+     * div (`x-ref="editor" x-cloak`) is empty and invisible.
+     *
+     * We extract the field's state path and language from the `x-data` attribute
+     * and replace the hidden div with a styled block that mimics the CodeMirror UI.
+     */
+    protected function fixCodeEditor(string $html, array $data): string
+    {
+        if (! str_contains($html, 'fi-fo-code-editor')) {
+            return $html;
+        }
+
+        return preg_replace_callback(
+            '/<div\s[^>]*x-data="codeEditorFormComponent\(\{([^"]*)\}?\)"[^>]*>.*?<\/div>\s*<\/div>/s',
+            function ($matches) use ($data) {
+                $xData = $matches[1];
+
+                // Extract state path from $entangle('data.fieldName', ...)
+                $fieldPath = null;
+                if (preg_match('/\$entangle\(&#039;data\.([^&]+)&#039;/', $xData, $m)) {
+                    $fieldPath = $m[1];
+                }
+
+                // Extract language (e.g. language: 'php')
+                $language = null;
+                if (preg_match("/language:\s*'([^']+)'/", $xData, $m)) {
+                    $language = $m[1];
+                }
+
+                // Get code content from state
+                $code = $fieldPath !== null ? data_get($data, $fieldPath) : null;
+
+                return $this->buildCodeEditorHtml((string) ($code ?? ''), $language);
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Build static HTML that mimics a CodeMirror code editor UI.
+     */
+    protected function buildCodeEditorHtml(string $code, ?string $language): string
+    {
+        $languageClass = $language !== null ? ' language-' . e($language) : '';
+        $languageLabel = $language !== null
+            ? '<div class="fi-fo-code-editor-lang" style="'
+                . 'font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);'
+                . 'font-size: 0.6875rem;'
+                . 'color: var(--gray-400, #9ca3af);'
+                . 'background-color: var(--gray-900, #111827);'
+                . 'padding: 0.25rem 0.75rem;'
+                . 'text-align: right;'
+                . 'letter-spacing: 0.05em;'
+                . 'border-bottom: 1px solid var(--gray-800, #1f2937);'
+                . '">' . e(strtoupper($language)) . '</div>'
+            : '';
+
+        $lines = explode("\n", $code);
+        $gutterHtml = '';
+        $codeLines = '';
+
+        foreach ($lines as $i => $line) {
+            $lineNum = $i + 1;
+            $gutterHtml .= '<div class="cm-gutterElement" style="padding: 0 0.5rem;">' . $lineNum . '</div>';
+            $codeLines .= '<div class="cm-line">' . e($line !== '' ? $line : ' ') . '</div>';
+        }
+
+        return '<div class="fi-fo-code-editor-static' . $languageClass . '" style="'
+            . 'font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);'
+            . 'font-size: 0.875rem;'
+            . 'line-height: 1.6;'
+            . 'background-color: var(--gray-950, #030712);'
+            . 'color: var(--gray-100, #f3f4f6);'
+            . 'border-radius: var(--radius-lg, 0.5rem);'
+            . 'overflow: hidden;'
+            . 'min-height: 12rem;'
+            . 'display: flex;'
+            . 'flex-direction: column;'
+            . '">'
+            . $languageLabel
+            . '<div style="display: flex; flex: 1; overflow: auto;">'
+            . '<div class="cm-gutters" style="'
+            . 'background-color: var(--gray-950, #030712);'
+            . 'color: var(--gray-500, #6b7280);'
+            . 'border-inline-end: 1px solid var(--gray-800, #1f2937);'
+            . 'padding: 0.75rem 0;'
+            . 'min-width: 2.5rem;'
+            . 'text-align: right;'
+            . 'user-select: none;'
+            . 'flex-shrink: 0;'
+            . '">'
+            . $gutterHtml
+            . '</div>'
+            . '<pre class="cm-scroller" style="'
+            . 'margin: 0;'
+            . 'padding: 0.75rem 1rem;'
+            . 'flex: 1;'
+            . 'overflow: auto;'
+            . 'white-space: pre;'
+            . 'color: inherit;'
+            . '">'
+            . '<code class="cm-content' . $languageClass . '">'
+            . $codeLines
+            . '</code>'
+            . '</pre>'
             . '</div>'
             . '</div>';
     }
