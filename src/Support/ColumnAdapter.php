@@ -11,6 +11,8 @@ use Filament\Support\View\Components\BadgeComponent;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\View\Components\Columns\IconColumnComponent\IconComponent;
 use Illuminate\View\ComponentAttributeBag;
 
@@ -68,6 +70,16 @@ class ColumnAdapter implements ArrayAccess
      */
     public function renderCell(array $record): string
     {
+        // TextInputColumn and SelectColumn require a mounted Livewire table to call
+        // toEmbeddedHtml() (they call getLivewire() internally). Render them manually.
+        if ($this->source instanceof TextInputColumn) {
+            return $this->renderTextInputCell($record);
+        }
+
+        if ($this->source instanceof SelectColumn) {
+            return $this->renderSelectCell($record);
+        }
+
         if ($this->source instanceof Column && $this->source instanceof HasEmbeddedView) {
             try {
                 $column = clone $this->source;
@@ -158,6 +170,82 @@ class ColumnAdapter implements ArrayAccess
     public function offsetSet(mixed $offset, mixed $value): void {}
 
     public function offsetUnset(mixed $offset): void {}
+
+    /**
+     * Render a TextInputColumn cell as a visible text input field.
+     *
+     * toEmbeddedHtml() on these columns requires a Livewire-mounted table, so
+     * we render them manually using Filament's fi-ta-text-input CSS classes.
+     */
+    private function renderTextInputCell(array $record): string
+    {
+        /** @var TextInputColumn $column */
+        $column = $this->source;
+        $name = $this->safeCall(fn () => $column->getName(), '');
+        $value = $record[$name] ?? '';
+        $type = $this->safeCall(fn () => $column->getType(), 'text');
+        $placeholder = $this->safeCall(fn () => $column->getPlaceholder(), null);
+        $isDisabled = $this->safeCall(fn () => $column->isDisabled(), false);
+
+        $escapedValue = e((string) $value);
+        $escapedPlaceholder = $placeholder !== null ? ' placeholder="' . e($placeholder) . '"' : '';
+        $disabledAttr = $isDisabled ? ' disabled' : '';
+
+        return '<div class="fi-ta-text-input">'
+            . '<div class="fi-input-wrp">'
+            . '<div class="fi-input-wrp-content-ctn">'
+            . '<input'
+            . ' type="' . e($type) . '"'
+            . ' class="fi-input"'
+            . ' value="' . $escapedValue . '"'
+            . $escapedPlaceholder
+            . $disabledAttr
+            . ' />'
+            . '</div>'
+            . '</div>'
+            . '</div>';
+    }
+
+    /**
+     * Render a SelectColumn cell as a visible native select dropdown.
+     *
+     * toEmbeddedHtml() on these columns requires a Livewire-mounted table, so
+     * we render them manually using Filament's fi-ta-select CSS classes.
+     */
+    private function renderSelectCell(array $record): string
+    {
+        /** @var SelectColumn $column */
+        $column = $this->source;
+        $name = $this->safeCall(fn () => $column->getName(), '');
+        $value = $record[$name] ?? '';
+        $options = $this->safeCall(fn () => $column->getOptions(), []);
+        $placeholder = $this->safeCall(fn () => $column->getPlaceholder(), null);
+        $canSelectPlaceholder = $this->safeCall(fn () => $column->canSelectPlaceholder(), true);
+        $isDisabled = $this->safeCall(fn () => $column->isDisabled(), false);
+
+        $disabledAttr = $isDisabled ? ' disabled' : '';
+
+        $html = '<div class="fi-ta-select">'
+            . '<div class="fi-input-wrp">'
+            . '<select class="fi-select-input"' . $disabledAttr . '>';
+
+        if ($canSelectPlaceholder && $placeholder !== null) {
+            $html .= '<option value="">' . e($placeholder) . '</option>';
+        }
+
+        foreach ($options as $optionValue => $optionLabel) {
+            $selected = ((string) $optionValue === (string) $value) ? ' selected' : '';
+            $html .= '<option value="' . e((string) $optionValue) . '"' . $selected . '>'
+                . e((string) $optionLabel)
+                . '</option>';
+        }
+
+        $html .= '</select>'
+            . '</div>'
+            . '</div>';
+
+        return $html;
+    }
 
     /**
      * Render a ColorColumn cell as a color swatch circle.

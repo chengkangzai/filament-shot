@@ -32,7 +32,9 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -1012,4 +1014,27 @@ it('generates form with toggle buttons example', function () use ($outputDir) {
         ->save("$outputDir/form-toggle-buttons.png");
 
     expect(file_exists("$outputDir/form-toggle-buttons.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with editable columns example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->label('Name'),
+            TextInputColumn::make('email')->label('Email'),
+            SelectColumn::make('status')
+                ->label('Status')
+                ->options([
+                    'active' => 'Active',
+                    'blocked' => 'Blocked',
+                    'pending' => 'Pending',
+                ]),
+        ])
+        ->records([
+            ['name' => 'Alice', 'email' => 'alice@example.com', 'status' => 'active'],
+            ['name' => 'Bob', 'email' => 'bob@example.com', 'status' => 'blocked'],
+        ])
+        ->width(700)
+        ->save("$outputDir/table-editable-columns.png");
+
+    expect(file_exists("$outputDir/table-editable-columns.png"))->toBeTrue();
 })->group('examples');
