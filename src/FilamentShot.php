@@ -3,6 +3,7 @@
 namespace CCK\FilamentShot;
 
 use CCK\FilamentShot\Renderers\FormRenderer;
+use CCK\FilamentShot\Renderers\HeaderActionsRenderer;
 use CCK\FilamentShot\Renderers\InfolistRenderer;
 use CCK\FilamentShot\Renderers\ModalRenderer;
 use CCK\FilamentShot\Renderers\NavigationRenderer;
@@ -10,6 +11,8 @@ use CCK\FilamentShot\Renderers\NotificationRenderer;
 use CCK\FilamentShot\Renderers\StatsRenderer;
 use CCK\FilamentShot\Renderers\TableRenderer;
 use CCK\FilamentShot\Renderers\ViewRenderer;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 
 class FilamentShot
 {
@@ -56,5 +59,13 @@ class FilamentShot
     public static function blade(string $template): ViewRenderer
     {
         return new ViewRenderer(bladeTemplate: $template);
+    }
+
+    /**
+     * @param  array<Action|ActionGroup>  $actions
+     */
+    public static function headerActions(array $actions): HeaderActionsRenderer
+    {
+        return new HeaderActionsRenderer($actions);
     }
 }
