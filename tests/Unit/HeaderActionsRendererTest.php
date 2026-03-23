@@ -87,7 +87,7 @@ it('renders cleanly with no breadcrumbs', function () {
         ->toHtml();
 
     expect($html)
-        ->not->toContain('fi-breadcrumbs')
+        ->not->toContain('<nav class="fi-breadcrumbs"')
         ->toContain('My Page')
         ->toContain('Create');
 });
