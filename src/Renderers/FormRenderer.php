@@ -239,15 +239,43 @@ class FormRenderer extends BaseRenderer
     /**
      * Add checked attribute to checkboxes when state is truthy.
      */
+    /**
+     * Add checked attribute to checkboxes when state is truthy.
+     *
+     * Handles both single Checkbox (boolean state) and CheckboxList (array state).
+     * For CheckboxList, each option's value attribute is checked against the state array.
+     */
     protected function injectCheckboxState(string $html, array $data): string
     {
         return preg_replace_callback(
             '/<input(\s[^>]*?)type=["\']checkbox["\']([^>]*?)wire:model(?:\.[\w.]+)?="data\.([^"]+)"([^>]*?)\s*\/?>/s',
             function ($matches) use ($data) {
                 $fieldPath = $matches[3];
-                $value = data_get($data, $fieldPath);
+                $stateValue = data_get($data, $fieldPath);
+                $allAttrs = $matches[1] . $matches[2] . $matches[4];
 
-                if ($value) {
+                // Coerce a single string value to a one-element array for CheckboxList
+                if (is_string($stateValue) && $stateValue !== '') {
+                    $stateValue = [$stateValue];
+                }
+
+                if (is_array($stateValue)) {
+                    // CheckboxList: check if this option's value is in the selected array
+                    if (! preg_match('/\bvalue="([^"]*)"/', $allAttrs, $valueMatch)) {
+                        return $matches[0];
+                    }
+
+                    $optionValue = $valueMatch[1];
+                    $selected = array_map('strval', $stateValue);
+
+                    if (in_array($optionValue, $selected, true)) {
+                        return str_replace('/>', ' checked />', $matches[0]);
+                    }
+
+                    return $matches[0];
+                }
+
+                if ($stateValue) {
                     return str_replace('/>', ' checked />', $matches[0]);
                 }
 
