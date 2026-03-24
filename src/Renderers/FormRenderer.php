@@ -1121,7 +1121,13 @@ class FormRenderer extends BaseRenderer
                 // Get code content from state
                 $code = $fieldPath !== null ? data_get($data, $fieldPath) : null;
 
-                return $this->buildCodeEditorHtml((string) ($code ?? ''), $language);
+                try {
+                    $darkMode = $this->isDarkMode();
+                } catch (\Throwable) {
+                    $darkMode = false;
+                }
+
+                return $this->buildCodeEditorHtml((string) ($code ?? ''), $language, $darkMode);
             },
             $html,
         );
@@ -1129,39 +1135,65 @@ class FormRenderer extends BaseRenderer
 
     /**
      * Build static HTML that mimics a CodeMirror code editor UI.
+     *
+     * Mirrors Filament's CodeEditor behaviour: dark mode uses the One Dark theme;
+     * light mode uses CodeMirror's default light theme.  Basic syntax highlighting
+     * is applied via PHP's built-in highlight_string() for PHP code, a custom
+     * formatter for JSON, and regex-based keyword colouring for other languages.
      */
-    protected function buildCodeEditorHtml(string $code, ?string $language): string
+    protected function buildCodeEditorHtml(string $code, ?string $language, bool $darkMode = true): string
     {
+        if ($darkMode) {
+            $bg = '#282c34';
+            $fg = '#abb2bf';
+            $gutterBg = '#21252b';
+            $gutterFg = '#495162';
+            $langBg = '#21252b';
+            $langFg = '#636d83';
+            $border = '#181a1f';
+        } else {
+            $bg = '#ffffff';
+            $fg = '#24292e';
+            $gutterBg = '#f6f8fa';
+            $gutterFg = '#959da5';
+            $langBg = '#f0f0f0';
+            $langFg = '#6a737d';
+            $border = '#e1e4e8';
+        }
+
         $languageClass = $language !== null ? ' language-' . e($language) : '';
         $languageLabel = $language !== null
             ? '<div class="fi-fo-code-editor-lang" style="'
                 . 'font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);'
                 . 'font-size: 0.6875rem;'
-                . 'color: var(--gray-400, #9ca3af);'
-                . 'background-color: var(--gray-900, #111827);'
+                . "color: {$langFg};"
+                . "background-color: {$langBg};"
                 . 'padding: 0.25rem 0.75rem;'
                 . 'text-align: right;'
                 . 'letter-spacing: 0.05em;'
-                . 'border-bottom: 1px solid var(--gray-800, #1f2937);'
+                . "border-bottom: 1px solid {$border};"
                 . '">' . e(strtoupper($language)) . '</div>'
             : '';
 
         $lines = explode("\n", $code);
         $gutterHtml = '';
-        $codeLines = '';
+        $highlightedLines = $this->syntaxHighlightLines($code, $language, $darkMode);
 
         foreach ($lines as $i => $line) {
-            $lineNum = $i + 1;
-            $gutterHtml .= '<div class="cm-gutterElement" style="padding: 0 0.5rem;">' . $lineNum . '</div>';
-            $codeLines .= '<div class="cm-line">' . e($line !== '' ? $line : ' ') . '</div>';
+            $gutterHtml .= '<div class="cm-gutterElement" style="padding: 0 0.5rem;">' . ($i + 1) . '</div>';
+        }
+
+        $codeLines = '';
+        foreach ($highlightedLines as $line) {
+            $codeLines .= '<div class="cm-line">' . ($line !== '' ? $line : ' ') . '</div>';
         }
 
         return '<div class="fi-fo-code-editor-static' . $languageClass . '" style="'
             . 'font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);'
             . 'font-size: 0.875rem;'
             . 'line-height: 1.6;'
-            . 'background-color: var(--gray-950, #030712);'
-            . 'color: var(--gray-100, #f3f4f6);'
+            . "background-color: {$bg};"
+            . "color: {$fg};"
             . 'border-radius: var(--radius-lg, 0.5rem);'
             . 'overflow: hidden;'
             . 'min-height: 12rem;'
@@ -1171,9 +1203,9 @@ class FormRenderer extends BaseRenderer
             . $languageLabel
             . '<div style="display: flex; flex: 1; overflow: auto;">'
             . '<div class="cm-gutters" style="'
-            . 'background-color: var(--gray-950, #030712);'
-            . 'color: var(--gray-500, #6b7280);'
-            . 'border-inline-end: 1px solid var(--gray-800, #1f2937);'
+            . "background-color: {$gutterBg};"
+            . "color: {$gutterFg};"
+            . "border-inline-end: 1px solid {$border};"
             . 'padding: 0.75rem 0;'
             . 'min-width: 2.5rem;'
             . 'text-align: right;'
@@ -1196,6 +1228,239 @@ class FormRenderer extends BaseRenderer
             . '</pre>'
             . '</div>'
             . '</div>';
+    }
+
+    /**
+     * Return an array of syntax-highlighted HTML strings, one per line.
+     *
+     * PHP uses the built-in highlight_string() with colour remapping.
+     * JSON uses a custom recursive formatter.
+     * All other languages receive basic regex-based keyword / string / comment
+     * colouring that covers the most common patterns.
+     *
+     * @return string[]
+     */
+    protected function syntaxHighlightLines(string $code, ?string $language, bool $darkMode): array
+    {
+        if ($language === 'php') {
+            return $this->highlightPhpLines($code, $darkMode);
+        }
+
+        if ($language === 'json') {
+            return $this->highlightJsonLines($code, $darkMode);
+        }
+
+        return $this->highlightGenericLines($code, $language, $darkMode);
+    }
+
+    /** @return string[] */
+    protected function highlightPhpLines(string $code, bool $darkMode): array
+    {
+        // Wrap bare code (no opening tag) so highlight_string() accepts it
+        $wrapped = str_starts_with(ltrim($code), '<?') ? $code : "<?php\n{$code}";
+        $stripped = str_starts_with(ltrim($code), '<?') ? false : true;
+
+        $highlighted = highlight_string($wrapped, true);
+
+        // Strip the outer <code> wrapper that highlight_string() adds
+        $highlighted = preg_replace('/^<code[^>]*>(.*)<\/code>$/s', '$1', trim($highlighted)) ?? $highlighted;
+
+        // Remove the injected `<?php\n` line when we added it ourselves
+        if ($stripped) {
+            $highlighted = preg_replace('/^.*?<br\s*\/?>/s', '', $highlighted, 1) ?? $highlighted;
+        }
+
+        // Remap PHP's default highlight colours to theme colours
+        if ($darkMode) {
+            $map = [
+                '#0000BB' => '#e06c75', // variables / tags   → red
+                '#007700' => '#c678dd', // keywords            → purple
+                '#DD0000' => '#98c379', // strings             → green
+                '#FF8000' => '#5c6370', // comments            → gray
+                '#000000' => '#abb2bf', // default             → text
+            ];
+        } else {
+            $map = [
+                '#0000BB' => '#e36209', // variables / tags   → orange
+                '#007700' => '#d73a49', // keywords            → red
+                '#DD0000' => '#032f62', // strings             → dark-blue
+                '#FF8000' => '#6a737d', // comments            → gray
+                '#000000' => '#24292e', // default             → text
+            ];
+        }
+
+        $highlighted = str_ireplace(array_keys($map), array_values($map), $highlighted);
+
+        // Convert <br /> line breaks to newlines and split
+        $highlighted = preg_replace('/<br\s*\/?>/i', "\n", $highlighted);
+
+        return explode("\n", $highlighted ?? '');
+    }
+
+    /** @return string[] */
+    protected function highlightJsonLines(string $code, bool $darkMode): array
+    {
+        $data = json_decode($code);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return $this->highlightGenericLines($code, 'json', $darkMode);
+        }
+
+        if ($darkMode) {
+            $keyColor = '#e06c75';
+            $strColor = '#98c379';
+            $numColor = '#d19a66';
+            $boolColor = '#56b6c2';
+            $nullColor = '#56b6c2';
+        } else {
+            $keyColor = '#d73a49';
+            $strColor = '#032f62';
+            $numColor = '#005cc5';
+            $boolColor = '#005cc5';
+            $nullColor = '#005cc5';
+        }
+
+        $pretty = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($pretty === false) {
+            return $this->highlightGenericLines($code, 'json', $darkMode);
+        }
+
+        $result = preg_replace_callback(
+            '/("(?:[^"\\\\]|\\\\.)*")\s*:        # object key
+            |("(?:[^"\\\\]|\\\\.)*")             # string value
+            |(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?) # number
+            |(true|false)                         # boolean
+            |(null)                               # null
+            /x',
+            function ($m) use ($keyColor, $strColor, $numColor, $boolColor, $nullColor) {
+                if ($m[1] !== '') {
+                    return '<span style="color:' . $keyColor . '">' . e($m[1]) . '</span>:';
+                }
+                if ($m[2] !== '') {
+                    return '<span style="color:' . $strColor . '">' . e($m[2]) . '</span>';
+                }
+                if ($m[3] !== '') {
+                    return '<span style="color:' . $numColor . '">' . e($m[3]) . '</span>';
+                }
+                if ($m[4] !== '') {
+                    return '<span style="color:' . $boolColor . '">' . e($m[4]) . '</span>';
+                }
+
+                return '<span style="color:' . $nullColor . '">' . e($m[5]) . '</span>';
+            },
+            $pretty,
+        );
+
+        return explode("\n", $result ?? e($pretty));
+    }
+
+    /**
+     * Basic regex-based highlighting for CSS, JS, Python, SQL, YAML, and similar.
+     *
+     * @return string[]
+     */
+    protected function highlightGenericLines(string $code, ?string $language, bool $darkMode): array
+    {
+        if ($darkMode) {
+            $keywordColor = '#c678dd';
+            $stringColor = '#98c379';
+            $commentColor = '#5c6370';
+            $numberColor = '#d19a66';
+            $funcColor = '#61afef';
+        } else {
+            $keywordColor = '#d73a49';
+            $stringColor = '#032f62';
+            $commentColor = '#6a737d';
+            $numberColor = '#005cc5';
+            $funcColor = '#6f42c1';
+        }
+
+        $keywords = match ($language) {
+            'javascript', 'typescript' => 'break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|'
+                . 'finally|for|function|if|import|in|instanceof|let|new|of|return|static|super|switch|'
+                . 'this|throw|try|typeof|var|void|while|with|yield|async|await|null|true|false|undefined',
+            'python' => 'and|as|assert|async|await|break|class|continue|def|del|elif|else|except|False|finally|'
+                . 'for|from|global|if|import|in|is|lambda|None|nonlocal|not|or|pass|raise|return|True|'
+                . 'try|while|with|yield',
+            'css' => 'important|px|em|rem|vh|vw|auto|none|block|flex|grid|inline|absolute|relative|fixed|sticky',
+            'sql' => 'SELECT|FROM|WHERE|AND|OR|NOT|IN|EXISTS|BETWEEN|LIKE|IS|NULL|ORDER|BY|GROUP|HAVING|'
+                . 'JOIN|LEFT|RIGHT|INNER|OUTER|CROSS|ON|AS|DISTINCT|LIMIT|OFFSET|INSERT|INTO|VALUES|'
+                . 'UPDATE|SET|DELETE|CREATE|TABLE|INDEX|DROP|ALTER|ADD|COLUMN|PRIMARY|KEY|FOREIGN|'
+                . 'REFERENCES|CONSTRAINT|DEFAULT|UNIQUE|CHECK|VIEW|PROCEDURE|FUNCTION|TRIGGER|IF',
+            'go' => 'break|case|chan|const|continue|default|defer|else|fallthrough|for|func|go|goto|if|'
+                . 'import|interface|map|package|range|return|select|struct|switch|type|var|'
+                . 'true|false|nil|make|new|len|cap|append|copy|close|delete|panic|recover|print|println',
+            'yaml' => 'true|false|null|yes|no|on|off',
+            default => null,
+        };
+
+        $commentPrefix = match ($language) {
+            'python', 'yaml', 'bash', 'shell' => '#',
+            'sql' => '--',
+            'css' => null,
+            default => '//',
+        };
+
+        $lines = explode("\n", $code);
+        $result = [];
+
+        foreach ($lines as $line) {
+            // Split at the comment boundary so token highlighting is only applied
+            // to the code portion; the comment is wrapped separately.
+            $codePart = $line;
+            $commentPart = null;
+
+            if ($commentPrefix !== null) {
+                $prefixPos = strpos($line, $commentPrefix);
+                // Ensure the prefix isn't inside a quoted string (simple heuristic)
+                if ($prefixPos !== false) {
+                    $before = substr($line, 0, $prefixPos);
+                    if (substr_count($before, '"') % 2 === 0 && substr_count($before, "'") % 2 === 0) {
+                        $codePart = $before;
+                        $commentPart = substr($line, $prefixPos);
+                    }
+                }
+            }
+
+            $escaped = e($codePart);
+
+            // Strings (double and single quoted) — apply before keywords/numbers
+            $escaped = preg_replace(
+                '/(&quot;(?:[^&]|&(?!quot;))*&quot;|&#039;(?:[^&]|&(?!#039;))*&#039;)/',
+                '<span style="color:' . $stringColor . '">$1</span>',
+                $escaped,
+            ) ?? $escaped;
+
+            // Numbers
+            $escaped = preg_replace(
+                '/(?<![a-zA-Z_\-])(\b\d+(?:\.\d+)?\b)(?![a-zA-Z_])/',
+                '<span style="color:' . $numberColor . '">$1</span>',
+                $escaped,
+            ) ?? $escaped;
+
+            // Keywords
+            if ($keywords !== null) {
+                $escaped = preg_replace(
+                    '/\b(' . $keywords . ')\b/',
+                    '<span style="color:' . $keywordColor . '">$1</span>',
+                    $escaped,
+                ) ?? $escaped;
+            }
+
+            // Function calls: identifier followed by (
+            $escaped = preg_replace(
+                '/\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\()/',
+                '<span style="color:' . $funcColor . '">$1</span>',
+                $escaped,
+            ) ?? $escaped;
+
+            if ($commentPart !== null) {
+                $escaped .= '<span style="color:' . $commentColor . '">' . e($commentPart) . '</span>';
+            }
+
+            $result[] = $escaped !== '' ? $escaped : ($line !== '' ? e($line) : '');
+        }
+
+        return $result;
     }
 
     protected function ensureViewErrorBag(): void

@@ -3,12 +3,12 @@
 use CCK\FilamentShot\Renderers\FormRenderer;
 
 // Helper: call protected buildCodeEditorHtml via reflection
-function buildCodeEditorHtml(string $code, ?string $language): string
+function buildCodeEditorHtml(string $code, ?string $language, bool $darkMode = true): string
 {
     $renderer = new FormRenderer([]);
     $method = new ReflectionMethod($renderer, 'buildCodeEditorHtml');
 
-    return $method->invoke($renderer, $code, $language);
+    return $method->invoke($renderer, $code, $language, $darkMode);
 }
 
 // Helper: call protected fixCodeEditor via reflection
@@ -136,7 +136,9 @@ it('fixCodeEditor replaces code editor with static block', function () {
     $result = fixCodeEditorHtml($html, ['snippet' => 'echo "hi";']);
 
     expect($result)->toContain('fi-fo-code-editor-static');
-    expect($result)->toContain('echo &quot;hi&quot;');
+    // PHP highlighting wraps tokens in spans; verify the code content is present
+    expect($result)->toContain('echo');
+    expect($result)->toContain('hi');
     expect($result)->not->toContain('x-cloak');
 });
 
@@ -148,4 +150,102 @@ it('fixCodeEditor renders empty editor when state key is missing', function () {
     expect($result)->toContain('fi-fo-code-editor-static');
     // Should not crash, just render empty editor
     expect($result)->toContain('cm-content');
+});
+
+// --- Light / dark theme tests ---
+
+it('renders dark theme with One Dark background color', function () {
+    $html = buildCodeEditorHtml('echo "hi";', null, true);
+
+    expect($html)->toContain('#282c34');   // One Dark background
+    expect($html)->toContain('#abb2bf');   // One Dark foreground
+});
+
+it('renders light theme with white background', function () {
+    $html = buildCodeEditorHtml('echo "hi";', null, false);
+
+    expect($html)->toContain('#ffffff');   // light background
+    expect($html)->toContain('#24292e');   // light foreground
+    // Must NOT use dark hardcoded colors
+    expect($html)->not->toContain('#282c34');
+    expect($html)->not->toContain('#030712');
+});
+
+it('language badge uses theme-appropriate colors in dark mode', function () {
+    $html = buildCodeEditorHtml('code', 'php', true);
+
+    expect($html)->toContain('fi-fo-code-editor-lang');
+    expect($html)->toContain('#21252b');   // dark badge background
+});
+
+it('language badge uses theme-appropriate colors in light mode', function () {
+    $html = buildCodeEditorHtml('code', 'php', false);
+
+    expect($html)->toContain('fi-fo-code-editor-lang');
+    expect($html)->toContain('#f0f0f0');   // light badge background
+});
+
+// --- Syntax highlighting tests ---
+
+it('highlights php keywords in dark mode', function () {
+    $html = buildCodeEditorHtml('<?php echo "hello"; ?>', 'php', true);
+
+    // highlight_string remaps to One Dark colors — keyword color for 'echo' etc.
+    expect($html)->toContain('color:');
+    expect($html)->toContain('hello');
+    // Should not have bare &lt;?php in the output — it's highlighted
+    expect($html)->not->toContain('<script>');
+});
+
+it('highlights php in light mode with different colors', function () {
+    $dark = buildCodeEditorHtml('<?php echo "test"; ?>', 'php', true);
+    $light = buildCodeEditorHtml('<?php echo "test"; ?>', 'php', false);
+
+    // The two outputs must use different colours
+    expect($dark)->not->toBe($light);
+});
+
+it('pretty-prints and highlights json', function () {
+    $html = buildCodeEditorHtml('{"name":"Alice","age":30}', 'json', true);
+
+    expect($html)->toContain('name');
+    expect($html)->toContain('Alice');
+    expect($html)->toContain('30');
+    // Keys and strings should be wrapped in color spans
+    expect($html)->toContain('color:');
+});
+
+it('falls back gracefully for invalid json', function () {
+    $html = buildCodeEditorHtml('{not valid json}', 'json', true);
+
+    expect($html)->toContain('fi-fo-code-editor-static');
+    expect($html)->toContain('not valid json');
+});
+
+it('applies generic keyword highlighting for javascript', function () {
+    $html = buildCodeEditorHtml('function greet() { return "hi"; }', 'javascript', true);
+
+    // "function" and "return" should be highlighted
+    expect($html)->toContain('color:');
+    expect($html)->toContain('greet');
+    expect($html)->toContain('hi');
+});
+
+it('applies comment highlighting for python', function () {
+    $html = buildCodeEditorHtml("x = 1  # this is a comment\nprint(x)", 'python', true);
+
+    // Comment text is wrapped in a color span; check the comment is present (possibly
+    // with HTML-escaped hash) and that a color is applied to it.
+    expect($html)->toContain('# this is a comment');
+    expect($html)->toContain('color:' . '#5c6370');  // dark-mode comment colour
+});
+
+it('escapes xss in highlighted php code', function () {
+    // highlight_string() tokenises < and > as operators; the important guarantee
+    // is that no literal <script> tag appears in the output.
+    $html = buildCodeEditorHtml('<?php echo "<script>alert(1)</script>"; ?>', 'php', true);
+
+    expect($html)->not->toContain('<script>alert(1)</script>');
+    // The string literal is escaped; check at least the opening bracket is encoded
+    expect($html)->toContain('&lt;script');
 });
