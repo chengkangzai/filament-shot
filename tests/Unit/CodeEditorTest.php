@@ -198,7 +198,7 @@ it('highlights php keywords in dark mode', function () {
 });
 
 it('highlights php in light mode with different colors', function () {
-    $dark  = buildCodeEditorHtml('<?php echo "test"; ?>', 'php', true);
+    $dark = buildCodeEditorHtml('<?php echo "test"; ?>', 'php', true);
     $light = buildCodeEditorHtml('<?php echo "test"; ?>', 'php', false);
 
     // The two outputs must use different colours

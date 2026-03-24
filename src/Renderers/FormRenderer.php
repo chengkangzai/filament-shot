@@ -1144,21 +1144,21 @@ class FormRenderer extends BaseRenderer
     protected function buildCodeEditorHtml(string $code, ?string $language, bool $darkMode = true): string
     {
         if ($darkMode) {
-            $bg        = '#282c34';
-            $fg        = '#abb2bf';
-            $gutterBg  = '#21252b';
-            $gutterFg  = '#495162';
-            $langBg    = '#21252b';
-            $langFg    = '#636d83';
-            $border    = '#181a1f';
+            $bg = '#282c34';
+            $fg = '#abb2bf';
+            $gutterBg = '#21252b';
+            $gutterFg = '#495162';
+            $langBg = '#21252b';
+            $langFg = '#636d83';
+            $border = '#181a1f';
         } else {
-            $bg        = '#ffffff';
-            $fg        = '#24292e';
-            $gutterBg  = '#f6f8fa';
-            $gutterFg  = '#959da5';
-            $langBg    = '#f0f0f0';
-            $langFg    = '#6a737d';
-            $border    = '#e1e4e8';
+            $bg = '#ffffff';
+            $fg = '#24292e';
+            $gutterBg = '#f6f8fa';
+            $gutterFg = '#959da5';
+            $langBg = '#f0f0f0';
+            $langFg = '#6a737d';
+            $border = '#e1e4e8';
         }
 
         $languageClass = $language !== null ? ' language-' . e($language) : '';
@@ -1175,8 +1175,8 @@ class FormRenderer extends BaseRenderer
                 . '">' . e(strtoupper($language)) . '</div>'
             : '';
 
-        $lines          = explode("\n", $code);
-        $gutterHtml     = '';
+        $lines = explode("\n", $code);
+        $gutterHtml = '';
         $highlightedLines = $this->syntaxHighlightLines($code, $language, $darkMode);
 
         foreach ($lines as $i => $line) {
@@ -1257,7 +1257,7 @@ class FormRenderer extends BaseRenderer
     protected function highlightPhpLines(string $code, bool $darkMode): array
     {
         // Wrap bare code (no opening tag) so highlight_string() accepts it
-        $wrapped  = str_starts_with(ltrim($code), '<?') ? $code : "<?php\n{$code}";
+        $wrapped = str_starts_with(ltrim($code), '<?') ? $code : "<?php\n{$code}";
         $stripped = str_starts_with(ltrim($code), '<?') ? false : true;
 
         $highlighted = highlight_string($wrapped, true);
@@ -1306,17 +1306,17 @@ class FormRenderer extends BaseRenderer
         }
 
         if ($darkMode) {
-            $keyColor    = '#e06c75';
-            $strColor    = '#98c379';
-            $numColor    = '#d19a66';
-            $boolColor   = '#56b6c2';
-            $nullColor   = '#56b6c2';
+            $keyColor = '#e06c75';
+            $strColor = '#98c379';
+            $numColor = '#d19a66';
+            $boolColor = '#56b6c2';
+            $nullColor = '#56b6c2';
         } else {
-            $keyColor    = '#d73a49';
-            $strColor    = '#032f62';
-            $numColor    = '#005cc5';
-            $boolColor   = '#005cc5';
-            $nullColor   = '#005cc5';
+            $keyColor = '#d73a49';
+            $strColor = '#032f62';
+            $numColor = '#005cc5';
+            $boolColor = '#005cc5';
+            $nullColor = '#005cc5';
         }
 
         $pretty = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -1362,36 +1362,31 @@ class FormRenderer extends BaseRenderer
     {
         if ($darkMode) {
             $keywordColor = '#c678dd';
-            $stringColor  = '#98c379';
+            $stringColor = '#98c379';
             $commentColor = '#5c6370';
-            $numberColor  = '#d19a66';
-            $funcColor    = '#61afef';
+            $numberColor = '#d19a66';
+            $funcColor = '#61afef';
         } else {
             $keywordColor = '#d73a49';
-            $stringColor  = '#032f62';
+            $stringColor = '#032f62';
             $commentColor = '#6a737d';
-            $numberColor  = '#005cc5';
-            $funcColor    = '#6f42c1';
+            $numberColor = '#005cc5';
+            $funcColor = '#6f42c1';
         }
 
         $keywords = match ($language) {
-            'javascript', 'typescript' =>
-                'break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|'
+            'javascript', 'typescript' => 'break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|'
                 . 'finally|for|function|if|import|in|instanceof|let|new|of|return|static|super|switch|'
                 . 'this|throw|try|typeof|var|void|while|with|yield|async|await|null|true|false|undefined',
-            'python' =>
-                'and|as|assert|async|await|break|class|continue|def|del|elif|else|except|False|finally|'
+            'python' => 'and|as|assert|async|await|break|class|continue|def|del|elif|else|except|False|finally|'
                 . 'for|from|global|if|import|in|is|lambda|None|nonlocal|not|or|pass|raise|return|True|'
                 . 'try|while|with|yield',
-            'css' =>
-                'important|px|em|rem|vh|vw|auto|none|block|flex|grid|inline|absolute|relative|fixed|sticky',
-            'sql' =>
-                'SELECT|FROM|WHERE|AND|OR|NOT|IN|EXISTS|BETWEEN|LIKE|IS|NULL|ORDER|BY|GROUP|HAVING|'
+            'css' => 'important|px|em|rem|vh|vw|auto|none|block|flex|grid|inline|absolute|relative|fixed|sticky',
+            'sql' => 'SELECT|FROM|WHERE|AND|OR|NOT|IN|EXISTS|BETWEEN|LIKE|IS|NULL|ORDER|BY|GROUP|HAVING|'
                 . 'JOIN|LEFT|RIGHT|INNER|OUTER|CROSS|ON|AS|DISTINCT|LIMIT|OFFSET|INSERT|INTO|VALUES|'
                 . 'UPDATE|SET|DELETE|CREATE|TABLE|INDEX|DROP|ALTER|ADD|COLUMN|PRIMARY|KEY|FOREIGN|'
                 . 'REFERENCES|CONSTRAINT|DEFAULT|UNIQUE|CHECK|VIEW|PROCEDURE|FUNCTION|TRIGGER|IF',
-            'go' =>
-                'break|case|chan|const|continue|default|defer|else|fallthrough|for|func|go|goto|if|'
+            'go' => 'break|case|chan|const|continue|default|defer|else|fallthrough|for|func|go|goto|if|'
                 . 'import|interface|map|package|range|return|select|struct|switch|type|var|'
                 . 'true|false|nil|make|new|len|cap|append|copy|close|delete|panic|recover|print|println',
             'yaml' => 'true|false|null|yes|no|on|off',
@@ -1400,18 +1395,18 @@ class FormRenderer extends BaseRenderer
 
         $commentPrefix = match ($language) {
             'python', 'yaml', 'bash', 'shell' => '#',
-            'sql'                              => '--',
-            'css'                              => null,
-            default                            => '//',
+            'sql' => '--',
+            'css' => null,
+            default => '//',
         };
 
-        $lines  = explode("\n", $code);
+        $lines = explode("\n", $code);
         $result = [];
 
         foreach ($lines as $line) {
             // Split at the comment boundary so token highlighting is only applied
             // to the code portion; the comment is wrapped separately.
-            $codePart    = $line;
+            $codePart = $line;
             $commentPart = null;
 
             if ($commentPrefix !== null) {
@@ -1420,7 +1415,7 @@ class FormRenderer extends BaseRenderer
                 if ($prefixPos !== false) {
                     $before = substr($line, 0, $prefixPos);
                     if (substr_count($before, '"') % 2 === 0 && substr_count($before, "'") % 2 === 0) {
-                        $codePart    = $before;
+                        $codePart = $before;
                         $commentPart = substr($line, $prefixPos);
                     }
                 }

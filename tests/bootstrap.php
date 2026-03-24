@@ -18,6 +18,7 @@ if (! file_exists($_vendorAutoload)) {
     foreach ([dirname(__DIR__, 2), dirname(__DIR__, 3)] as $_candidate) {
         if (file_exists($_candidate . '/vendor/autoload.php')) {
             $_vendorAutoload = $_candidate . '/vendor/autoload.php';
+
             break;
         }
     }
