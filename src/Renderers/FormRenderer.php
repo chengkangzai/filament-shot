@@ -124,7 +124,7 @@ class FormRenderer extends BaseRenderer
             app('view')->share('__livewire', null);
         }
 
-        $html = $this->injectFormValues($html, $component->data);
+        $html = $this->injectFormValues($html, $component->data, $this->state);
         $html = $this->injectWireStateScript($html, $component->data);
         $html = $this->fixTabs($html);
         $html = $this->fixWizard($html);
@@ -178,10 +178,10 @@ class FormRenderer extends BaseRenderer
      * Filament uses wire:model and Alpine.js for data binding. Since we render
      * static HTML without JS, we post-process to add proper HTML attributes.
      */
-    protected function injectFormValues(string $html, array $data): string
+    protected function injectFormValues(string $html, array $data, array $rawState = []): string
     {
         $html = $this->injectInputValues($html, $data);
-        $html = $this->injectCheckboxState($html, $data);
+        $html = $this->injectCheckboxState($html, $data, $rawState);
         $html = $this->injectSelectState($html, $data);
         $html = $this->injectMultiSelectState($html, $data);
         $html = $this->injectTextareaContent($html, $data);
@@ -246,13 +246,18 @@ class FormRenderer extends BaseRenderer
      * Handles both single Checkbox (boolean state) and CheckboxList (array state).
      * For CheckboxList, each option's value attribute is checked against the state array.
      */
-    protected function injectCheckboxState(string $html, array $data): string
+    protected function injectCheckboxState(string $html, array $data, array $rawState = []): string
     {
         return preg_replace_callback(
             '/<input(\s[^>]*?)type=["\']checkbox["\']([^>]*?)wire:model(?:\.[\w.]+)?="data\.([^"]+)"([^>]*?)\s*\/?>/s',
-            function ($matches) use ($data) {
+            function ($matches) use ($data, $rawState) {
                 $fieldPath = $matches[3];
-                $stateValue = data_get($data, $fieldPath);
+                // Prefer the raw user-provided state for top-level fields so that
+                // string values (e.g. 'editor') are not lost to Filament normalisation
+                // (Filament converts a string CheckboxList state to [] during fill()).
+                $stateValue = array_key_exists($fieldPath, $rawState)
+                    ? $rawState[$fieldPath]
+                    : data_get($data, $fieldPath);
                 $allAttrs = $matches[1] . $matches[2] . $matches[4];
 
                 // Coerce a single string value to a one-element array for CheckboxList
