@@ -10,6 +10,8 @@ use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\CodeEditor;
+use Filament\Forms\Components\CodeEditor\Enums\Language;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\MarkdownEditor;
@@ -32,7 +34,9 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -1000,4 +1004,74 @@ it('generates checkboxlist example with pre-selected options', function () use (
         ->save("$outputDir/form-checkbox-list.png");
 
     expect(file_exists("$outputDir/form-checkbox-list.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with code editor example', function () use ($outputDir) {
+    FilamentShot::form([
+        TextInput::make('filename')->label('Filename'),
+        CodeEditor::make('content')
+            ->label('Content')
+            ->language(Language::Php)
+            ->columnSpanFull(),
+    ])
+        ->state([
+            'filename' => 'greeting.php',
+            'content' => "<?php\n\nfunction greet(string \$name): string\n{\n    return \"Hello, {\$name}!\";\n}\n\necho greet('World');",
+        ])
+        ->width(700)
+        ->save("$outputDir/form-code-editor.png");
+
+    expect(file_exists("$outputDir/form-code-editor.png"))->toBeTrue();
+})->group('examples');
+
+it('generates form with toggle buttons example', function () use ($outputDir) {
+    FilamentShot::form([
+        ToggleButtons::make('status')
+            ->label('Status')
+            ->options([
+                'active' => 'Active',
+                'blocked' => 'Blocked',
+                'pending' => 'Pending',
+            ])
+            ->colors([
+                'active' => 'success',
+                'blocked' => 'danger',
+                'pending' => 'warning',
+            ]),
+        ToggleButtons::make('priority')
+            ->label('Priority')
+            ->options([
+                'low' => 'Low',
+                'medium' => 'Medium',
+                'high' => 'High',
+            ]),
+    ])
+        ->state(['status' => 'active', 'priority' => 'high'])
+        ->width(500)
+        ->save("$outputDir/form-toggle-buttons.png");
+
+    expect(file_exists("$outputDir/form-toggle-buttons.png"))->toBeTrue();
+})->group('examples');
+
+it('generates table with editable columns example', function () use ($outputDir) {
+    FilamentShot::table()
+        ->columns([
+            TextColumn::make('name')->label('Name'),
+            TextInputColumn::make('email')->label('Email'),
+            SelectColumn::make('status')
+                ->label('Status')
+                ->options([
+                    'active' => 'Active',
+                    'blocked' => 'Blocked',
+                    'pending' => 'Pending',
+                ]),
+        ])
+        ->records([
+            ['name' => 'Alice', 'email' => 'alice@example.com', 'status' => 'active'],
+            ['name' => 'Bob', 'email' => 'bob@example.com', 'status' => 'blocked'],
+        ])
+        ->width(700)
+        ->save("$outputDir/table-editable-columns.png");
+
+    expect(file_exists("$outputDir/table-editable-columns.png"))->toBeTrue();
 })->group('examples');
