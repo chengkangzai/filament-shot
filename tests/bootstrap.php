@@ -11,7 +11,18 @@ use Composer\Autoload\ClassLoader;
  * ClassLoader's PSR-4 map so CCK\FilamentShot\ resolves from this
  * worktree's src/ directory.
  */
-require dirname(__DIR__) . '/vendor/autoload.php';
+$_vendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (! file_exists($_vendorAutoload)) {
+    // When invoked via a shared vendor (e.g. main project's pest binary), fall back
+    // to the nearest parent that has a vendor directory.
+    foreach ([dirname(__DIR__, 2), dirname(__DIR__, 3)] as $_candidate) {
+        if (file_exists($_candidate . '/vendor/autoload.php')) {
+            $_vendorAutoload = $_candidate . '/vendor/autoload.php';
+            break;
+        }
+    }
+}
+require $_vendorAutoload;
 
 $_worktreeRoot = dirname(__DIR__);
 $_loaders = spl_autoload_functions();
