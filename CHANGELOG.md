@@ -2,6 +2,20 @@
 
 All notable changes to `filament-shot` will be documented in this file.
 
+## v0.9.2 - 2026-03-26
+
+### What's Changed
+
+#### Bug Fixes
+
+- **Fixed fitContent rendering**: `select('body')` was cropping screenshots to viewport height for content-dense pages. Now uses 1px viewport + `fullPage()` so `scrollHeight` accurately reflects actual content height (not inflated viewport size). This dramatically improves performance (~86% faster) and correctness.
+
+#### New Features
+
+- **`->withTailwind()`**: Injects the Tailwind Play CDN into rendered HTML, enabling utility classes in custom `blade()`/`view()` templates that are absent from Filament's purged CSS bundle. Requires network access during rendering.
+
+**Full Changelog**: https://github.com/chengkangzai/filament-shot/compare/v0.9.1...v0.9.2
+
 ## v0.9.1 - 2026-03-26
 
 ### What's New
