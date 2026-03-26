@@ -2,6 +2,13 @@
 
 All notable changes to `filament-shot` will be documented in this file.
 
+## v0.9.1 - 2026-03-26
+
+### What's New
+
+- **Filament v4 support** — package now supports both Filament `^4.0` and `^5.0`
+- CI matrix extended to test against both Filament versions on every push
+
 ## v0.9.0 - 2026-03-24
 
 ### What's New
