@@ -21,15 +21,19 @@ class BrowsershotFactory
         file_put_contents($tempFile, $html);
         register_shutdown_function(static fn () => @unlink($tempFile));
 
+        // When fitContent is enabled, use a 1px viewport height so scrollHeight equals
+        // actual content height (not viewport height). fullPage() then captures the
+        // true content height via document.documentElement.scrollHeight. Using a tall
+        // viewport (e.g. 9999) would make scrollHeight equal the viewport, not content.
         $browsershot = Browsershot::htmlFromFilePath($tempFile)
-            ->windowSize($width, $height)
+            ->windowSize($width, $fitContent ? 1 : $height)
             ->deviceScaleFactor($deviceScale)
             ->timeout(config('filament-shot.browsershot.timeout', 60))
             ->waitUntilNetworkIdle()
             ->delay(config('filament-shot.browsershot.delay', 500));
 
         if ($fitContent) {
-            $browsershot->select('body');
+            $browsershot->fullPage();
         }
 
         if ($nodeBinary = config('filament-shot.browsershot.node_binary')) {

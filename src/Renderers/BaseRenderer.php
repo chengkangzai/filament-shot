@@ -6,6 +6,7 @@ use CCK\FilamentShot\Concerns\HasCss;
 use CCK\FilamentShot\Concerns\HasFont;
 use CCK\FilamentShot\Concerns\HasHighlight;
 use CCK\FilamentShot\Concerns\HasOutput;
+use CCK\FilamentShot\Concerns\HasTailwind;
 use CCK\FilamentShot\Concerns\HasTheme;
 use CCK\FilamentShot\Concerns\HasViewport;
 use CCK\FilamentShot\Support\AssetResolver;
@@ -16,6 +17,7 @@ abstract class BaseRenderer
     use HasFont;
     use HasHighlight;
     use HasOutput;
+    use HasTailwind;
     use HasTheme;
     use HasViewport;
 
@@ -51,6 +53,7 @@ abstract class BaseRenderer
             'content' => $this->renderContent(),
             'contentWidth' => $this->getWidth() . 'px',
             'font' => $this->getFont(),
+            'tailwindCdn' => $this->tailwindCdn,
         ])->render();
 
         return $this->sanitizeHtml($html, $alpineRelativePaths);
