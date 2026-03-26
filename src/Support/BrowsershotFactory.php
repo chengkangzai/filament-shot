@@ -21,8 +21,11 @@ class BrowsershotFactory
         file_put_contents($tempFile, $html);
         register_shutdown_function(static fn () => @unlink($tempFile));
 
+        // When fitContent is enabled, use a large viewport height so Chromium renders
+        // the full content without scrolling or auto-scaling. select('body') then
+        // crops to the actual body height regardless of what we set here.
         $browsershot = Browsershot::htmlFromFilePath($tempFile)
-            ->windowSize($width, $height)
+            ->windowSize($width, $fitContent ? 9999 : $height)
             ->deviceScaleFactor($deviceScale)
             ->timeout(config('filament-shot.browsershot.timeout', 60))
             ->waitUntilNetworkIdle()
