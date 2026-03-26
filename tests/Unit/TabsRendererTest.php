@@ -63,6 +63,9 @@ it('renders tabs with specific tab active via activeTab()', function () {
         ->state(['name' => 'Test', 'debug' => 'On'])
         ->renderHtml();
 
+    // Tab labels should always be present
+    expect($html)->toContain('General')->toContain('Advanced');
+
     if (! isFilamentV4()) {
         // Second tab button should have fi-active (v5 class)
         expect($html)->toMatch('/fi-tabs-item fi-active"[^>]*data-tab-key="advanced/s');
