@@ -78,7 +78,8 @@
         },
         "audit": {
             "ignore": {
-                "PKSA-5bdf-2x61-v43c": "filament/tables auth bypass does not affect filament-shot (screenshot renderer, no web authentication)"
+                "PKSA-5bdf-2x61-v43c": "filament/tables auth bypass does not affect filament-shot (screenshot renderer, no web authentication)",
+                "PKSA-yb9k-ykqx-p2zw": "filament/tables auth bypass does not affect filament-shot (screenshot renderer, no web authentication)"
             }
         }
     },
