@@ -2,6 +2,16 @@
 
 All notable changes to `filament-shot` will be documented in this file.
 
+## Unreleased
+
+### Bug Fixes
+
+- **Fixed blank modal screenshots** (#150): `FilamentShot::modal()` and `FilamentShot::form()->modal()` produced empty PNGs because Filament's modal markup hides the inner `.fi-modal-window` via Alpine's `x-show="isWindowVisible"`, and the window container's viewport-tied grid layout (`min-height: 100%`, `max-height: calc(100dvh - 2rem)`) collapsed under the fitContent 1px viewport. The screenshot CSS now forces the window visible at its natural height.
+
+### New Features
+
+- **`FilamentShot::modal(array $components = [])`** (#150): the standalone modal renderer now accepts an optional components array, rendered inside the modal body via the form-rendering pipeline. Supports `->state()` and `->openFields()`. Matches the documented signature.
+
 ## v0.9.2 - 2026-03-26
 
 ### What's Changed

@@ -70,3 +70,47 @@ function assertImageMatchesSnapshot(string $snapshotName, string $actualPngPath,
         . 'Run with UPDATE_SNAPSHOTS=true to regenerate.'
     );
 }
+
+/**
+ * Assert that a PNG contains meaningful non-white content (i.e. it is not blank).
+ *
+ * Guards against renderers that silently produce an all-white image — the failure
+ * mode behind issue #150, where modals captured nothing visible.
+ *
+ * @param  float  $minNonWhite  Minimum fraction of non-white pixels required (default 0.5%)
+ */
+function assertPngIsNotBlank(string $path, float $minNonWhite = 0.005): void
+{
+    expect(file_exists($path))->toBeTrue("PNG was not created: {$path}");
+
+    $img = imagecreatefromstring(file_get_contents($path));
+    expect($img)->not->toBeFalse("Could not load PNG: {$path}");
+
+    $w = imagesx($img);
+    $h = imagesy($img);
+    $nonWhite = 0;
+
+    for ($x = 0; $x < $w; $x += 2) {
+        for ($y = 0; $y < $h; $y += 2) {
+            $rgb = imagecolorat($img, $x, $y);
+            $r = ($rgb >> 16) & 0xFF;
+            $g = ($rgb >> 8) & 0xFF;
+            $b = $rgb & 0xFF;
+
+            if ($r < 248 || $g < 248 || $b < 248) {
+                $nonWhite++;
+            }
+        }
+    }
+
+    imagedestroy($img);
+
+    $sampled = (int) (ceil($w / 2) * ceil($h / 2));
+    $fraction = $sampled > 0 ? $nonWhite / $sampled : 0;
+
+    expect($fraction)->toBeGreaterThan(
+        $minNonWhite,
+        "PNG appears blank: only {$nonWhite} non-white pixels sampled ("
+        . round($fraction * 100, 3) . '%). Expected at least ' . round($minNonWhite * 100, 3) . '%.'
+    );
+}

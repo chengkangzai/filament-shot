@@ -144,12 +144,25 @@ FilamentShot::form([TextInput::make('name')])
     ->save('modal-form.png');
 ```
 
-Or a standalone modal without form fields:
+Or a standalone modal. Pass no arguments for a pure confirmation dialog:
 
 ```php
-FilamentShot::modal([TextInput::make('reason')])
+FilamentShot::modal()
+    ->heading('Confirm Deletion')
+    ->description('This action cannot be undone.')
+    ->color('danger')
+    ->icon('heroicon-o-trash')
+    ->iconColor('danger')
+    ->save('modal.png');
+```
+
+Or pass a components array to render fields inside the modal body (use `->state()` to fill them):
+
+```php
+FilamentShot::modal([TextInput::make('reason')->label('Reason for deletion')])
     ->heading('Confirm Deletion')
     ->color('danger')
+    ->state(['reason' => 'Duplicate account'])
     ->save('modal.png');
 ```
 

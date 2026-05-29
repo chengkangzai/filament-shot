@@ -27,18 +27,34 @@
            set by x-show, keeping the modal visible in screenshots regardless of
            Alpine's state. */
         .fi-modal {
-            display: flex !important;
+            display: block !important;
             position: relative !important;
         }
         .fi-modal .fi-modal-close-overlay {
             display: none !important;
         }
+        /* Container is normally `display: grid` with `grid-template-rows: 1fr auto 1fr`
+           and `min-height: 100%` + `position: fixed`, which fills the viewport and pads
+           the window with empty filler rows. Flatten it to a static block so the window
+           sits at its natural height in document flow. */
         .fi-modal .fi-modal-window-ctn {
+            display: block !important;
             position: relative !important;
+            inset: auto !important;
+            min-height: 0 !important;
+            padding: 0 !important;
             width: 100%;
         }
+        /* The window carries `x-show="isWindowVisible"` (Alpine sets inline display:none)
+           plus `max-height: calc(100dvh - 2rem)` which collapses at small viewports.
+           Force it visible at natural height; !important beats Alpine's inline style. */
         .fi-modal .fi-modal-window {
+            display: flex !important;
             position: relative !important;
+            grid-row-start: auto !important;
+            height: auto !important;
+            max-height: none !important;
+            margin-inline: auto;
         }
 
         /* Force Filament notification visible for screenshots.

@@ -119,6 +119,44 @@ it('image snapshot: stats', function () {
     @unlink($path);
 })->group('snapshot', 'integration');
 
+it('renders a standalone confirmation modal as a non-blank PNG', function () {
+    $path = tempnam(sys_get_temp_dir(), 'fs_') . '.png';
+
+    FilamentShot::modal()
+        ->heading('Confirm Deletion')
+        ->description('This action cannot be undone.')
+        ->submitLabel('Delete')
+        ->cancelLabel('Cancel')
+        ->icon('heroicon-o-trash')
+        ->iconColor('danger')
+        ->color('danger')
+        ->width(800)
+        ->save($path);
+
+    // Regression guard for #150: the modal must produce visible content,
+    // not an all-white image.
+    assertPngIsNotBlank($path);
+
+    @unlink($path);
+})->group('snapshot', 'integration');
+
+it('renders a modal with body components as a non-blank PNG', function () {
+    $path = tempnam(sys_get_temp_dir(), 'fs_') . '.png';
+
+    FilamentShot::modal([
+        TextInput::make('reason')->label('Reason for deletion'),
+    ])
+        ->heading('Confirm Deletion')
+        ->color('danger')
+        ->state(['reason' => 'Duplicate account'])
+        ->width(800)
+        ->save($path);
+
+    assertPngIsNotBlank($path);
+
+    @unlink($path);
+})->group('snapshot', 'integration');
+
 it('image snapshot: dark mode table', function () {
     $path = tempnam(sys_get_temp_dir(), 'fs_') . '.png';
 

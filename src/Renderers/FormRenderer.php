@@ -102,6 +102,34 @@ class FormRenderer extends BaseRenderer
 
     protected function renderContent(): string
     {
+        $html = $this->renderSchemaHtml();
+
+        if ($this->modalHeading !== null) {
+            $html = view('filament-shot::components.modal', [
+                'heading' => $this->modalHeading,
+                'description' => $this->modalDescription,
+                'icon' => $this->modalIcon,
+                'iconColor' => $this->modalIconColor,
+                'color' => $this->modalColor,
+                'submitLabel' => $this->modalSubmitLabel,
+                'cancelLabel' => $this->modalCancelLabel,
+                'content' => $html,
+                'darkMode' => $this->isDarkMode(),
+            ])->render();
+        }
+
+        return $html;
+    }
+
+    /**
+     * Render the form schema to static HTML, applying all the state-injection
+     * and Alpine-resolution post-processors.
+     *
+     * Exposed publicly so other renderers (e.g. ModalRenderer) can embed a rendered
+     * schema inside their own layout without re-implementing the pipeline.
+     */
+    public function renderSchemaHtml(): string
+    {
         $this->ensureViewErrorBag();
 
         ShotFormComponent::prepareFor($this->components, $this->state);
@@ -131,23 +159,8 @@ class FormRenderer extends BaseRenderer
         $html = $this->fixBuilder($html);
         $html = $this->fixRichEditor($html);
         $html = $this->fixMarkdownEditor($html);
-        $html = $this->fixCodeEditor($html, $component->data);
 
-        if ($this->modalHeading !== null) {
-            $html = view('filament-shot::components.modal', [
-                'heading' => $this->modalHeading,
-                'description' => $this->modalDescription,
-                'icon' => $this->modalIcon,
-                'iconColor' => $this->modalIconColor,
-                'color' => $this->modalColor,
-                'submitLabel' => $this->modalSubmitLabel,
-                'cancelLabel' => $this->modalCancelLabel,
-                'content' => $html,
-                'darkMode' => $this->isDarkMode(),
-            ])->render();
-        }
-
-        return $html;
+        return $this->fixCodeEditor($html, $component->data);
     }
 
     /**
