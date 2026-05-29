@@ -2,7 +2,7 @@
 
 All notable changes to `filament-shot` will be documented in this file.
 
-## Unreleased
+## v0.9.3 - 2026-05-29
 
 ### Bug Fixes
 
