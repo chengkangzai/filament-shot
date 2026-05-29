@@ -1,6 +1,44 @@
 <?php
 
 use CCK\FilamentShot\FilamentShot;
+use Filament\Forms\Components\TextInput;
+
+it('renders body components inside the modal', function () {
+    $html = FilamentShot::modal([
+        TextInput::make('reason')->label('Reason for deletion'),
+    ])
+        ->heading('Confirm Deletion')
+        ->color('danger')
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-modal')
+        ->toContain('class="fi-modal-content"')
+        ->toContain('Reason for deletion')
+        ->toContain('wire:model')
+        ->toContain('Confirm Deletion');
+});
+
+it('injects state into modal body components', function () {
+    $html = FilamentShot::modal([
+        TextInput::make('reason'),
+    ])
+        ->heading('Confirm')
+        ->state(['reason' => 'Duplicate account'])
+        ->toHtml();
+
+    expect($html)->toContain('value="Duplicate account"');
+});
+
+it('renders an empty body when no components are given', function () {
+    $html = FilamentShot::modal()
+        ->heading('Confirm Action')
+        ->toHtml();
+
+    expect($html)
+        ->toContain('fi-modal')
+        ->not->toContain('class="fi-modal-content"');
+});
 
 it('renders a standalone confirmation modal', function () {
     $html = FilamentShot::modal()

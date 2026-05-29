@@ -13,6 +13,7 @@ use CCK\FilamentShot\Renderers\TableRenderer;
 use CCK\FilamentShot\Renderers\ViewRenderer;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Schemas\Components\Component;
 
 class FilamentShot
 {
@@ -36,9 +37,12 @@ class FilamentShot
         return new StatsRenderer($stats);
     }
 
-    public static function modal(): ModalRenderer
+    /**
+     * @param  array<Component>  $components  Optional body components rendered inside the modal
+     */
+    public static function modal(array $components = []): ModalRenderer
     {
-        return new ModalRenderer;
+        return new ModalRenderer($components);
     }
 
     public static function notification(): NotificationRenderer
